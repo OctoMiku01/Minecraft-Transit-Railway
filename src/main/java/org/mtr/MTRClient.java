@@ -331,6 +331,7 @@ public final class MTRClient {
 			ReleasedDynamicTextureRegistry.INSTANCE.reload();
 		});
 		EventRegistryClient.registerWorldRenderEvent(MainRenderer::render);
+		EventRegistryClient.registerWorldDrawEvents(() -> MainRenderer.drawModels(false), () -> MainRenderer.drawModels(true));
 		EventRegistryClient.registerHudLayerRenderEvent(context -> DrivingGuiRenderer.render(context));
 
 		Config.init(Minecraft.getInstance().gameDirectory.toPath());

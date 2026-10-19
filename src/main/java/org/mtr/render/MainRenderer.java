@@ -1,5 +1,6 @@
 package org.mtr.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import lombok.Getter;
@@ -80,6 +81,10 @@ public class MainRenderer {
 	@Getter
 	private static long timerMillis;
 	private static long lastRenderedMillis;
+	/**
+	 * The camera position of the current frame, used when drawing the queued models after the features are drawn.
+	 */
+	private static Vec3 modelOffset = Vec3.ZERO;
 
 	/**
 	 * Shared off-main-thread worker for occlusion culling and dynamic texture generation.
@@ -165,16 +170,17 @@ public class MainRenderer {
 		VehicleRidingMovement.tick();
 		ArrivalsCacheClient.INSTANCE.tick();
 
+		MODEL_RENDERS.clear();
+		MODEL_RENDERS_TRANSLUCENT.clear();
 		final Vec3 cameraShakeOffset = clientPlayerEntity.position().subtract(offset);
 		RenderVehicles.render(millisElapsed, cameraShakeOffset);
 		RenderLifts.render(millisElapsed, cameraShakeOffset);
 		RenderRails.render(matrixStack, submitNodeCollector, offset);
 		RenderPassengers.render();
 
-		renderModel(matrixStack, submitNodeCollector, MODEL_RENDERS, offset);
-		renderModel(matrixStack, submitNodeCollector, MODEL_RENDERS_TRANSLUCENT, offset);
-		MODEL_RENDERS.clear();
-		MODEL_RENDERS_TRANSLUCENT.clear();
+		// Models are drawn later in the frame by drawModels, once the solid and translucent features are drawn
+		modelOffset = offset;
+		NewOptimizedModel.releaseUnusedBuffers();
 
 		for (int i = 0; i < TOTAL_RENDER_STAGES; i++) {
 			for (int j = 0; j < QUEUED_RENDER_LAYERS.length; j++) {
@@ -275,6 +281,33 @@ public class MainRenderer {
 	}
 
 	/**
+	 * Draw the models queued this frame by {@link #renderModel(Object2ObjectOpenHashMap, StoredMatrixTransformations, int)}.
+	 * Called by the loader's world-render hooks after the solid and the translucent features are drawn, while the camera's model view matrix is active.
+	 *
+	 * @param translucent whether to draw the translucent models instead of the opaque ones
+	 */
+	public static void drawModels(boolean translucent) {
+		(translucent ? MODEL_RENDERS_TRANSLUCENT : MODEL_RENDERS).forEach((newOptimizedModel, modelsForRenderStage) -> modelsForRenderStage.forEach((renderStage, renderDetails) -> {
+			final Identifier texture = newOptimizedModel.texture;
+			final RenderType renderLayer = switch (renderStage) {
+				case LIGHT -> MoreRenderLayers.getLight(texture, false);
+				case ALWAYS_ON_LIGHT -> MoreRenderLayers.getLight(texture, true);
+				case INTERIOR -> MoreRenderLayers.getInterior(texture);
+				case INTERIOR_TRANSLUCENT -> MoreRenderLayers.getInteriorTranslucent(texture);
+				case EXTERIOR -> MoreRenderLayers.getExterior(texture);
+			};
+			newOptimizedModel.draw(renderLayer, instanceConsumer -> renderDetails.forEach(renderDetailsEntry -> {
+				final PoseStack matrixStack = new PoseStack();
+				renderDetailsEntry.left().transform(matrixStack, modelOffset);
+				instanceConsumer.accept(
+					RenderSystem.getModelViewMatrixCopy().mul(matrixStack.last().pose()),
+					renderStage.isFullBrightness ? 1 : (float) renderDetailsEntry.rightInt() / 0xF
+				);
+			}));
+		}));
+	}
+
+	/**
 	 * Schedule work that submits directly to the frame's collector later this frame, such as rendering entities.
 	 *
 	 * @param scheduledSubmit the callback invoked during the drain pass
@@ -327,25 +360,6 @@ public class MainRenderer {
 
 	public static int getFlashingColor(int color, int multiplier) {
 		return getFlashingColor(new Color(color), multiplier).getRGB();
-	}
-
-	private static void renderModel(PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>>>> modelRenders, Vec3 offset) {
-		modelRenders.forEach((newOptimizedModel, modelsForRenderStage) -> modelsForRenderStage.forEach((renderStage, renderDetails) -> {
-			final Identifier texture = newOptimizedModel.texture;
-			final RenderType renderLayer = switch (renderStage) {
-				case LIGHT -> MoreRenderLayers.getLight(texture, false);
-				case ALWAYS_ON_LIGHT -> MoreRenderLayers.getLight(texture, true);
-				case INTERIOR -> MoreRenderLayers.getInterior(texture);
-				case INTERIOR_TRANSLUCENT -> MoreRenderLayers.getInteriorTranslucent(texture);
-				case EXTERIOR -> MoreRenderLayers.getExterior(texture);
-			};
-			final ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>> renderDetailsCopy = new ObjectArrayList<>(renderDetails);
-			submitNodeCollector.submitCustomGeometry(matrixStack, renderLayer, (pose, vertexConsumer) -> renderDetailsCopy.forEach(renderDetailsEntry -> {
-				final PoseStack newMatrixStack = createMatrixStack(pose);
-				renderDetailsEntry.left().transform(newMatrixStack, offset);
-				newOptimizedModel.render(vertexConsumer, newMatrixStack.last(), renderStage.isFullBrightness ? 1 : (float) renderDetailsEntry.rightInt() / 0xF);
-			}));
-		}));
 	}
 
 	/**

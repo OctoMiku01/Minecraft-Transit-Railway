@@ -26,14 +26,15 @@ At runtime, model data goes through five stages:
    - OBJ: `ObjReader.read(...)`, `MtlReader.read(...)`, face walk -> `addModel(...)`.
    - BBModel: JSON parse + outline walk -> `addModel(...)`.
 
-4. **Synchronous GPU upload (render thread)**
-   - `ModelLoaderBase.get()` eventually triggers optimised model build and VBO upload.
-   - Upload path includes `NewOptimizedModelGroup.build()` -> `VertexBuffer.createAndUpload(...)`.
-   - This is render-thread-only due to GL context requirements.
+4. **Lazy GPU upload (render thread)**
+   - `ModelLoaderBase.get()` eventually triggers the optimised model build (`NewOptimizedModelGroup.build()`).
+   - Each `NewOptimizedModel` uploads its vertices into a `GpuBuffer` the first time it is drawn, once per vertex format.
+   - The buffers are released on the render thread after the model is garbage collected (`NewOptimizedModel.releaseUnusedBuffers()`).
 
-5. **Per-frame render queueing and draw drain**
-   - World systems queue work via `MainRenderer.scheduleRender(...)` or `MainRenderer.renderModel(...)`.
-   - End-of-frame drain batches by layer/texture/model and emits draw calls.
+5. **Per-frame render queueing and drawing**
+   - World systems queue work via `MainRenderer.scheduleRender(...)` or `MainRenderer.renderModel(...)` while `MainRenderer.render(...)` runs in `LevelRenderEvents.COLLECT_SUBMITS`.
+   - Scheduled draws are submitted to the frame's `SubmitNodeCollector` and drawn by Minecraft together with entities and block entities.
+   - Models are drawn directly from their GPU buffers in `LevelRenderEvents.AFTER_SOLID_FEATURES` (opaque stages) and `AFTER_TRANSLUCENT_FEATURES` (translucent stages), one draw call per instance with its own model view matrix and colour modulator.
 
 ## 2. Reload and resource registration
 
@@ -108,19 +109,17 @@ This ensures preload does not race with unfinished parse tasks. Without this wai
 
 ### Frame stages (simplified)
 
-1. world systems enqueue render work
-2. queue maps are swapped/current-frame snapshots taken
-3. opaque/translucent model buckets are drained
-4. queued layer draws are drained by priority and layer ordering
-5. queues are cleared for next frame
+1. model queues from the previous frame are cleared
+2. world systems enqueue render work
+3. queue maps are swapped/current-frame snapshots taken
+4. queued layer draws and text are submitted to the collector by priority and layer ordering
+5. opaque models are drawn after the solid features, translucent models after the translucent features
 
 ### Hot-path micro-optimisations currently in place
 
 - cached enum arrays in `MainRenderer` to avoid repeated `values()` allocations
 - constant empty identifier for non-texture `scheduleRender(...)` calls
-- reduced temporary allocations in `NewOptimizedModel`:
-  - reusable model-view matrix scratch
-  - quantised colour-modulator table for common light values
+- `NewOptimizedModel` keeps its vertices on the GPU, so a frame only writes one transform uniform and issues one draw call per instance
 
 ## 6. Rail rendering path and distance behaviour
 

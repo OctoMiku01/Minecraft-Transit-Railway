@@ -74,6 +74,14 @@ public final class EventRegistryClient {
 		LevelRenderEvents.COLLECT_SUBMITS.register(levelRenderContext -> worldRenderCallback.accept(levelRenderContext.poseStack(), levelRenderContext.submitNodeCollector(), levelRenderContext.levelState().cameraRenderState));
 	}
 
+	/**
+	 * Register callbacks for drawing directly to the frame buffers after the solid and after the translucent features of the level are drawn.
+	 */
+	public static void registerWorldDrawEvents(Runnable afterSolidFeatures, Runnable afterTranslucentFeatures) {
+		LevelRenderEvents.AFTER_SOLID_FEATURES.register(levelRenderContext -> afterSolidFeatures.run());
+		LevelRenderEvents.AFTER_TRANSLUCENT_FEATURES.register(levelRenderContext -> afterTranslucentFeatures.run());
+	}
+
 	public static void registerHudLayerRenderEvent(Consumer<GuiGraphicsExtractor> hudLayerRenderCallback) {
 		HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Identifier.fromNamespaceAndPath(MTR.MOD_ID, "gui"), (guiGraphics, deltaTracker) -> hudLayerRenderCallback.accept(guiGraphics));
 	}
