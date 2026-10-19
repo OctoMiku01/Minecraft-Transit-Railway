@@ -4,6 +4,7 @@ import net.minecraft.DetectedVersion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.metadata.pack.PackFormat;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
 import org.mtr.MTR;
@@ -101,14 +102,14 @@ public final class ResourceManagerHelper {
 	/**
 	 * @return the resource-pack format version Minecraft expects on the current client.
 	 */
-	public static int getResourcePackVersion() {
-		return DetectedVersion.tryDetectVersion().getPackVersion(PackType.CLIENT_RESOURCES);
+	public static PackFormat getResourcePackVersion() {
+		return DetectedVersion.tryDetectVersion().packVersion(PackType.CLIENT_RESOURCES);
 	}
 
 	/**
 	 * @return the data-pack format version Minecraft expects on the current server.
 	 */
-	public static int getDataPackVersion() {
-		return DetectedVersion.tryDetectVersion().getPackVersion(PackType.SERVER_DATA);
+	public static PackFormat getDataPackVersion() {
+		return DetectedVersion.tryDetectVersion().packVersion(PackType.SERVER_DATA);
 	}
 }

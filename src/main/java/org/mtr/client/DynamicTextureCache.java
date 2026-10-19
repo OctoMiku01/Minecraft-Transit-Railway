@@ -345,8 +345,8 @@ public class DynamicTextureCache implements IGui {
 						newNativeImage = nativeImage;
 					}
 
-					final DynamicTexture nativeImageBackedTexture = new DynamicTexture(newNativeImage);
 					final Identifier identifier = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "id_" + MTR.randomString());
+					final DynamicTexture nativeImageBackedTexture = new DynamicTexture(identifier::toString, newNativeImage);
 					Minecraft.getInstance().getTextureManager().register(identifier, nativeImageBackedTexture);
 					dynamicResourceNew = new DynamicResource(identifier, nativeImageBackedTexture);
 					dynamicResources.put(key, dynamicResourceNew);

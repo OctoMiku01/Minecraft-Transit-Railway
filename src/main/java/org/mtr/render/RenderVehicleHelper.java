@@ -5,7 +5,12 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -158,5 +163,17 @@ public class RenderVehicleHelper {
 			(float) (corner2.x - offset.x), (float) (corner2.y - offset.y), (float) (corner2.z - offset.z),
 			color
 		);
+	}
+
+	/**
+	 * Submit an entity at the origin of the given matrix stack, independent of where the entity is in the world.
+	 * Shadows are dropped because they would be calculated from the entity's real position.
+	 */
+	public static void submitEntity(Entity entity, int light, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+		final EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+		final EntityRenderState entityRenderState = entityRenderDispatcher.extractEntity(entity, 0);
+		entityRenderState.lightCoords = light;
+		entityRenderState.shadowPieces.clear();
+		entityRenderDispatcher.submit(entityRenderState, camera, 0, 0, 0, matrixStack, submitNodeCollector);
 	}
 }

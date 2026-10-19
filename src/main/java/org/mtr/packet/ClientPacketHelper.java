@@ -91,9 +91,9 @@ public final class ClientPacketHelper {
 
 	private static void openScreen(Screen screen, Predicate<Screen> isInstance) {
 		final Minecraft minecraftClient = Minecraft.getInstance();
-		final Screen currentScreen = minecraftClient.screen;
+		final Screen currentScreen = minecraftClient.gui.screen();
 		if (currentScreen == null || !isInstance.test(currentScreen)) {
-			minecraftClient.setScreen(screen);
+			minecraftClient.gui.setScreen(screen);
 		}
 	}
 

@@ -16,8 +16,8 @@ public final class SpecialSignRouteRenderer extends SpecialSignRouteStationExitR
 	}
 
 	@Override
-	protected void renderOverlayText(PoseStack matrixStack, String overlayText, Identifier font, float x, float y, float zOffset, float width, float height, float padding, boolean flipText) {
-		FontRenderHelper.render(matrixStack, overlayText, FontRenderOptions.builder()
+	protected void renderOverlayText(PoseStack matrixStack, DrawTarget drawTarget, String overlayText, Identifier font, float x, float y, float zOffset, float width, float height, float padding, boolean flipText) {
+		FontRenderHelper.render(matrixStack, drawTarget, overlayText, FontRenderOptions.builder()
 			.font(font)
 			.horizontalPositioning(FontRenderOptions.Alignment.CENTER)
 			.verticalPositioning(FontRenderOptions.Alignment.CENTER)

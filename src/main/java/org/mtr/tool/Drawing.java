@@ -3,8 +3,6 @@ package org.mtr.tool;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -65,10 +63,6 @@ public final class Drawing {
 		matrix4f = null;
 		this.matrixStack = matrixStack;
 		this.vertexConsumer = vertexConsumer;
-	}
-
-	public Drawing(PoseStack matrixStack, RenderType renderLayer) {
-		this(matrixStack, Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderLayer));
 	}
 
 	// Vertices

@@ -3,7 +3,7 @@ package org.mtr.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,7 +30,7 @@ public class RenderRouteSign<T extends BlockRouteSignBase.BlockEntityBase> exten
 	private static final float TEXTURE_BREAK = MIDDLE / HEIGHT_BOTTOM;
 
 	@Override
-	public void render(T blockEntity, PoseStack matrixStack2, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public void render(T blockEntity, PoseStack matrixStack2, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final BlockPos pos = blockEntity.getBlockPos();
 		final BlockState state = world.getBlockState(pos);
 		final Direction facing = IBlock.getStatePropertySafe(state, BlockStateProperties.HORIZONTAL_FACING);
@@ -81,7 +81,7 @@ public class RenderRouteSign<T extends BlockRouteSignBase.BlockEntityBase> exten
 	}
 
 	@Override
-	public boolean shouldRenderOffScreen(T blockEntity) {
+	public boolean shouldRenderOffScreen() {
 		return true;
 	}
 }

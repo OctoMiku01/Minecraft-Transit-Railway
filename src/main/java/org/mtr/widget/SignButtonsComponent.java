@@ -5,13 +5,13 @@ import gg.essential.elementa.constraints.PixelConstraint;
 import gg.essential.universal.UMatrixStack;
 import kotlin.Pair;
 import lombok.Setter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import org.jspecify.annotations.Nullable;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongAVLTreeSet;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.registry.UConverters;
 import org.mtr.resource.SignResource;
+import org.mtr.tool.GuiDrawTarget;
 import org.mtr.tool.ReleasedDynamicTextureRegistry;
 
 import java.util.Arrays;
@@ -58,7 +58,6 @@ public final class SignButtonsComponent extends UIComponent {
 		final float mouseX = mousePosition.getFirst();
 		final float mouseY = mousePosition.getSecond();
 
-		final Minecraft minecraftClient = Minecraft.getInstance();
 		hoveringSignResource = null;
 
 		for (int i = 0; i < filteredSignResources.size(); i++) {
@@ -80,10 +79,9 @@ public final class SignButtonsComponent extends UIComponent {
 
 			final SignResource[] currentSignResources = new SignResource[signWidthUnits];
 			currentSignResources[signResource.hasCustomText && signResource.getFlipCustomText() ? signWidthUnits - 1 : 0] = signResource;
-			SignResource.render(UConverters.convert(matrixStack), minecraftClient.renderBuffers().bufferSource(), signPos, x + 2, y + 2, selectedIds, currentSignResources, signHeight, 0, true);
+			SignResource.render(UConverters.convert(matrixStack), new GuiDrawTarget(), signPos, x + 2, y + 2, selectedIds, currentSignResources, signHeight, 0, true);
 		}
 
-		minecraftClient.renderBuffers().bufferSource().endBatch();
 		super.draw(matrixStack);
 	}
 

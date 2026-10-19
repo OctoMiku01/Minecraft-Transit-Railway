@@ -134,7 +134,7 @@ public final class RailModifierScreen extends WindowBase {
 				}
 			}).collect(Collectors.toCollection(ObjectArrayList::new));
 			updateRailStyles(styles);
-			Minecraft.getInstance().setScreen(null);
+			Minecraft.getInstance().gui.setScreen(null);
 		});
 
 		if (rail.canAccelerate() && !rail.isPlatform() && !rail.isSiding()) {

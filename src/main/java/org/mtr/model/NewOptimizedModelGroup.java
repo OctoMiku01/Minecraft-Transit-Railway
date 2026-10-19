@@ -1,6 +1,6 @@
 package org.mtr.model;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.PrimitiveTopology;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
@@ -36,13 +36,13 @@ public final class NewOptimizedModelGroup {
 		}
 	}
 
-	public Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> build(VertexFormat.Mode drawMode) {
+	public Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> build(PrimitiveTopology drawMode) {
 		final Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> newOptimizedModels = new Object2ObjectOpenHashMap<>(RenderStage.values().length);
 		storedVertexConsumersForRenderStageAndTexture.forEach((renderStage, storedVertexConsumerForTexture) -> {
 			if (renderStage != null) {
 				storedVertexConsumerForTexture.forEach((texture, storedVertexDataList) -> newOptimizedModels
 					.computeIfAbsent(renderStage, key -> new ObjectArrayList<>())
-					.add(new NewOptimizedModel(texture, drawMode, storedVertexDataList.isEmpty() ? null : vertexConsumer -> StoredVertexData.apply(storedVertexDataList, vertexConsumer)))
+					.add(new NewOptimizedModel(texture, drawMode, storedVertexDataList.isEmpty() ? null : storedVertexDataList))
 				);
 			}
 		});

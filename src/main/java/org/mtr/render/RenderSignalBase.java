@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -40,7 +40,7 @@ public abstract class RenderSignalBase<T extends BlockSignalBase.BlockEntityBase
 	}
 
 	@Override
-	public void render(T entity, PoseStack matrixStack2, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public void render(T entity, PoseStack matrixStack2, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final BlockPos pos = entity.getBlockPos();
 		final BlockState state = world.getBlockState(pos);
 		if (!(state.getBlock() instanceof BlockSignalBase)) {

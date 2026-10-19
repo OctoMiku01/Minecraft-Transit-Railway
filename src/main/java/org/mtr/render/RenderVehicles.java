@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -53,7 +53,7 @@ public final class RenderVehicles {
 			return;
 		}
 
-		final double renderDistance = minecraftClient.levelRenderer.getLastViewDistance() * 16;
+		final double renderDistance = minecraftClient.options.getEffectiveRenderDistance() * 16;
 
 		// When riding a moving vehicle, the client movement is always out of sync with the vehicle rendering. This produces annoying shaking effects.
 		// Offsets are used to render the vehicle with respect to the player position rather than the absolute world position, eliminating shaking.
@@ -100,7 +100,7 @@ public final class RenderVehicles {
 				ridingCarPositionAndRotation = vehiclePropertiesList.get(ridingCarNumber).right().right();
 				offsetVector = ridingVehicleCarNumberAndOffset.right().left();
 				final Double tempOffsetRotation = ridingVehicleCarNumberAndOffset.right().right();
-				offsetRotation = tempOffsetRotation == null ? null : tempOffsetRotation + (Math.abs(Utilities.circularDifference(Math.round(clientPlayerEntity.getYRot()), Math.round(minecraftClient.gameRenderer.getMainCamera().getYRot()), 360)) > 90 ? Math.PI : 0);
+				offsetRotation = tempOffsetRotation == null ? null : tempOffsetRotation + (Math.abs(Utilities.circularDifference(Math.round(clientPlayerEntity.getYRot()), Math.round(minecraftClient.gameRenderer.mainCamera().yRot()), 360)) > 90 ? Math.PI : 0);
 			}
 
 			// Iterate all cars of a vehicle
@@ -269,7 +269,7 @@ public final class RenderVehicles {
 
 					if (isWithinHalfRenderDistance) {
 						// Render the current riding player
-						if (ridingCarNumber == carNumber && offsetVector != null && minecraftClient.gameRenderer.getMainCamera().isDetached()) {
+						if (ridingCarNumber == carNumber && offsetVector != null && minecraftClient.gameRenderer.mainCamera().isDetached()) {
 							renderPlayer(clientPlayerEntity, -1, 0, 0, offsetVector, 0, oscillationAmount, offsetVector, offsetRotation, absoluteVehicleCarPositionAndRotation, absoluteVehicleCarPositionAndRotation, cameraShakeOffset);
 						}
 
@@ -364,7 +364,7 @@ public final class RenderVehicles {
 			), renderingPositionAndRotation.yaw, renderingPositionAndRotation.pitch, renderingPositionAndRotation.roll);
 		} else {
 			// Offset rendering with rotation
-			final double ridingRotation = offsetRotation - ridingCarPositionAndRotation.yaw - Math.toRadians(Minecraft.getInstance().gameRenderer.getMainCamera().getYRot());
+			final double ridingRotation = offsetRotation - ridingCarPositionAndRotation.yaw - Math.toRadians(Minecraft.getInstance().gameRenderer.mainCamera().yRot());
 			return new PositionAndRotation(new Vector(-offsetVector.x, -offsetVector.y, -offsetVector.z).rotateZ(ridingCarPositionAndRotation.roll).rotateX(ridingCarPositionAndRotation.pitch).rotateY(ridingCarPositionAndRotation.yaw).add(
 				renderingPositionAndRotation.position.x() - ridingCarPositionAndRotation.position.x(),
 				renderingPositionAndRotation.position.y() - ridingCarPositionAndRotation.position.y(),
@@ -473,20 +473,15 @@ public final class RenderVehicles {
 		);
 
 		final Minecraft minecraftClient = Minecraft.getInstance();
-		if (offsetVector != null || CullingHelper.getDistanceFromCamera(playerRenderingPositionAndRotation.position.x(), playerRenderingPositionAndRotation.position.y(), playerRenderingPositionAndRotation.position.z()) <= minecraftClient.levelRenderer.getLastViewDistance() * 8) {
+		if (offsetVector != null || CullingHelper.getDistanceFromCamera(playerRenderingPositionAndRotation.position.x(), playerRenderingPositionAndRotation.position.y(), playerRenderingPositionAndRotation.position.z()) <= minecraftClient.options.getEffectiveRenderDistance() * 8) {
 			final StoredMatrixTransformations storedMatrixTransformations = getStoredMatrixTransformations(offsetVector == null, playerRenderingPositionAndRotation, -oscillationAmount / 2);
 
 			// Render player
-			MainRenderer.scheduleRender(QueuedRenderLayer.INTERIOR, (matrixStack, vertexConsumer, offset) -> {
+			MainRenderer.scheduleSubmit((matrixStack, submitNodeCollector, camera, offset) -> {
 				storedMatrixTransformations.transform(matrixStack, offset);
 				Drawing.rotateXDegrees(matrixStack, 180);
 				Drawing.rotateYRadians(matrixStack, (float) (Math.PI + additionalRotation));
-//? if >= 1.21.4 {
-				minecraftClient.getEntityRenderDispatcher().render(playerEntity, 0, 0, 0, 0, matrixStack, minecraftClient.renderBuffers().bufferSource(), IGui.DEFAULT_LIGHT);
-//? } else {
-				/*minecraftClient.getEntityRenderDispatcher().render(playerEntity, 0, 0, 0, 0, 0, matrixStack, minecraftClient.renderBuffers().bufferSource(), IGui.DEFAULT_LIGHT);
-//
-*///? }
+				RenderVehicleHelper.submitEntity(playerEntity, IGui.DEFAULT_LIGHT, matrixStack, submitNodeCollector, camera);
 				matrixStack.popPose();
 			});
 		}
@@ -523,7 +518,7 @@ public final class RenderVehicles {
 			final Vector position8 = previousConnectionPositions.position4;
 
 			final BlockPos blockPosConnection = BlockPos.containing(position1.x(), position1.y() + 1, position1.z());
-			final int lightConnection = LightTexture.pack(clientWorld.getBrightness(LightLayer.BLOCK, blockPosConnection), clientWorld.getBrightness(LightLayer.SKY, blockPosConnection));
+			final int lightConnection = LightCoordsUtil.pack(clientWorld.getBrightness(LightLayer.BLOCK, blockPosConnection), clientWorld.getBrightness(LightLayer.SKY, blockPosConnection));
 
 			MainRenderer.scheduleRender(outerSideTexture, false, QueuedRenderLayer.EXTERIOR, (matrixStack, vertexConsumer, offset) -> {
 				// Sides

@@ -69,7 +69,7 @@ public final class SidingScreen extends NameColorDataScreenBase<Siding> {
 			.setWidth(new PixelConstraint(LEFT_WIDTH));
 
 		selectVehicleButton.setText(Component.translatable("selectWorld.edit").getString());
-		selectVehicleButton.onClick(() -> Minecraft.getInstance().setScreen(new VehicleSelectorScreen(siding, this)));
+		selectVehicleButton.onClick(() -> Minecraft.getInstance().gui.setScreen(new VehicleSelectorScreen(siding, this)));
 
 		if (!siding.getTransportMode().continuousMovement) {
 			GuiHelper.createSpacing(firstTabScrollComponent);

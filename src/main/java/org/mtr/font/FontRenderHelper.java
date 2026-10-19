@@ -2,9 +2,8 @@ package org.mtr.font;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
@@ -12,6 +11,7 @@ import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.data.IGui;
 import org.mtr.libraries.it.unimi.dsi.fastutil.floats.FloatFloatImmutablePair;
+import org.mtr.render.DrawTarget;
 import org.mtr.tool.GuiHelper;
 
 import java.awt.*;
@@ -21,11 +21,17 @@ public final class FontRenderHelper {
 	public static final Identifier MTR_FONT = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "mtr");
 	private static final float LINE_SPACING = 0.25F;
 
-	public static FloatFloatImmutablePair render(@Nullable PoseStack matrixStack, String text, FontRenderOptions fontRenderOptions) {
-		return render(matrixStack, null, text, fontRenderOptions);
+	/**
+	 * Measure text without drawing it.
+	 */
+	public static FloatFloatImmutablePair measure(String text, FontRenderOptions fontRenderOptions) {
+		return render(null, null, text, fontRenderOptions);
 	}
 
-	public static FloatFloatImmutablePair render(@Nullable PoseStack matrixStack, @Nullable MultiBufferSource vertexConsumerProvider, String text, FontRenderOptions fontRenderOptions) {
+	/**
+	 * Draw text and return its dimensions. Nothing is drawn if either the matrix stack or the draw target is {@code null}.
+	 */
+	public static FloatFloatImmutablePair render(@Nullable PoseStack matrixStack, @Nullable DrawTarget drawTarget, String text, FontRenderOptions fontRenderOptions) {
 		// Split lines
 		final String[] lines;
 		switch (fontRenderOptions.getLineBreak()) {
@@ -43,7 +49,7 @@ public final class FontRenderHelper {
 		float maxLineWidth = 0;
 		float totalLineHeight = 0;
 		final boolean hasCjkColor = fontRenderOptions.getCjkColor() != null && fontRenderOptions.getCjkColor() != fontRenderOptions.getColor();
-		final boolean shouldCheckCjk = matrixStack != null && hasCjkColor || fontRenderOptions.getCjkScaling() != 1;
+		final boolean shouldCheckCjk = matrixStack != null && drawTarget != null && hasCjkColor || fontRenderOptions.getCjkScaling() != 1;
 		for (int i = 0; i < orderedTextArray.length; i++) {
 			final boolean isCjk = shouldCheckCjk && IGui.isCjk(lines[i]);
 			fontSize[i] = (isCjk ? fontRenderOptions.getCjkScaling() : 1) * fontRenderOptions.getMaxFontSize();
@@ -73,7 +79,7 @@ public final class FontRenderHelper {
 			final float xScale = fontRenderOptions.getTextOverflow() == FontRenderOptions.TextOverflow.COMPRESS ? Math.min(yScale, Math.min(1, fontRenderOptions.getHorizontalSpace() / rawLineWidths[i])) : yScale;
 			final float horizontalOffset = fontRenderOptions.getHorizontalTextAlignment().getOffset(rawLineWidths[i] * xScale - fontRenderOptions.getHorizontalSpace());
 			totalWidth = Math.max(totalWidth, renderRaw(
-				matrixStack, vertexConsumerProvider, orderedTextArray[i],
+				matrixStack, drawTarget, orderedTextArray[i],
 				x + fontRenderOptions.getOffsetX() + horizontalOffset,
 				y + fontRenderOptions.getOffsetY(),
 				fontRenderOptions.getOffsetZ(),
@@ -87,13 +93,12 @@ public final class FontRenderHelper {
 		return new FloatFloatImmutablePair(totalWidth, y);
 	}
 
-	private static float[] renderRaw(@Nullable PoseStack matrixStack, @Nullable MultiBufferSource vertexConsumerProvider, FormattedCharSequence orderedText, float x, float y, float z, float xScale, float yScale, boolean isDefaultFont, boolean drawShadow, @Nullable Color color, int light) {
-		if (matrixStack != null && color != null) {
-			final MultiBufferSource newVertexConsumerProvider = vertexConsumerProvider == null ? Minecraft.getInstance().renderBuffers().bufferSource() : vertexConsumerProvider;
+	private static float[] renderRaw(@Nullable PoseStack matrixStack, @Nullable DrawTarget drawTarget, FormattedCharSequence orderedText, float x, float y, float z, float xScale, float yScale, boolean isDefaultFont, boolean drawShadow, @Nullable Color color, int light) {
+		if (matrixStack != null && drawTarget != null && color != null) {
 			matrixStack.pushPose();
 			matrixStack.translate(x, y, z);
 			matrixStack.scale(xScale / GuiHelper.MINECRAFT_FONT_SIZE, yScale / GuiHelper.MINECRAFT_FONT_SIZE, 1);
-			Minecraft.getInstance().font.drawInBatch(orderedText, isDefaultFont ? 0.5F : 0, 1, color.getRGB(), drawShadow, matrixStack.last().pose(), newVertexConsumerProvider, Font.DisplayMode.NORMAL, 0, light);
+			drawTarget.drawText(matrixStack, orderedText, isDefaultFont ? 0.5F : 0, 1, color.getRGB(), drawShadow, light);
 			matrixStack.popPose();
 		}
 
@@ -101,7 +106,7 @@ public final class FontRenderHelper {
 	}
 
 	private static FormattedCharSequence getOrderedText(String text, @Nullable Identifier font) {
-		return (font == null ? Component.literal(text) : Component.literal(text).setStyle(Style.EMPTY.withFont(font))).getVisualOrderText();
+		return (font == null ? Component.literal(text) : Component.literal(text).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(font)))).getVisualOrderText();
 	}
 
 	private static FormattedCharSequence[] getOrderedTextArray(String[] lines, @Nullable Identifier font) {

@@ -411,7 +411,7 @@ public class VehicleRidingMovement {
 					clientPlayerEntity.fallDistance = 0;
 					clientPlayerEntity.setDeltaMovement(0, 0, 0);
 					clientPlayerEntity.setSpeed(0);
-					clientPlayerEntity.absMoveTo(x, y, z);
+					clientPlayerEntity.absSnapTo(x, y, z);
 				}
 			};
 

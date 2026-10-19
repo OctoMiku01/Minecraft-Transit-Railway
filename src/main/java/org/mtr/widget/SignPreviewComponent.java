@@ -3,13 +3,13 @@ package org.mtr.widget;
 import gg.essential.universal.UMatrixStack;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import org.jspecify.annotations.Nullable;
 import org.mtr.core.tool.Utilities;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongAVLTreeSet;
 import org.mtr.registry.UConverters;
 import org.mtr.resource.SignResource;
+import org.mtr.tool.GuiDrawTarget;
 import org.mtr.tool.GuiAnimation;
 import org.mtr.tool.ReleasedDynamicTextureRegistry;
 
@@ -61,9 +61,7 @@ public final class SignPreviewComponent extends SlotBackgroundComponent {
 
 		matrixStack.push();
 		matrixStack.translate(getLeft() + 1, getTop() + 1, 0);
-		final Minecraft minecraftClient = Minecraft.getInstance();
-		SignResource.render(UConverters.convert(matrixStack), minecraftClient.renderBuffers().bufferSource(), signPos, selectedIds, signIds, getHeight() - 2, 0, true);
-		minecraftClient.renderBuffers().bufferSource().endBatch();
+		SignResource.render(UConverters.convert(matrixStack), new GuiDrawTarget(), signPos, selectedIds, signIds, getHeight() - 2, 0, true);
 		matrixStack.pop();
 
 		final Pair<Float, Float> mousePosition = getMousePosition();
@@ -79,7 +77,7 @@ public final class SignPreviewComponent extends SlotBackgroundComponent {
 			final Color color;
 			final boolean drawCross;
 
-			if (Screen.hasShiftDown()) {
+			if (Minecraft.getInstance().hasShiftDown()) {
 				if (signIds[signIndex] != null) {
 					hoverDeleteIndex = signIndex;
 					color = new Color(0xFF, 0, 0, 0x7F);

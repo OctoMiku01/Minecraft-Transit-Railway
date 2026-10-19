@@ -6,8 +6,6 @@ import gg.essential.elementa.constraints.PixelConstraint;
 import gg.essential.universal.UMatrixStack;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.client.CustomResourceLoader;
@@ -21,10 +19,12 @@ import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectCollection;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import org.mtr.registry.UConverters;
-import org.mtr.render.SpecialSignStationExitRenderer;
 import org.mtr.resource.SignResource;
+import org.mtr.render.DrawTarget;
+import org.mtr.render.SpecialSignStationExitRenderer;
 import org.mtr.tool.DataHelper;
 import org.mtr.tool.Drawing;
+import org.mtr.tool.GuiDrawTarget;
 import org.mtr.tool.GuiHelper;
 
 import java.util.Collections;
@@ -65,7 +65,8 @@ public final class ListComponent<T> extends UIComponent {
 			.verticalTextAlignment(FontRenderOptions.Alignment.CENTER);
 
 		final PoseStack matrixStack = UConverters.convert(uMatrixStack);
-		final Drawing drawing = new Drawing(matrixStack, RenderType.gui());
+		final GuiDrawTarget guiDrawTarget = new GuiDrawTarget();
+		final Drawing drawing = new Drawing(matrixStack, guiDrawTarget.getBuffer(null));
 		final ObjectArrayList<Runnable> deferredRenders = new ObjectArrayList<>();
 		final float left = getLeft();
 		final float right = getRight();
@@ -91,7 +92,7 @@ public final class ListComponent<T> extends UIComponent {
 					clickAction = listItem::toggle;
 
 					// Draw the action button
-					deferredRenders.add(() -> new Drawing(matrixStack, GuiHelper.getGuiTexturedRenderType(listItem.isExpanded() ? GuiHelper.CHEVRON_UP_TEXTURE_ID : GuiHelper.CHEVRON_DOWN_TEXTURE_ID))
+					deferredRenders.add(() -> new Drawing(matrixStack, guiDrawTarget.getBuffer(listItem.isExpanded() ? GuiHelper.CHEVRON_UP_TEXTURE_ID : GuiHelper.CHEVRON_DOWN_TEXTURE_ID))
 						.setVerticesWH(leftBound + GuiHelper.DEFAULT_PADDING / 2F, startY + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_ICON_SIZE, GuiHelper.DEFAULT_ICON_SIZE)
 						.setUv()
 						.draw()
@@ -111,7 +112,7 @@ public final class ListComponent<T> extends UIComponent {
 						}
 
 						// Draw the action button
-						deferredRenders.add(() -> new Drawing(matrixStack, GuiHelper.getGuiTexturedRenderType(identifier))
+						deferredRenders.add(() -> new Drawing(matrixStack, guiDrawTarget.getBuffer(identifier))
 							.setVerticesWH(leftBound + GuiHelper.DEFAULT_PADDING / 2F, startY + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_ICON_SIZE, GuiHelper.DEFAULT_ICON_SIZE)
 							.setUv()
 							.draw()
@@ -127,11 +128,11 @@ public final class ListComponent<T> extends UIComponent {
 				listItem.drawIcon.draw(drawing, left, startY);
 			}
 			if (listItem.deferredDrawIcon != null) {
-				deferredRenders.add(() -> listItem.deferredDrawIcon.draw(matrixStack, left, startY));
+				deferredRenders.add(() -> listItem.deferredDrawIcon.draw(matrixStack, guiDrawTarget, left, startY));
 			}
 
 			// Draw text
-			deferredRenders.add(() -> FontRenderHelper.render(matrixStack, listItem.text, fontRenderOptionsBuilder
+			deferredRenders.add(() -> FontRenderHelper.render(matrixStack, guiDrawTarget, listItem.text, fontRenderOptionsBuilder
 				.horizontalSpace(right - left - listItem.iconWidth - GuiHelper.DEFAULT_PADDING * 2 - (isMouseOver ? GuiHelper.DEFAULT_LINE_SIZE * listItem.actionCount() : 0))
 				.offsetX(left + listItem.iconWidth + GuiHelper.DEFAULT_PADDING)
 				.offsetY(startY)
@@ -144,7 +145,7 @@ public final class ListComponent<T> extends UIComponent {
 
 		setHeight(new PixelConstraint(Math.max(1, totalHeight[0])));
 		deferredRenders.forEach(Runnable::run);
-		Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
+		guiDrawTarget.flush();
 		super.draw(uMatrixStack);
 	}
 
@@ -242,7 +243,7 @@ public final class ListComponent<T> extends UIComponent {
 
 			dataList.add(ListItem.createChild(
 				(drawing, x, y) -> GuiHelper.drawCircle(drawing, x + GuiHelper.DEFAULT_PADDING / 2F, y + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING, 32, colors),
-				(matrixStack, x, y) -> drawPlatformNumber(matrixStack, x, y, savedRail.getName()),
+				(matrixStack, drawTarget, x, y) -> drawPlatformNumber(matrixStack, drawTarget, x, y, savedRail.getName()),
 				GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING / 2,
 				savedRail,
 				text,
@@ -336,7 +337,7 @@ public final class ListComponent<T> extends UIComponent {
 
 			dataList.add(ListItem.createChild(
 				(drawing, x, y) -> drawing.setVerticesWH(x + GuiHelper.DEFAULT_PADDING / 2F, y + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING).setColor(stationColor).draw(),
-				(matrixStack, x, y) -> drawPlatformNumber(matrixStack, x, y, platform.getName()),
+				(matrixStack, drawTarget, x, y) -> drawPlatformNumber(matrixStack, drawTarget, x, y, platform.getName()),
 				GuiHelper.DEFAULT_PADDING + GuiHelper.MINECRAFT_FONT_SIZE,
 				routePlatformData,
 				customDestinationPrefix + stationName,
@@ -361,7 +362,7 @@ public final class ListComponent<T> extends UIComponent {
 			}
 
 			final ListItem.DrawIcon drawIcon = (drawing, x, y) -> drawing.setVerticesWH(x + GuiHelper.DEFAULT_PADDING / 2F, y + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING).setColor(GuiHelper.DARK_GRAY_COLOR).draw();
-			final ListItem.DeferredDrawIcon deferredDrawIcon = (drawing, x, y) -> SpecialSignStationExitRenderer.renderText(drawing, stationExit.getName(), FontRenderHelper.MTR_FONT, x + GuiHelper.DEFAULT_LINE_SIZE / 2F, y + GuiHelper.DEFAULT_LINE_SIZE / 2F, 0, GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT, GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT);
+			final ListItem.DeferredDrawIcon deferredDrawIcon = (matrixStack, drawTarget, x, y) -> SpecialSignStationExitRenderer.renderText(matrixStack, drawTarget, stationExit.getName(), FontRenderHelper.MTR_FONT, x + GuiHelper.DEFAULT_LINE_SIZE / 2F, y + GuiHelper.DEFAULT_LINE_SIZE / 2F, 0, GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT, GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT);
 
 			if (flatten) {
 				dataList.add(ListItem.createChild(
@@ -405,7 +406,7 @@ public final class ListComponent<T> extends UIComponent {
 		final int index = indexList.getFirst();
 		if (direction > 0 && index < dataList.size() - 1 || direction < 0 && index > 0) {
 			final T data = dataList.remove(index);
-			if (Screen.hasShiftDown()) {
+			if (Minecraft.getInstance().hasShiftDown()) {
 				if (direction > 0) {
 					dataList.add(data);
 				} else {
@@ -420,8 +421,8 @@ public final class ListComponent<T> extends UIComponent {
 		}
 	}
 
-	private static void drawPlatformNumber(PoseStack matrixStack, double x, double y, String name) {
-		FontRenderHelper.render(matrixStack, Utilities.formatName(name), FontRenderOptions.builder()
+	private static void drawPlatformNumber(PoseStack matrixStack, DrawTarget drawTarget, double x, double y, String name) {
+		FontRenderHelper.render(matrixStack, drawTarget, Utilities.formatName(name), FontRenderOptions.builder()
 			.horizontalPositioning(FontRenderOptions.Alignment.CENTER)
 			.verticalPositioning(FontRenderOptions.Alignment.CENTER)
 			.horizontalSpace(GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT)

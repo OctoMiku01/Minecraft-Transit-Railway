@@ -1,6 +1,6 @@
 package org.mtr.model;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.PrimitiveTopology;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 import org.mtr.data.VehicleExtension;
@@ -17,7 +17,7 @@ public final class BuiltVehicleModelHolder {
 	public final ModelProperties modelProperties;
 	private final Object2ObjectOpenHashMap<PartCondition, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>>> builtModels;
 	private final ObjectArrayList<ModelPropertiesPart.RawDoorModelDetails> rawDoorModelDetailsList;
-	private final VertexFormat.Mode drawMode;
+	private final PrimitiveTopology drawMode;
 	private final ObjectArrayList<BuiltDoorModelDetails> builtDoorModelDetailsList = new ObjectArrayList<>();
 	private final Object2ObjectOpenHashMap<PartCondition, ObjectArrayList<ModelDisplayPart>> displays;
 	public final ObjectArrayList<AABB> floors;
@@ -27,7 +27,7 @@ public final class BuiltVehicleModelHolder {
 		ModelProperties modelProperties,
 		Object2ObjectOpenHashMap<PartCondition, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>>> builtModels,
 		ObjectArrayList<ModelPropertiesPart.RawDoorModelDetails> rawDoorModelDetailsList,
-		VertexFormat.Mode drawMode,
+		PrimitiveTopology drawMode,
 		Object2ObjectOpenHashMap<PartCondition, ObjectArrayList<ModelDisplayPart>> displays,
 		ObjectArrayList<AABB> floors,
 		ObjectArrayList<AABB> doorways

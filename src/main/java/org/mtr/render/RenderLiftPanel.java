@@ -3,7 +3,7 @@ package org.mtr.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -49,7 +49,7 @@ public class RenderLiftPanel<T extends BlockLiftPanelBase.BlockEntityBase> exten
 	}
 
 	@Override
-	public void render(T blockEntity, PoseStack matrixStack2, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public void render(T blockEntity, PoseStack matrixStack2, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final BlockPos trackPosition = blockEntity.getTrackPosition();
 		if (trackPosition == null || !(world.getBlockState(trackPosition).getBlock() instanceof BlockLiftTrackFloor)) {
 			return;
@@ -95,9 +95,9 @@ public class RenderLiftPanel<T extends BlockLiftPanelBase.BlockEntityBase> exten
 			});
 
 			// Floor Number
-			MainRenderer.scheduleTextRender((matrixStack, offset) -> {
+			MainRenderer.scheduleTextRender((matrixStack, drawTarget, offset) -> {
 				storedMatrixTransformations2.transform(matrixStack, offset);
-				FontRenderHelper.render(matrixStack,
+				FontRenderHelper.render(matrixStack, drawTarget,
 					currentFloorNumber,
 					FontRenderOptions.builder()
 						.horizontalTextAlignment(FontRenderOptions.Alignment.CENTER)

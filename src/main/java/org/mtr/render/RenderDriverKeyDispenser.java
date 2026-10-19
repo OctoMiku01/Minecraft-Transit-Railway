@@ -3,7 +3,7 @@ package org.mtr.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
@@ -25,7 +25,7 @@ public class RenderDriverKeyDispenser extends BlockEntityRendererExtension<Block
 	private static final int ROTATION_DURATION = 5000;
 
 	@Override
-	public void render(BlockDriverKeyDispenser.DriverKeyDispenserBlockEntity blockEntity, PoseStack matrixStack2, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public void render(BlockDriverKeyDispenser.DriverKeyDispenserBlockEntity blockEntity, PoseStack matrixStack2, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final Depot depot = MTRClient.findDepot(blockEntity.getBlockPos());
 		final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations(0.5 + blockEntity.getBlockPos().getX(), blockEntity.getBlockPos().getY(), 0.5 + blockEntity.getBlockPos().getZ());
 

@@ -1,12 +1,10 @@
 package org.mtr.tool;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import gg.essential.elementa.components.UIContainer;
 import gg.essential.elementa.components.UIWrappedText;
 import gg.essential.elementa.constraints.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
@@ -18,16 +16,6 @@ import org.mtr.widget.ScrollPanelComponent;
 import org.mtr.widget.SlotBackgroundComponent;
 
 import java.awt.*;
-
-//? if < 1.21.4 {
-/*import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.util.Util;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderStateShard;
-
-import java.util.function.Function;
-*///? }
 
 /**
  * GUI colour palette and widget rendering utilities.
@@ -89,11 +77,6 @@ public final class GuiHelper {
 
 	private static final int SHADOW_COLOR_DARK = 0x11000000;
 	private static final int SHADOW_COLOR_LIGHT = 0x11FFFFFF;
-
-//? if < 1.21.4 {
-	/*private static final RenderStateShard.ShaderStateShard POSITION_TEXTURE_COLOR_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexColorShader);
-	private static final Function<Identifier, RenderType> GUI_TEXTURED = Util.memoize((resourceLocation) -> RenderType.create("gui_textured", DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS, 786432, RenderType.CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setShaderState(POSITION_TEXTURE_COLOR_SHADER).setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST).createCompositeState(false)));
-*///? }
 
 	/**
 	 * Creates a constraint for a fixed aspect ratio of an inside rectangle with a border.
@@ -179,15 +162,6 @@ public final class GuiHelper {
 			timeG < 2000 ? (float) Math.sin(timeG * Math.PI / 2000) : 0,
 			timeB < 2000 ? (float) Math.sin(timeB * Math.PI / 2000) : 0
 		);
-	}
-
-	public static RenderType getGuiTexturedRenderType(Identifier texture) {
-//? if >= 1.21.4 {
-		return RenderType.guiTextured(texture);
-//? } else {
-		/*return GUI_TEXTURED.apply(texture);
-//
-*///? }
 	}
 
 	/**
@@ -300,28 +274,27 @@ public final class GuiHelper {
 	/**
 	 * Draws text (in a GUI) with the Minecraft font from double coordinates. No shadow is drawn.
 	 */
-	public static void drawText(GuiGraphics context, @Nullable String text, double x, double y, double z, int color) {
+	public static void drawText(GuiGraphicsExtractor context, @Nullable String text, double x, double y, double z, int color) {
 		drawText(context, text, null, x, y, z, color);
 	}
 
 	/**
 	 * Draws text (in a GUI) with the Minecraft font from double coordinates. No shadow is drawn.
 	 */
-	public static void drawText(GuiGraphics context, @Nullable Component text, double x, double y, double z, int color) {
+	public static void drawText(GuiGraphicsExtractor context, @Nullable Component text, double x, double y, double z, int color) {
 		drawText(context, null, text, x, y, z, color);
 	}
 
-	private static void drawText(GuiGraphics context, @Nullable String text1, @Nullable Component text2, double x, double y, double z, int color) {
+	private static void drawText(GuiGraphicsExtractor context, @Nullable String text1, @Nullable Component text2, double x, double y, double z, int color) {
 		if ((text1 != null || text2 != null) && (color & 0xFF000000) != 0) {
-			final PoseStack matrixStack = context.pose();
-			matrixStack.pushPose();
-			matrixStack.translate(x, y, z);
+			context.pose().pushMatrix();
+			context.pose().translate((float) x, (float) y);
 			if (text1 != null) {
-				context.drawString(Minecraft.getInstance().font, text1, 0, 0, color, false);
+				context.text(Minecraft.getInstance().font, text1, 0, 0, color, false);
 			} else {
-				context.drawString(Minecraft.getInstance().font, text2, 0, 0, color, false);
+				context.text(Minecraft.getInstance().font, text2, 0, 0, color, false);
 			}
-			matrixStack.popPose();
+			context.pose().popMatrix();
 		}
 	}
 

@@ -5,7 +5,8 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
@@ -301,7 +302,7 @@ public final class MTRClient {
 			// If player is moving, send a request every 0.5 seconds to the server to fetch any new nearby data
 			final LocalPlayer clientPlayerEntity = Minecraft.getInstance().player;
 			if (clientPlayerEntity != null && lastUpdatePacketMillis > 0 && getGameMillis() > lastUpdatePacketMillis) {
-				final DataRequest dataRequest = new DataRequest(clientPlayerEntity.getUUID(), MTR.blockPosToPosition(Minecraft.getInstance().gameRenderer.getMainCamera().getBlockPosition()), (int) Minecraft.getInstance().levelRenderer.getLastViewDistance() * 16L);
+				final DataRequest dataRequest = new DataRequest(clientPlayerEntity.getUUID(), MTR.blockPosToPosition(Minecraft.getInstance().gameRenderer.mainCamera().blockPosition()), (int) Minecraft.getInstance().options.getEffectiveRenderDistance() * 16L);
 				dataRequest.writeExistingIds(MinecraftClientData.getInstance());
 				RegistryClient.sendPacketToServer(new PacketRequestData(dataRequest));
 				lastUpdatePacketMillis = 0;
@@ -387,7 +388,7 @@ public final class MTRClient {
 	}
 
 	public static void transformToFacePlayer(PoseStack matrixStack, double x, double y, double z) {
-		final Vec3 cameraPosition = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+		final Vec3 cameraPosition = Minecraft.getInstance().gameRenderer.mainCamera().position();
 		final double differenceX = cameraPosition.x - x;
 		final double differenceY = cameraPosition.y - y;
 		final double differenceZ = cameraPosition.z - z;
@@ -434,7 +435,7 @@ public final class MTRClient {
 
 	@FunctionalInterface
 	public interface WorldRenderCallback {
-		void accept(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, Vec3 offset);
+		void accept(PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera);
 	}
 
 	private static class ResourcePackCreatorWebServlet extends WebServlet {

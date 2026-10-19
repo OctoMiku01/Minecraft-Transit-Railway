@@ -6,7 +6,6 @@ import gg.essential.elementa.constraints.*;
 import gg.essential.universal.UMatrixStack;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import org.mtr.core.tool.Utilities;
 import org.mtr.tool.GuiHelper;
 
@@ -67,7 +66,7 @@ public final class Grouped24HourSlidersComponent extends UIContainer {
 		}
 
 		column2.onMouseEnterRunnable(() -> {
-			if (Screen.hasShiftDown()) {
+			if (Minecraft.getInstance().hasShiftDown()) {
 				for (final NumberInputComponent numberInput : numberInputs) {
 					numberInput.overrideHighlighted(true);
 				}
@@ -105,7 +104,7 @@ public final class Grouped24HourSlidersComponent extends UIContainer {
 		final Pair<Float, Float> mousePosition = getMousePosition();
 		final float mouseX = mousePosition.getFirst();
 		final float mouseY = mousePosition.getSecond();
-		final boolean shiftPressed = Screen.hasShiftDown();
+		final boolean shiftPressed = Minecraft.getInstance().hasShiftDown();
 
 		if (shiftPressed != previousShiftPressed) {
 			for (final NumberInputComponent numberInput : numberInputs) {
@@ -125,7 +124,7 @@ public final class Grouped24HourSlidersComponent extends UIContainer {
 	}
 
 	private void setValueFromPosition(float position) {
-		if (Screen.hasShiftDown()) {
+		if (Minecraft.getInstance().hasShiftDown()) {
 			final float value = (position - NumberInputComponent.SLIDER_HANDLE_WIDTH / 2F) / (column2.getWidth() - NumberInputComponent.SLIDER_HANDLE_WIDTH) * max;
 			for (int j = 0; j < Utilities.HOURS_PER_DAY; j++) {
 				if (numberInputs[j].getValue() != value) {

@@ -36,7 +36,7 @@ import org.mtr.registry.Items;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class BlockNode extends BlockWaterloggable implements SimpleWaterloggedBlock, IBlockTooltip {
+public class BlockNode extends BlockWaterloggable implements SimpleWaterloggedBlock {
 
 	public final TransportMode transportMode;
 
@@ -124,7 +124,7 @@ public class BlockNode extends BlockWaterloggable implements SimpleWaterloggedBl
 		return (IBlock.getStatePropertySafe(state, FACING) ? 0 : 90) + (IBlock.getStatePropertySafe(state, BlockNode.IS_22_5) ? 22.5F : 0) + (IBlock.getStatePropertySafe(state, BlockNode.IS_45) ? 45 : 0);
 	}
 
-	public static class BlockContinuousMovementNode extends BlockNode {
+	public static class BlockContinuousMovementNode extends BlockNode implements IBlockTooltip {
 
 		public final boolean upper;
 		public final boolean isStation;

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -19,7 +19,7 @@ import org.mtr.tool.Drawing;
 public class RenderClock extends BlockEntityRendererExtension<BlockClock.ClockBlockEntity> implements IGui, IBlock {
 
 	@Override
-	public void render(BlockClock.ClockBlockEntity blockEntity, PoseStack matrixStack2, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public void render(BlockClock.ClockBlockEntity blockEntity, PoseStack matrixStack2, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final BlockPos pos = blockEntity.getBlockPos();
 		final BlockState state = world.getBlockState(pos);
 		final boolean rotated = IBlock.getStatePropertySafe(state, BlockClock.FACING);
@@ -31,7 +31,7 @@ public class RenderClock extends BlockEntityRendererExtension<BlockClock.ClockBl
 
 		MainRenderer.scheduleRender(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png"), false, QueuedRenderLayer.LIGHT, (matrixStack, vertexConsumer, offset) -> {
 			storedMatrixTransformations.transform(matrixStack, offset);
-			final long time = world.getDayTime() + 6000;
+			final long time = world.getDefaultClockTime() + 6000;
 
 			drawHand(matrixStack, vertexConsumer, time * 360F / 12000, true);
 			drawHand(matrixStack, vertexConsumer, time * 360F / 1000, false);

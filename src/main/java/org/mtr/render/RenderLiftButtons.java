@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -37,7 +37,7 @@ public class RenderLiftButtons extends BlockEntityRendererExtension<BlockLiftBut
 	private static final Identifier BUTTON_TEXTURE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/lift_button.png");
 
 	@Override
-	public void render(BlockLiftButtons.LiftButtonsBlockEntity blockEntity, PoseStack matrixStack2, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public void render(BlockLiftButtons.LiftButtonsBlockEntity blockEntity, PoseStack matrixStack2, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final BlockPos blockPos = blockEntity.getBlockPos();
 		final BlockState blockState = world.getBlockState(blockPos);
 		final Direction facing = IBlock.getStatePropertySafe(blockState, BlockStateProperties.HORIZONTAL_FACING);

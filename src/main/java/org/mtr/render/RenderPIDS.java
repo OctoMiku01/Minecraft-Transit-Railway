@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -55,7 +55,7 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 	}
 
 	@Override
-	public final void render(T blockEntity, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public final void render(T blockEntity, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final BlockPos blockPos = blockEntity.getBlockPos();
 		if (!blockEntity.canStoreData.test(world, blockPos)) {
 			return;
@@ -79,8 +79,8 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 		}
 	}
 
-	public void renderText(PoseStack matrixStack, String text, int x, int y, Color color) {
-		FontRenderHelper.render(matrixStack, text, FontRenderOptions.builder().offsetX(x).offsetY(y).color(color).build());
+	public void renderText(PoseStack matrixStack, DrawTarget drawTarget, String text, int x, int y, Color color) {
+		FontRenderHelper.render(matrixStack, drawTarget, text, FontRenderOptions.builder().offsetX(x).offsetY(y).color(color).build());
 	}
 
 	public String getArrivalString(long arrival, boolean isRealtime, boolean isCjk) {
@@ -95,15 +95,15 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 
 	private void getArrivalsAndRender(T entity, BlockPos blockPos, Direction facing, LongCollection platformIds) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
-		MainRenderer.scheduleTextRender((matrixStack, offset) -> {
-			render(entity, blockPos, facing, arrivalResponseList, matrixStack, offset);
+		MainRenderer.scheduleTextRender((matrixStack, drawTarget, offset) -> {
+			render(entity, blockPos, facing, arrivalResponseList, matrixStack, drawTarget, offset);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-				render(entity, blockPos.relative(facing), facing.getOpposite(), arrivalResponseList, matrixStack, offset);
+				render(entity, blockPos.relative(facing), facing.getOpposite(), arrivalResponseList, matrixStack, drawTarget, offset);
 			}
 		});
 	}
 
-	private void render(T entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, PoseStack matrixStack, Vec3 offset) {
+	private void render(T entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, PoseStack matrixStack, DrawTarget drawTarget, Vec3 offset) {
 		final float scale = 160 * entity.maxArrivals / maxHeight * textPadding;
 		final boolean hasDifferentCarLengths = hasDifferentCarLengths(arrivalResponseList);
 		final boolean isSingleArrival = entity instanceof BlockPIDSVerticalSingleArrival1.PIDSVerticalSingleArrival1BlockEntity;
@@ -178,7 +178,7 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 			matrixStack.scale(1 / scale, 1 / scale, 1 / scale);
 
 			if (renderCustomMessage) {
-				renderText(matrixStack, customMessageSplit[languageIndex], textColor, maxWidth * scale / 16, HorizontalAlignment.LEFT);
+				renderText(matrixStack, drawTarget, customMessageSplit[languageIndex], textColor, maxWidth * scale / 16, HorizontalAlignment.LEFT);
 			} else {
 				final long arrival = (arrivalResponse.getArrival() - ArrivalsCacheClient.INSTANCE.getMillisOffset() - System.currentTimeMillis()) / 1000;
 				final Color color = arrival <= 0 ? textColorArrived : textColor;
@@ -196,11 +196,11 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 				if (isSingleArrival) {
 					if (i == 0) {
 						final float halfWidth = maxWidth * scale / 16 / 2;
-						renderText(matrixStack, arrivalString, color, halfWidth, HorizontalAlignment.LEFT);
+						renderText(matrixStack, drawTarget, arrivalString, color, halfWidth, HorizontalAlignment.LEFT);
 						matrixStack.translate(halfWidth, 0, 0);
-						renderText(matrixStack, (isCjk ? TranslationProvider.GUI_MTR_PLATFORM_ABBREVIATED_CJK : TranslationProvider.GUI_MTR_PLATFORM_ABBREVIATED).getString(arrivalResponse.getPlatformName()), color, halfWidth, HorizontalAlignment.RIGHT);
+						renderText(matrixStack, drawTarget, (isCjk ? TranslationProvider.GUI_MTR_PLATFORM_ABBREVIATED_CJK : TranslationProvider.GUI_MTR_PLATFORM_ABBREVIATED).getString(arrivalResponse.getPlatformName()), color, halfWidth, HorizontalAlignment.RIGHT);
 					} else if (i == 1) {
-						renderText(matrixStack, destinationFormatted, color, maxWidth * scale / 16, HorizontalAlignment.LEFT);
+						renderText(matrixStack, drawTarget, destinationFormatted, color, maxWidth * scale / 16, HorizontalAlignment.LEFT);
 					} else if (i == 3) {
 						final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrivalResponse.getRouteId());
 						final ObjectArrayList<SimplifiedRoutePlatform> stations = new ObjectArrayList<>();
@@ -228,46 +228,46 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 						}
 
 						lines.forEach(line -> {
-							renderText(matrixStack, line, color, maxWidth * scale / 16, stations.isEmpty() ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT);
+							renderText(matrixStack, drawTarget, line, color, maxWidth * scale / 16, stations.isEmpty() ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT);
 							matrixStack.translate(0, maxHeight * scale / entity.maxArrivals / 16, 0);
 						});
 					} else if (i == 15) {
-						renderText(matrixStack, carLengthString, Color.RED, maxWidth * scale / 16, HorizontalAlignment.RIGHT);
+						renderText(matrixStack, drawTarget, carLengthString, Color.RED, maxWidth * scale / 16, HorizontalAlignment.RIGHT);
 					}
 				} else {
 					if (entity.alternateLines()) {
 						if (i % 2 == 0) {
-							renderText(matrixStack, destinationFormatted, color, maxWidth * scale / 16, HorizontalAlignment.LEFT);
+							renderText(matrixStack, drawTarget, destinationFormatted, color, maxWidth * scale / 16, HorizontalAlignment.LEFT);
 						} else {
 							if (hasDifferentCarLengths) {
-								renderText(matrixStack, carLengthString, Color.RED, 32, HorizontalAlignment.LEFT);
+								renderText(matrixStack, drawTarget, carLengthString, Color.RED, 32, HorizontalAlignment.LEFT);
 								matrixStack.translate(32, 0, 0);
 							}
-							renderText(matrixStack, arrivalString, color, maxWidth * scale / 16 - (hasDifferentCarLengths ? 32 : 0), HorizontalAlignment.RIGHT);
+							renderText(matrixStack, drawTarget, arrivalString, color, maxWidth * scale / 16 - (hasDifferentCarLengths ? 32 : 0), HorizontalAlignment.RIGHT);
 						}
 					} else {
 						final boolean showPlatformNumber = entity instanceof BlockArrivalProjectorBase.BlockEntityArrivalProjectorBase;
 
 						if (entity.showArrivalNumber()) {
-							renderText(matrixStack, String.valueOf(arrivalIndex), color, 12, HorizontalAlignment.LEFT);
+							renderText(matrixStack, drawTarget, String.valueOf(arrivalIndex), color, 12, HorizontalAlignment.LEFT);
 							matrixStack.translate(12, 0, 0);
 						}
 
 						final float destinationWidth = maxWidth * scale / 16 - 40 - (hasDifferentCarLengths || showPlatformNumber ? showPlatformNumber ? 16 : 32 : 0) - (entity.showArrivalNumber() ? 12 : 0);
-						renderText(matrixStack, destinationFormatted, color, destinationWidth, HorizontalAlignment.LEFT);
+						renderText(matrixStack, drawTarget, destinationFormatted, color, destinationWidth, HorizontalAlignment.LEFT);
 						matrixStack.translate(destinationWidth, 0, 0);
 
 						if (hasDifferentCarLengths || showPlatformNumber) {
 							if (showPlatformNumber) {
-								renderText(matrixStack, arrivalResponse.getPlatformName(), color, 16, HorizontalAlignment.LEFT);
+								renderText(matrixStack, drawTarget, arrivalResponse.getPlatformName(), color, 16, HorizontalAlignment.LEFT);
 								matrixStack.translate(16, 0, 0);
 							} else {
-								renderText(matrixStack, carLengthString, Color.RED, 32, HorizontalAlignment.LEFT);
+								renderText(matrixStack, drawTarget, carLengthString, Color.RED, 32, HorizontalAlignment.LEFT);
 								matrixStack.translate(32, 0, 0);
 							}
 						}
 
-						renderText(matrixStack, arrivalString, color, 40, HorizontalAlignment.RIGHT);
+						renderText(matrixStack, drawTarget, arrivalString, color, 40, HorizontalAlignment.RIGHT);
 					}
 				}
 			}
@@ -276,14 +276,14 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 		}
 	}
 
-	private void renderText(PoseStack matrixStack, String text, Color color, float availableWidth, HorizontalAlignment horizontalAlignment) {
+	private void renderText(PoseStack matrixStack, DrawTarget drawTarget, String text, Color color, float availableWidth, HorizontalAlignment horizontalAlignment) {
 		matrixStack.pushPose();
 		final Font textRenderer = Minecraft.getInstance().font;
 		final int textWidth = textRenderer.width(text);
 		if (availableWidth < textWidth) {
 			matrixStack.scale(textWidth == 0 ? 1 : availableWidth / textWidth, 1, 1);
 		}
-		renderText(matrixStack, text, (int) horizontalAlignment.getOffset(0, textWidth - availableWidth), 0, color);
+		renderText(matrixStack, drawTarget, text, (int) horizontalAlignment.getOffset(0, textWidth - availableWidth), 0, color);
 		matrixStack.popPose();
 	}
 

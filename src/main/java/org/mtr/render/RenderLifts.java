@@ -53,7 +53,7 @@ public class RenderLifts implements IGui {
 		}
 
 		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = new ObjectArrayList<>();
-		final Vec3 cameraPosition = minecraftClient.gameRenderer.getMainCamera().getPosition();
+		final Vec3 cameraPosition = minecraftClient.gameRenderer.mainCamera().position();
 		final com.logisticscraft.occlusionculling.util.Vec3d camera = new com.logisticscraft.occlusionculling.util.Vec3d(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 		final boolean canRide = !clientPlayerEntity.isSpectator();
@@ -219,9 +219,9 @@ public class RenderLifts implements IGui {
 		final ObjectObjectImmutablePair<LiftDirection, ObjectObjectImmutablePair<String, String>> liftDetails = getLiftDetails(world, lift, MTR.positionToBlockPos(lift.getCurrentFloor().getPosition()));
 		final LiftDirection liftDirection = liftDetails.left();
 
-		MainRenderer.scheduleTextRender((matrixStack, offset) -> {
+		MainRenderer.scheduleTextRender((matrixStack, drawTarget, offset) -> {
 			storedMatrixTransformations.transform(matrixStack, offset);
-			FontRenderHelper.render(matrixStack,
+			FontRenderHelper.render(matrixStack, drawTarget,
 				liftDetails.right().left(),
 				FontRenderOptions.builder()
 					.horizontalTextAlignment(FontRenderOptions.Alignment.CENTER)

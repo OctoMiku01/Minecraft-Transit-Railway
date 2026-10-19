@@ -1,12 +1,12 @@
 package org.mtr.map;
 
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.cache.CachedFileProvider;
+import org.mtr.render.RecordingVertexConsumer;
 
 import java.util.Locale;
 
@@ -29,7 +29,7 @@ public final class MapTileProvider extends CachedFileProvider<MapTileResource> {
 	}
 
 	@Nullable
-	public VertexBuffer getTile(BlockPos blockPos) {
+	public RecordingVertexConsumer getTile(BlockPos blockPos) {
 		final int chunkX = Math.floorDiv(blockPos.getX(), TILE_SIZE);
 		final int y = mapType == MapType.DYNAMIC ? blockPos.getY() : 0;
 		final int chunkZ = Math.floorDiv(blockPos.getZ(), TILE_SIZE);
@@ -38,7 +38,7 @@ public final class MapTileProvider extends CachedFileProvider<MapTileResource> {
 			chunkX, y, chunkZ,
 			cacheDirectory.resolve(String.format("%s_%s_%s_%s", mapType.toString().toLowerCase(Locale.ENGLISH), chunkX, y, chunkZ))
 		));
-		return mapTileResource == null ? null : mapTileResource.getVertexBuffer();
+		return mapTileResource == null ? null : mapTileResource.getTileVertices();
 	}
 
 	public enum MapType {TERRAIN, ELEVATION, SATELLITE, DYNAMIC}

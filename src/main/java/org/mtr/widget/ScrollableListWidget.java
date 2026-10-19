@@ -1,9 +1,8 @@
 package org.mtr.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.client.CustomResourceLoader;
@@ -16,8 +15,10 @@ import org.mtr.libraries.it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
+import org.mtr.render.DrawTarget;
 import org.mtr.tool.DataHelper;
 import org.mtr.tool.Drawing;
+import org.mtr.tool.GuiExtractorDrawTarget;
 import org.mtr.tool.GuiHelper;
 import org.mtr.tool.RouteHelper;
 
@@ -40,12 +41,13 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 	private static final int DELETE_COLOR = 0xFFCC0000;
 
 	@Override
-	protected void render(GuiGraphics context, int mouseX, int mouseY) {
+	protected void render(GuiGraphicsExtractor context, int mouseX, int mouseY) {
 		clickAction = null;
 		hoverItem = null;
 		final FontRenderOptions.FontRenderOptionsBuilder fontRenderOptionsBuilder = initDimensions();
-		final PoseStack matrixStack = context.pose();
-		final Drawing drawing = new Drawing(matrixStack, RenderType.gui());
+		final GuiExtractorDrawTarget guiDrawTarget = new GuiExtractorDrawTarget(context);
+		final PoseStack matrixStack = guiDrawTarget.createMatrixStack();
+		final Drawing drawing = new Drawing(matrixStack, guiDrawTarget.getBuffer(null));
 		final ObjectArrayList<Runnable> deferredRenders = new ObjectArrayList<>();
 
 		ListItem.iterateData(dataList, filter, (index, indexList, listItem) -> {
@@ -67,7 +69,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 						clickAction = listItem::toggle;
 
 						// Draw the action button
-						deferredRenders.add(() -> new Drawing(matrixStack, GuiHelper.getGuiTexturedRenderType(listItem.isExpanded() ? GuiHelper.CHEVRON_UP_TEXTURE_ID : GuiHelper.CHEVRON_DOWN_TEXTURE_ID))
+						deferredRenders.add(() -> new Drawing(matrixStack, guiDrawTarget.getBuffer(listItem.isExpanded() ? GuiHelper.CHEVRON_UP_TEXTURE_ID : GuiHelper.CHEVRON_DOWN_TEXTURE_ID))
 							.setVerticesWH(leftBound + GuiHelper.DEFAULT_PADDING / 2F, startY + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_ICON_SIZE, GuiHelper.DEFAULT_ICON_SIZE)
 							.setUv()
 							.draw()
@@ -87,7 +89,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 							}
 
 							// Draw the action button
-							deferredRenders.add(() -> new Drawing(matrixStack, GuiHelper.getGuiTexturedRenderType(identifier))
+							deferredRenders.add(() -> new Drawing(matrixStack, guiDrawTarget.getBuffer(identifier))
 								.setVerticesWH(leftBound + GuiHelper.DEFAULT_PADDING / 2F, startY + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_ICON_SIZE, GuiHelper.DEFAULT_ICON_SIZE)
 								.setUv()
 								.draw()
@@ -103,11 +105,11 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 					listItem.drawIcon.draw(drawing, (float) startX, (float) startY);
 				}
 				if (listItem.deferredDrawIcon != null) {
-					deferredRenders.add(() -> listItem.deferredDrawIcon.draw(matrixStack, (float) startX, (float) startY));
+					deferredRenders.add(() -> listItem.deferredDrawIcon.draw(matrixStack, guiDrawTarget, (float) startX, (float) startY));
 				}
 
 				// Draw text
-				deferredRenders.add(() -> FontRenderHelper.render(matrixStack, listItem.text, fontRenderOptionsBuilder
+				deferredRenders.add(() -> FontRenderHelper.render(matrixStack, guiDrawTarget, listItem.text, fontRenderOptionsBuilder
 					.horizontalSpace(endX - startX - listItem.iconWidth - GuiHelper.DEFAULT_PADDING * 2 - (isMouseOver ? GuiHelper.DEFAULT_LINE_SIZE * listItem.actionCount() : 0))
 					.offsetX(startX + listItem.iconWidth + GuiHelper.DEFAULT_PADDING)
 					.offsetY((float) startY)
@@ -120,6 +122,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		});
 
 		deferredRenders.forEach(Runnable::run);
+		guiDrawTarget.flush();
 	}
 
 	@Override
@@ -191,7 +194,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 
 		ListItem.iterateData(dataList, filter, (index, indexList, listItem) -> {
 			if (!fixedWidth && maxLineWidth[0] < maxWidth) {
-				maxLineWidth[0] = Math.max(maxLineWidth[0], (indexList.size() + 1) * GuiHelper.DEFAULT_PADDING + listItem.iconWidth + (int) Math.ceil(FontRenderHelper.render(null, listItem.text, fontRenderOptionsBuilder.build()).leftFloat()) + listItem.actionCount() * GuiHelper.DEFAULT_LINE_SIZE + getScrollbarWidth());
+				maxLineWidth[0] = Math.max(maxLineWidth[0], (indexList.size() + 1) * GuiHelper.DEFAULT_PADDING + listItem.iconWidth + (int) Math.ceil(FontRenderHelper.measure(listItem.text, fontRenderOptionsBuilder.build()).leftFloat()) + listItem.actionCount() * GuiHelper.DEFAULT_LINE_SIZE + getScrollbarWidth());
 			}
 			count[0]++;
 			return false;
@@ -259,7 +262,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 
 			dataList.add(ListItem.createChild(
 				(drawing, x, y) -> GuiHelper.drawCircle(drawing, x + GuiHelper.DEFAULT_PADDING / 2F, y + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING, 32, colors),
-				(matrixStack, x, y) -> drawPlatformNumber(matrixStack, x, y, savedRail.getName()),
+				(matrixStack, drawTarget, x, y) -> drawPlatformNumber(matrixStack, drawTarget, x, y, savedRail.getName()),
 				GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING / 2,
 				savedRail,
 				text,
@@ -319,7 +322,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 
 			dataList.add(ListItem.createChild(
 				(drawing, x, y) -> drawing.setVerticesWH(x + GuiHelper.DEFAULT_PADDING / 2F, y + GuiHelper.DEFAULT_PADDING / 2F, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING, GuiHelper.DEFAULT_LINE_SIZE - GuiHelper.DEFAULT_PADDING).setColor(stationColor).draw(),
-				(matrixStack, x, y) -> drawPlatformNumber(matrixStack, x, y, platform.getName()),
+				(matrixStack, drawTarget, x, y) -> drawPlatformNumber(matrixStack, drawTarget, x, y, platform.getName()),
 				GuiHelper.DEFAULT_PADDING + GuiHelper.MINECRAFT_FONT_SIZE,
 				routePlatformData,
 				customDestinationPrefix + stationName,
@@ -342,7 +345,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		final int index = indexList.getFirst();
 		if (direction > 0 && index < dataList.size() - 1 || direction < 0 && index > 0) {
 			final T data = dataList.remove(index);
-			if (Screen.hasShiftDown()) {
+			if (Minecraft.getInstance().hasShiftDown()) {
 				if (direction > 0) {
 					dataList.add(data);
 				} else {
@@ -357,8 +360,8 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		}
 	}
 
-	private static void drawPlatformNumber(PoseStack matrixStack, double x, double y, String name) {
-		FontRenderHelper.render(matrixStack, Utilities.formatName(name), FontRenderOptions.builder()
+	private static void drawPlatformNumber(PoseStack matrixStack, DrawTarget drawTarget, double x, double y, String name) {
+		FontRenderHelper.render(matrixStack, drawTarget, Utilities.formatName(name), FontRenderOptions.builder()
 			.horizontalPositioning(FontRenderOptions.Alignment.CENTER)
 			.verticalPositioning(FontRenderOptions.Alignment.CENTER)
 			.horizontalSpace(GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT)

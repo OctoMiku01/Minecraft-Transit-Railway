@@ -155,7 +155,7 @@ public final class MTR {
 					// Instant deploy depot(s) by name
 					.then(depotOperationFromCommand(Commands.literal("instantDeploy"), DepotOperation.INSTANT_DEPLOY))
 					// Force copy a world backup from one folder another
-					.then(Commands.literal("restoreWorld").requires(serverCommandSource -> serverCommandSource.hasPermission(4)).then(Commands.argument("worldDirectory", StringArgumentType.string()).then(Commands.argument("backupDirectory", StringArgumentType.string()).executes(contextHandler -> {
+					.then(Commands.literal("restoreWorld").requires(Commands.hasPermission(Commands.LEVEL_OWNERS)).then(Commands.argument("worldDirectory", StringArgumentType.string()).then(Commands.argument("backupDirectory", StringArgumentType.string()).executes(contextHandler -> {
 						final Path runPath = contextHandler.getSource().getServer().getServerDirectory();
 						final Path worldDirectory = runPath.resolve(StringArgumentType.getString(contextHandler, "worldDirectory"));
 						final Path backupDirectory = runPath.resolve(StringArgumentType.getString(contextHandler, "backupDirectory"));
@@ -218,9 +218,9 @@ public final class MTR {
 						minecraftServer,
 						null,
 						new SetTime(
-							(minecraftServer.overworld().getDayTime() + 6000) * SECONDS_PER_MC_HOUR,
+							(minecraftServer.overworld().getDefaultClockTime() + 6000) * SECONDS_PER_MC_HOUR,
 							MILLIS_PER_MC_DAY,
-							minecraftServer.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)
+							minecraftServer.getGameRules().get(GameRules.ADVANCE_TIME)
 						),
 						response -> canSendWorldTimeUpdate = true,
 						SerializedDataBase.class
@@ -384,7 +384,7 @@ public final class MTR {
 	}
 
 	private static LiteralCommandNode<CommandSourceStack> depotOperationFromCommand(LiteralArgumentBuilder<CommandSourceStack> commandBuilder, DepotOperation depotOperation) {
-		return commandBuilder.requires(serverCommandSource -> serverCommandSource.hasPermission(2)).then(Commands.literal("allDepots").executes(contextHandler -> {
+		return commandBuilder.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("allDepots").executes(contextHandler -> {
 			contextHandler.getSource().sendSuccess(depotOperation.translationHolderAll::getText, true);
 			return depotOperationFromCommand(contextHandler.getSource().getLevel(), "", depotOperation);
 		})).then(Commands.literal("depot").then(Commands.argument("name", StringArgumentType.greedyString()).executes(contextHandler -> {

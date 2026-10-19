@@ -1,6 +1,6 @@
 package org.mtr.model;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.PrimitiveTopology;
 import de.javagl.obj.*;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.io.IOUtils;
@@ -42,7 +42,7 @@ import java.util.function.Function;
 public final class ObjModelLoader extends ModelLoaderBase {
 
 	public ObjModelLoader(Identifier defaultTexture) {
-		super(defaultTexture, VertexFormat.Mode.TRIANGLES);
+		super(defaultTexture, PrimitiveTopology.TRIANGLES);
 	}
 
 	/**

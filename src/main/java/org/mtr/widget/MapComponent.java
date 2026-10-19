@@ -1,9 +1,8 @@
 package org.mtr.widget;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import gg.essential.elementa.UIComponent;
 import gg.essential.elementa.components.UIBlock;
 import gg.essential.elementa.constraints.CoerceAtMostConstraint;
@@ -12,18 +11,16 @@ import gg.essential.elementa.constraints.RelativeConstraint;
 import gg.essential.elementa.constraints.SubtractiveConstraint;
 import gg.essential.universal.UMatrixStack;
 import gg.essential.universal.UMinecraft;
+import gg.essential.universal.render.ScissorState;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.MTRClient;
-import org.mtr.client.IDrawing;
 import org.mtr.client.MinecraftClientData;
 import org.mtr.core.data.*;
 import org.mtr.core.operation.DeleteDataRequest;
@@ -39,9 +36,12 @@ import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import org.mtr.map.MapTileProvider;
 import org.mtr.registry.UConverters;
+import org.mtr.render.DrawTarget;
+import org.mtr.render.RecordingVertexConsumer;
 import org.mtr.screen.*;
 import org.mtr.tool.Drawing;
 import org.mtr.tool.GuiAnimation;
+import org.mtr.tool.GuiDrawTarget;
 import org.mtr.tool.GuiHelper;
 
 import java.awt.*;
@@ -223,7 +223,7 @@ public final class MapComponent extends UIComponent {
 							new ObjectObjectImmutablePair<>(GuiHelper.SELECT_TEXTURE_ID, (indexList, platform) -> {
 								if (editingRoute != null) {
 									final RoutePlatformData routePlatformData = new RoutePlatformData(platform.getId());
-									if (Screen.hasShiftDown()) {
+									if (Minecraft.getInstance().hasShiftDown()) {
 										editingRoute.getRoutePlatforms().addFirst(routePlatformData);
 									} else {
 										editingRoute.getRoutePlatforms().add(routePlatformData);
@@ -282,12 +282,14 @@ public final class MapComponent extends UIComponent {
 		final float delta = MTRClient.getGameTimeDeltaTicks();
 
 		// Background
-		new Drawing(matrixStack, RenderType.gui()).setVerticesWH(left, top, width, height).setColor(Color.BLACK).draw();
+		final GuiDrawTarget guiDrawTarget = new GuiDrawTarget();
+		new Drawing(matrixStack, guiDrawTarget.getBuffer(null)).setVerticesWH(left, top, width, height).setColor(Color.BLACK).draw();
+		guiDrawTarget.flush();
 
 		guiAnimationX.tick();
 		guiAnimationY.tick();
 		guiAnimationScale.tick();
-		applyScissor();
+		final ScissorState previousScissorState = applyScissor();
 
 		// World map
 		final MapTileProvider mapTileProvider = MTRClient.getMapTileProvider();
@@ -296,16 +298,16 @@ public final class MapComponent extends UIComponent {
 			final DoubleDoubleImmutablePair topLeftWorldCoords = coordsToWorldPos(0D, 0D);
 			final float offsetX = clampTileSize(topLeftWorldCoords.leftDouble()) - (float) topLeftWorldCoords.leftDouble();
 			final float offsetY = clampTileSize(topLeftWorldCoords.rightDouble()) - (float) topLeftWorldCoords.rightDouble();
-			RenderType.gui().setupRenderState();
+			final VertexConsumer tileVertexConsumer = guiDrawTarget.getBuffer(null);
 
 			for (double x = 0; x < width + tileSize; x += tileSize) {
 				for (double y = 0; y < height + tileSize; y += tileSize) {
 					final DoubleDoubleImmutablePair worldCoords = coordsToWorldPos(x, y);
 					final BlockPos tilePos = new BlockPos(clampTileSize(worldCoords.leftDouble()), player == null ? 0 : player.blockPosition().getY(), clampTileSize(worldCoords.rightDouble()));
 					final long key = tilePos.asLong();
-					final VertexBuffer vertexBuffer = mapTileProvider.getTile(tilePos);
+					final RecordingVertexConsumer tileVertices = mapTileProvider.getTile(tilePos);
 
-					if (vertexBuffer == null) {
+					if (tileVertices == null) {
 						tileOpacityValues.remove(key);
 					} else {
 						final float opacity = tileOpacityValues.get(key);
@@ -317,22 +319,17 @@ public final class MapComponent extends UIComponent {
 
 						final float newX = (float) x + left;
 						final float newY = (float) y + top;
-						IDrawing.changeShaderColor(new Color(newOpacity * DARKEN_MAP, newOpacity * DARKEN_MAP, newOpacity * DARKEN_MAP, 1), () -> {
-							vertexBuffer.bind();
-							vertexBuffer.drawWithShader(
-								new Matrix4f(RenderSystem.getModelViewMatrix()).translate(newX, newY, 0).scale((float) guiAnimationScale.getCurrentValue(), (float) guiAnimationScale.getCurrentValue(), 1).translate(offsetX, offsetY, 1),
-								RenderSystem.getProjectionMatrix(),
-								RenderSystem.getShader()
-							);
-						});
+						tileVertices.replay(
+							tileVertexConsumer,
+							new Matrix4f(matrixStack.last().pose()).translate(newX, newY, 0).scale((float) guiAnimationScale.getCurrentValue(), (float) guiAnimationScale.getCurrentValue(), 1).translate(offsetX, offsetY, 1),
+							newOpacity * DARKEN_MAP
+						);
 					}
 				}
 			}
-
-			RenderType.gui().clearRenderState();
 		}
 
-		final ObjectArrayList<Consumer<PoseStack>> deferredRenders = new ObjectArrayList<>();
+		final ObjectArrayList<BiConsumer<PoseStack, DrawTarget>> deferredRenders = new ObjectArrayList<>();
 
 		// Player position indicator
 		if (player != null) {
@@ -340,7 +337,7 @@ public final class MapComponent extends UIComponent {
 				matrixStack.pushPose();
 				matrixStack.translate(left + x, top + y, 5);
 				Drawing.rotateZDegrees(matrixStack, player.getYRot() + 180);
-				new Drawing(matrixStack, GuiHelper.getGuiTexturedRenderType(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/gui/dashboard_player_arrow.png")))
+				new Drawing(matrixStack, guiDrawTarget.getBuffer(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/gui/dashboard_player_arrow.png")))
 					.setVerticesWH(-PLAYER_ARROW_SIZE / 2F, -PLAYER_ARROW_SIZE / 2F, PLAYER_ARROW_SIZE, PLAYER_ARROW_SIZE)
 					.setUv()
 					.draw();
@@ -348,7 +345,7 @@ public final class MapComponent extends UIComponent {
 			});
 		}
 
-		final Drawing drawing = new Drawing(matrixStack, RenderType.gui()).setGuiBoundsWH(left, top, width, height);
+		final Drawing drawing = new Drawing(matrixStack, guiDrawTarget.getBuffer(null)).setGuiBoundsWH(left, top, width, height);
 		hoverStationsHomesLandmarks.clear();
 		hoverPlatforms.clear();
 		hoverDepots.clear();
@@ -399,8 +396,9 @@ public final class MapComponent extends UIComponent {
 				checkPopupHover(sidingsPopupBlock, drawing, mouseX, mouseY);
 		}
 
-		deferredRenders.forEach(deferredRender -> deferredRender.accept(matrixStack));
-		RenderSystem.disableScissor();
+		deferredRenders.forEach(deferredRender -> deferredRender.accept(matrixStack, guiDrawTarget));
+		guiDrawTarget.flush();
+		previousScissorState.activate();
 		lastMouseX = mouseX;
 		lastMouseY = mouseY;
 
@@ -456,7 +454,7 @@ public final class MapComponent extends UIComponent {
 		}
 	}
 
-	private <T extends SimpleAreaBase, U extends T> void drawAreas(Drawing drawing, ObjectArrayList<Consumer<PoseStack>> deferredRenders, ObjectArraySet<U> areas, @Nullable ObjectArraySet<T> hoverDataList, float mouseX, float mouseY) {
+	private <T extends SimpleAreaBase, U extends T> void drawAreas(Drawing drawing, ObjectArrayList<BiConsumer<PoseStack, DrawTarget>> deferredRenders, ObjectArraySet<U> areas, @Nullable ObjectArraySet<T> hoverDataList, float mouseX, float mouseY) {
 		final float width = getWidth();
 		final float height = getHeight();
 		final float left = getLeft();
@@ -501,7 +499,7 @@ public final class MapComponent extends UIComponent {
 					final double clampedAreaWidth = areaWidth - Math.max(0, left - x1) - Math.max(0, x2 - left - width) - AREA_NAME_PADDING * 2;
 					final double clampedAreaHeight = areaHeight - Math.max(0, top - y1) - Math.max(0, y2 - top - height) - AREA_NAME_PADDING * 2;
 					if (clampedAreaWidth > 0 && clampedAreaHeight > 0) {
-						deferredRenders.add(matrixStack -> FontRenderHelper.render(matrixStack, area.getName(), FontRenderOptions.builder()
+						deferredRenders.add((matrixStack, drawTarget) -> FontRenderHelper.render(matrixStack, drawTarget, area.getName(), FontRenderOptions.builder()
 							.horizontalSpace((float) clampedAreaWidth)
 							.verticalSpace((float) clampedAreaHeight)
 							.offsetX((float) Math.max(left, x1) + AREA_NAME_PADDING)
@@ -517,7 +515,7 @@ public final class MapComponent extends UIComponent {
 		});
 	}
 
-	private <T extends SavedRailBase<T, U>, U extends AreaBase<U, T>> void drawSavedRails(Drawing drawing, ObjectArrayList<Consumer<PoseStack>> deferredRenders, Object2ObjectAVLTreeMap<Position, ObjectArrayList<T>> flatPositionToSavedRailsMap, @Nullable ObjectArraySet<T> hoverDataList, float mouseX, float mouseY) {
+	private <T extends SavedRailBase<T, U>, U extends AreaBase<U, T>> void drawSavedRails(Drawing drawing, ObjectArrayList<BiConsumer<PoseStack, DrawTarget>> deferredRenders, Object2ObjectAVLTreeMap<Position, ObjectArrayList<T>> flatPositionToSavedRailsMap, @Nullable ObjectArraySet<T> hoverDataList, float mouseX, float mouseY) {
 		final float left = getLeft();
 		final float top = getTop();
 
@@ -538,7 +536,7 @@ public final class MapComponent extends UIComponent {
 
 			// Draw overlay text
 			if (guiAnimationScale.getCurrentValue() > SAVED_RAIL_NAME_PADDING * 2) {
-				deferredRenders.add(matrixStack -> FontRenderHelper.render(matrixStack, savedRails.stream().map(NameColorDataBase::getName).collect(Collectors.joining("|")), FontRenderOptions.builder()
+				deferredRenders.add((matrixStack, drawTarget) -> FontRenderHelper.render(matrixStack, drawTarget, savedRails.stream().map(NameColorDataBase::getName).collect(Collectors.joining("|")), FontRenderOptions.builder()
 					.horizontalSpace((float) guiAnimationScale.getCurrentValue() - SAVED_RAIL_NAME_PADDING * 2)
 					.verticalSpace((float) guiAnimationScale.getCurrentValue() - SAVED_RAIL_NAME_PADDING * 2)
 					.horizontalTextAlignment(FontRenderOptions.Alignment.CENTER)
@@ -590,14 +588,16 @@ public final class MapComponent extends UIComponent {
 		showPopup = true;
 	}
 
-	private void applyScissor() {
+	private ScissorState applyScissor() {
+		final ScissorState previousScissorState = ScissorState.Companion.active();
 		final Window window = Minecraft.getInstance().getWindow();
 		final double guiScale = window.getGuiScale();
 		final double leftScaled = getLeft() * guiScale;
 		final double bottomScaled = window.getHeight() - getBottom() * guiScale;
 		final double widthScaled = getWidth() * guiScale;
 		final double heightScaled = getHeight() * guiScale;
-		RenderSystem.enableScissor((int) leftScaled, (int) bottomScaled, (int) widthScaled, (int) heightScaled);
+		new ScissorState(true, (int) leftScaled, (int) bottomScaled, (int) widthScaled, (int) heightScaled).activate();
+		return previousScissorState;
 	}
 
 	private static <T extends NameColorDataBase> ListComponent<T> createPopupListComponent(UIBlock block) {

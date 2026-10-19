@@ -69,7 +69,7 @@ public abstract class AbstractResourcePackCreatorServlet extends HttpServlet {
 					final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bytes.length);
 					byteBuffer.put(bytes);
 					byteBuffer.rewind();
-					final AbstractTexture abstractTexture = new DynamicTexture(NativeImage.read(byteBuffer));
+					final AbstractTexture abstractTexture = new DynamicTexture(identifier::toString, NativeImage.read(byteBuffer));
 					final Minecraft minecraftClient = Minecraft.getInstance();
 					minecraftClient.execute(() -> {
 						minecraftClient.getTextureManager().register(identifier, abstractTexture);

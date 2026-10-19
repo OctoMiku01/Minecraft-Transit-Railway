@@ -1,6 +1,6 @@
 package org.mtr.model;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.PrimitiveTopology;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 public final class BlockbenchModelLoader extends ModelLoaderBase {
 
 	public BlockbenchModelLoader(Identifier defaultTexture) {
-		super(defaultTexture, VertexFormat.Mode.QUADS);
+		super(defaultTexture, PrimitiveTopology.QUADS);
 	}
 
 	public void loadModel(BlockbenchModel blockbenchModel) {

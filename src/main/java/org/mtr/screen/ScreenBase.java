@@ -55,7 +55,7 @@ public abstract class ScreenBase extends Screen {
 		if (previousScreen != null) {
 			UMinecraft.setCurrentScreenObj(previousScreen);
 		} else {
-			Minecraft.getInstance().setScreen(previousScreenLegacy);
+			Minecraft.getInstance().gui.setScreen(previousScreenLegacy);
 		}
 	}
 

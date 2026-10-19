@@ -1,8 +1,6 @@
 package org.mtr.resource;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -25,6 +23,7 @@ import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import org.mtr.render.DrawTarget;
 import org.mtr.render.SpecialSignPlatformRenderer;
 import org.mtr.render.SpecialSignRouteRenderer;
 import org.mtr.render.SpecialSignStationExitRenderer;
@@ -36,7 +35,7 @@ import org.mtr.tool.GuiHelper;
 import org.mtr.tool.RouteHelper;
 
 import java.util.Collections;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public final class SignResource extends SignResourceSchema {
@@ -95,15 +94,15 @@ public final class SignResource extends SignResourceSchema {
 		return CustomResourceTools.colorStringToInt(backgroundColor);
 	}
 
-	public static void render(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, BlockPos blockPos, LongAVLTreeSet[] selectedIds, @Nullable String[] signIds, float signSize, float zOffset, boolean renderPlaceholder) {
+	public static void render(PoseStack matrixStack, DrawTarget drawTarget, BlockPos blockPos, LongAVLTreeSet[] selectedIds, @Nullable String[] signIds, float signSize, float zOffset, boolean renderPlaceholder) {
 		final @Nullable SignResource[] signResources = new SignResource[signIds.length];
 		for (int i = 0; i < signIds.length; i++) {
 			signResources[i] = CustomResourceLoader.getSignById(signIds[i]);
 		}
-		render(matrixStack, vertexConsumerProvider, blockPos, 0, 0, selectedIds, signResources, signSize, zOffset, renderPlaceholder);
+		render(matrixStack, drawTarget, blockPos, 0, 0, selectedIds, signResources, signSize, zOffset, renderPlaceholder);
 	}
 
-	public static void render(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, BlockPos blockPos, float x, float y, LongAVLTreeSet[] selectedIds, @Nullable SignResource[] signResources, float signSize, float zOffset, boolean renderPlaceholder) {
+	public static void render(PoseStack matrixStack, DrawTarget drawTarget, BlockPos blockPos, float x, float y, LongAVLTreeSet[] selectedIds, @Nullable SignResource[] signResources, float signSize, float zOffset, boolean renderPlaceholder) {
 		final float signPadding = SMALL_SIGN_PADDING * signSize;
 		boolean renderBackground = false;
 		int backgroundColor = 0;
@@ -121,17 +120,17 @@ public final class SignResource extends SignResourceSchema {
 
 		// Draw background
 		if (renderBackground) {
-			new Drawing(matrixStack, vertexConsumerProvider.getBuffer(RenderType.gui())).setVerticesWH(x, y, signResources.length * signSize, signSize).setColor(GuiHelper.BLACK_COLOR | backgroundColor).draw();
+			new Drawing(matrixStack, drawTarget.getBuffer(null)).setVerticesWH(x, y, signResources.length * signSize, signSize).setColor(GuiHelper.BLACK_COLOR | backgroundColor).draw();
 		}
 
-		final ObjectArrayList<Consumer<PoseStack>> deferredRenders = new ObjectArrayList<>();
+		final ObjectArrayList<BiConsumer<PoseStack, DrawTarget>> deferredRenders = new ObjectArrayList<>();
 
 		// Draw sign tiles and text
 		for (int i = 0; i < signResources.length; i++) {
 			final SignResource signResource = signResources[i];
 
 			if (signResource != null) {
-				final Drawing textureDrawing = new Drawing(matrixStack, vertexConsumerProvider.getBuffer(GuiHelper.getGuiTexturedRenderType(signResource.textureId)));
+				final Drawing textureDrawing = new Drawing(matrixStack, drawTarget.getBuffer(signResource.textureId));
 				final Identifier font = signResource.font.isEmpty() ? FontRenderHelper.MTR_FONT : Identifier.parse(signResource.font);
 
 				if (signResource.signType == SignType.NORMAL) {
@@ -147,7 +146,7 @@ public final class SignResource extends SignResourceSchema {
 
 					if (textSpace > 0) {
 						final float offsetX = (i + (signResource.flipCustomText ? 0 : 1) + (signResource.small ? 0 : (signResource.flipCustomText ? -1 : 1) * SMALL_SIGN_PADDING)) * signSize;
-						deferredRenders.add(matrixStackNew -> FontRenderHelper.render(matrixStackNew, signResource.getCustomText(), FontRenderOptions.builder()
+						deferredRenders.add((matrixStackNew, drawTargetNew) -> FontRenderHelper.render(matrixStackNew, drawTargetNew, signResource.getCustomText(), FontRenderOptions.builder()
 							.font(font)
 							.horizontalSpace(textSpace)
 							.verticalSpace(signSize * (1 - SMALL_SIGN_PADDING * 2))
@@ -210,7 +209,8 @@ public final class SignResource extends SignResourceSchema {
 			}
 		}
 
-		deferredRenders.forEach(deferredRender -> deferredRender.accept(matrixStack));
+		deferredRenders.forEach(deferredRender -> deferredRender.accept(matrixStack, drawTarget));
+		drawTarget.flush();
 	}
 
 	public static ObjectArrayList<Platform> getPlatforms(@Nullable BlockPos blockPos) {

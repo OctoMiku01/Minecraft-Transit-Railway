@@ -1,3 +1,4 @@
+import net.fabricmc.loom.task.NestJarsAction
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.mtr.BuildTools
 import org.mtr.core.Generator
@@ -63,7 +64,7 @@ dependencies {
 	implementationAndShadow("org.mtr:transport-simulation-core:+")
 	implementationAndShadow("com.logisticscraft:occlusionculling:+")
 	implementationAndInclude("gg.essential:elementa:${property("dependency.elementa")}")
-	implementationAndInclude("org.jetbrains.kotlin:kotlin-stdlib:+")
+	implementationAndInclude("org.jetbrains.kotlin:kotlin-stdlib:${property("dependency.kotlin")}")
 	implementation("org.jspecify:jspecify:+")
 
 	testImplementation("org.junit.jupiter:junit-jupiter-api:5.+")
@@ -103,8 +104,15 @@ tasks {
 		(options as StandardJavadocDocletOptions).addStringOption("Xdoclint:all,-missing", "-quiet")
 	}
 
+	jar {
+		archiveClassifier = "dev"
+	}
+
+	// Without a remapping step, the shadow jar is the final mod jar, so nested mods have to be added to it as well
 	shadowJar {
+		archiveClassifier = ""
 		configurations = listOf(project.configurations["shadowBundle"])
+		NestJarsAction.addToTask(this, files(named("processIncludeJars")).asFileTree)
 		minimize()
 		relocate("com.logisticscraft", "org.mtr.libraries.com.logisticscraft")
 		relocate("de.javagl", "org.mtr.libraries.de.javagl")

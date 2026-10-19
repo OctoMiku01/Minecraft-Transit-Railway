@@ -71,7 +71,7 @@ public final class LiftSelectionScreen extends WindowBase {
 		super.onTick();
 		final Lift lift = MinecraftClientData.getLift(liftId);
 		if (lift == null) {
-			Minecraft.getInstance().setScreen(null);
+			Minecraft.getInstance().gui.setScreen(null);
 			return;
 		}
 
@@ -98,6 +98,6 @@ public final class LiftSelectionScreen extends WindowBase {
 		final PressLift pressLift = new PressLift();
 		pressLift.add(MTR.blockPosToPosition(floorLevels.get(floorIndexFromTop)), LiftDirection.NONE);
 		RegistryClient.sendPacketToServer(new PacketPressLiftButton(pressLift));
-		Minecraft.getInstance().setScreen(null);
+		Minecraft.getInstance().gui.setScreen(null);
 	}
 }

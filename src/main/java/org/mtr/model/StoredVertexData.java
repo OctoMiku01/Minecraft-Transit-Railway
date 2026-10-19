@@ -100,5 +100,15 @@ public record StoredVertexData(
 			normalEntries.add(new Vector3f(x, y, z));
 			return this;
 		}
+
+		@Override
+		public VertexConsumer setColor(int color) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer setLineWidth(float width) {
+			return this;
+		}
 	}
 }

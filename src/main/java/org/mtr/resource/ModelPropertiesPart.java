@@ -366,7 +366,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema {
 		final String text = formatText(vehicle);
 
 		if (!text.isEmpty()) {
-			MainRenderer.scheduleTextRender((matrixStack, offset) -> {
+			MainRenderer.scheduleTextRender((matrixStack, drawTarget, offset) -> {
 				storedMatrixTransformations.transform(matrixStack, offset);
 				matrixStack.translate(modelDisplayPart.x, modelDisplayPart.y, modelDisplayPart.z);
 				Drawing.rotateYDegrees(matrixStack, modelDisplayPart.flipped ? 180 : 0);
@@ -374,7 +374,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema {
 				modelDisplayPart.storedMatrixTransformations.transform(matrixStack, Vec3.ZERO);
 				matrixStack.translate(displayXPadding / 16, displayYPadding / 16, -IGui.SMALL_OFFSET);
 
-				FontRenderHelper.render(matrixStack, text, FontRenderOptions.builder()
+				FontRenderHelper.render(matrixStack, drawTarget, text, FontRenderOptions.builder()
 					.color(new Color(displayColorInt))
 					.cjkColor(new Color(displayColorCjkInt))
 					.cjkScaling((float) displayCjkSizeRatio)

@@ -64,7 +64,7 @@ public final class ResourcePackCreatorOperationServlet extends AbstractResourceP
 				})));
 				break;
 			case "/resume-game":
-				minecraftClient.execute(() -> minecraftClient.setScreen(new FakePauseScreen()));
+				minecraftClient.execute(() -> minecraftClient.gui.setScreen(new FakePauseScreen()));
 				returnStandardResponse(httpServletResponse, asyncContext, null);
 				break;
 			default:

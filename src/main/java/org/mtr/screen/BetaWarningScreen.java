@@ -2,10 +2,10 @@ package org.mtr.screen;
 
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.mtr.client.IDrawing;
@@ -39,27 +39,27 @@ public class BetaWarningScreen extends ScreenBase implements IGui, Utilities {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		super.render(context, mouseX, mouseY, delta);
+	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+		super.extractRenderState(context, mouseX, mouseY, delta);
 
-		context.pose().pushPose();
-		context.pose().translate(width / 2F, SQUARE_SIZE, 0);
-		context.pose().scale(2, 2, 1);
-		context.drawCenteredString(font, "Minecraft Transit Railway 4.1.0", 0, 0, ARGB_WHITE);
-		context.pose().popPose();
+		context.pose().pushMatrix();
+		context.pose().translate(width / 2F, SQUARE_SIZE);
+		context.pose().scale(2, 2);
+		context.centeredText(font, "Minecraft Transit Railway 4.1.0", 0, 0, ARGB_WHITE);
+		context.pose().popMatrix();
 
 		int i = SQUARE_SIZE * 2;
-		context.drawCenteredString(font, "Please back up your worlds before continuing!", width / 2, i += TEXT_HEIGHT, System.currentTimeMillis() % 1000 < 500 ? 0xFFFF00 : 0xFF9900);
+		context.centeredText(font, "Please back up your worlds before continuing!", width / 2, i += TEXT_HEIGHT, System.currentTimeMillis() % 1000 < 500 ? 0xFFFF00 : 0xFF9900);
 		i = wrapAndRender(context, "- This is a very early release for Minecraft 1.21.x versions. Please report any bugs you find.", i + SQUARE_SIZE);
 		i = wrapAndRender(context, "- Lift / Elevator rendering has NOT been implemented yet.", i);
 		i = wrapAndRender(context, "- Some model previews in GUI screens have NOT been implemented yet.", i);
-		context.drawCenteredString(font, "Thank you and enjoy :)", width / 2, i, ARGB_WHITE);
+		context.centeredText(font, "Thank you and enjoy :)", width / 2, i, ARGB_WHITE);
 
-		context.pose().pushPose();
-		context.pose().translate(width / 2F, i + TEXT_HEIGHT + TEXT_PADDING / 2F, 0);
-		context.pose().scale(0.5F, 0.5F, 1);
-		context.drawCenteredString(font, openTime < FORCE_OPEN_DURATION ? String.format("Please read the above carefully to continue! (%s)", (FORCE_OPEN_DURATION - openTime) / MILLIS_PER_SECOND) : "Press ESC to continue", 0, 0, ARGB_WHITE);
-		context.pose().popPose();
+		context.pose().pushMatrix();
+		context.pose().translate(width / 2F, i + TEXT_HEIGHT + TEXT_PADDING / 2F);
+		context.pose().scale(0.5F, 0.5F);
+		context.centeredText(font, openTime < FORCE_OPEN_DURATION ? String.format("Please read the above carefully to continue! (%s)", (FORCE_OPEN_DURATION - openTime) / MILLIS_PER_SECOND) : "Press ESC to continue", 0, 0, ARGB_WHITE);
+		context.pose().popMatrix();
 
 		drawSprite(context, Identifier.parse("mtr/patreon"), width / 2 - BUTTON_WIDTH / 2 - SQUARE_SIZE, height - SQUARE_SIZE * 3 - TEXT_PADDING, SQUARE_SIZE, SQUARE_SIZE);
 		final int youTubeIconPadding = Math.round(SQUARE_SIZE * (90F / 64 - 1) / 2);
@@ -87,11 +87,11 @@ public class BetaWarningScreen extends ScreenBase implements IGui, Utilities {
 		}
 	}
 
-	private int wrapAndRender(GuiGraphics context, String text, int y) {
+	private int wrapAndRender(GuiGraphicsExtractor context, String text, int y) {
 		final int textWidth = Math.min(512, width - SQUARE_SIZE * 2);
 		final int[] newY = {y};
 		font.split(Component.literal(text), textWidth).forEach(orderedText -> {
-			context.drawString(font, orderedText, (width - textWidth) / 2 + (newY[0] == y ? 0 : 10), newY[0], ARGB_LIGHT_GRAY, true);
+			context.text(font, orderedText, (width - textWidth) / 2 + (newY[0] == y ? 0 : 10), newY[0], ARGB_LIGHT_GRAY, true);
 			newY[0] += TEXT_HEIGHT + TEXT_PADDING / 2;
 		});
 		return newY[0] + TEXT_PADDING * 3 / 2;
@@ -99,18 +99,18 @@ public class BetaWarningScreen extends ScreenBase implements IGui, Utilities {
 
 	public static void handle() {
 		if (openTime < FORCE_OPEN_DURATION && Config.getClient().showBetaWarningScreen()) {
-			final Screen screen = Minecraft.getInstance().screen;
+			final Screen screen = Minecraft.getInstance().gui.screen();
 			if (screen != null && screen.getTitle().toString().contains("narrator.screen.title")) {
-				Minecraft.getInstance().setScreen(new BetaWarningScreen());
+				Minecraft.getInstance().gui.setScreen(new BetaWarningScreen());
 			}
 		} else {
 			openTime = FORCE_OPEN_DURATION;
 		}
 	}
 
-	private static void drawSprite(GuiGraphics context, Identifier resourceLocation, int x, int y, int width, int height) {
+	private static void drawSprite(GuiGraphicsExtractor context, Identifier resourceLocation, int x, int y, int width, int height) {
 //? if >= 1.21.4 {
-		context.blitSprite(RenderType::guiTextured, resourceLocation, x, y, width, height);
+		context.blitSprite(RenderPipelines.GUI_TEXTURED, resourceLocation, x, y, width, height);
 //? } else {
 		/*context.blitSprite(resourceLocation, x, y, width, height);
 //

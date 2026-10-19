@@ -1,17 +1,19 @@
 package org.mtr.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTRClient;
@@ -39,7 +41,7 @@ import java.util.function.Consumer;
  *
  * <p>Three responsibilities live here:</p>
  * <ol>
- *   <li><b>Tick management</b> — {@link #render(PoseStack, MultiBufferSource, Vec3)}
+ *   <li><b>Tick management</b> — {@link #render(PoseStack, SubmitNodeCollector, CameraRenderState)}
  *       is the single entry point the loader (Fabric / NeoForge) wires into the world-render
  *       pipeline. It advances {@link #timerMillis}, ticks {@link DynamicTextureCache},
  *       riding state, and the arrivals cache, then dispatches into the per-domain
@@ -48,7 +50,7 @@ import java.util.function.Consumer;
  *       {@link #scheduleRender(Identifier, boolean, QueuedRenderLayer, ScheduledRender)} or
  *       {@link #renderModel(Object2ObjectOpenHashMap, StoredMatrixTransformations, int)} to
  *       enqueue draw work for the current frame. The drains at the end of
- *       {@link #render(PoseStack, MultiBufferSource, Vec3)} sort and dispatch by
+ *       {@link #render(PoseStack, SubmitNodeCollector, CameraRenderState)} sort and dispatch by
  *       {@link QueuedRenderLayer} and {@link RenderStage}.</li>
  *   <li><b>Shared frame utilities</b> — {@link #getFlashingLight()},
  *       {@link #getFlashingColor(Color, int)}, and {@link #getInterchangeRouteNames(Consumer)}
@@ -73,7 +75,7 @@ public class MainRenderer {
 	/**
 	 * Get a continuously ticking timer for rendering, suitable for animations.
 	 * Returns a value in milliseconds representing the time elapsed, incremented when
-	 * {@link MainRenderer#render(PoseStack, MultiBufferSource, Vec3)} is invoked.
+	 * {@link MainRenderer#render(PoseStack, SubmitNodeCollector, CameraRenderState)} is invoked.
 	 */
 	@Getter
 	private static long timerMillis;
@@ -101,6 +103,8 @@ public class MainRenderer {
 	private static final ObjectArrayList<ObjectArrayList<Object2ObjectArrayMap<Identifier, ObjectArrayList<ScheduledRender>>>> CURRENT_RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
 	private static final ObjectArrayList<ScheduledTextRender> TEXT_RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
 	private static final ObjectArrayList<ScheduledTextRender> CURRENT_TEXT_RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
+	private static final ObjectArrayList<ScheduledSubmit> SUBMITS = new ObjectArrayList<>();
+	private static final ObjectArrayList<ScheduledSubmit> CURRENT_SUBMITS = new ObjectArrayList<>();
 	private static final Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>>>> MODEL_RENDERS = new Object2ObjectOpenHashMap<>();
 	private static final Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>>>> MODEL_RENDERS_TRANSLUCENT = new Object2ObjectOpenHashMap<>();
 
@@ -129,11 +133,12 @@ public class MainRenderer {
 	 * Finally drains the {@code MODEL_RENDERS*} maps and the scheduled-render queues into
 	 * actual draw calls grouped by render layer.</p>
 	 *
-	 * @param matrixStack            the current world matrix stack (caller-owned, do not retain)
-	 * @param vertexConsumerProvider the buffer source for this frame
-	 * @param offset                 the camera-relative offset for the world frame
+	 * @param matrixStack         the current world matrix stack (caller-owned, do not retain)
+	 * @param submitNodeCollector the collector receiving every draw of this frame
+	 * @param camera              the camera of the world frame
 	 */
-	public static void render(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, Vec3 offset) {
+	public static void render(PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+		final Vec3 offset = camera.pos;
 		final Minecraft minecraftClient = Minecraft.getInstance();
 		final ClientLevel clientWorld = minecraftClient.level;
 		final LocalPlayer clientPlayerEntity = minecraftClient.player;
@@ -163,11 +168,11 @@ public class MainRenderer {
 		final Vec3 cameraShakeOffset = clientPlayerEntity.position().subtract(offset);
 		RenderVehicles.render(millisElapsed, cameraShakeOffset);
 		RenderLifts.render(millisElapsed, cameraShakeOffset);
-		RenderRails.render(matrixStack, vertexConsumerProvider, offset);
+		RenderRails.render(matrixStack, submitNodeCollector, offset);
 		RenderPassengers.render();
 
-		renderModel(matrixStack, MODEL_RENDERS, offset);
-		renderModel(matrixStack, MODEL_RENDERS_TRANSLUCENT, offset);
+		renderModel(matrixStack, submitNodeCollector, MODEL_RENDERS, offset);
+		renderModel(matrixStack, submitNodeCollector, MODEL_RENDERS_TRANSLUCENT, offset);
 		MODEL_RENDERS.clear();
 		MODEL_RENDERS_TRANSLUCENT.clear();
 
@@ -183,7 +188,13 @@ public class MainRenderer {
 		CURRENT_TEXT_RENDERS.addAll(TEXT_RENDERS);
 		TEXT_RENDERS.clear();
 
+		CURRENT_SUBMITS.clear();
+		CURRENT_SUBMITS.addAll(SUBMITS);
+		SUBMITS.clear();
+
 		for (int i = 0; i < TOTAL_RENDER_STAGES; i++) {
+			// Priority draws go into a later submit order so they land on top of normal draws
+			final OrderedSubmitNodeCollector orderedSubmitNodeCollector = submitNodeCollector.order(i);
 			for (int j = 0; j < QUEUED_RENDER_LAYERS.length; j++) {
 				final QueuedRenderLayer queuedRenderLayer = QUEUED_RENDER_LAYERS[j];
 				CURRENT_RENDERS.get(i).get(j).forEach((key, value) -> {
@@ -195,14 +206,21 @@ public class MainRenderer {
 						case INTERIOR_TRANSLUCENT -> MoreRenderLayers.getInteriorTranslucent(key);
 						case EXTERIOR -> MoreRenderLayers.getExterior(key);
 						case EXTERIOR_TRANSLUCENT -> MoreRenderLayers.getExteriorTranslucent(key);
-						case LINES -> RenderType.lines();
+						case LINES -> RenderTypes.lines();
 					};
-					value.forEach(renderer -> renderer.accept(matrixStack, vertexConsumerProvider.getBuffer(renderLayer), offset));
+					final ObjectArrayList<ScheduledRender> scheduledRenders = new ObjectArrayList<>(value);
+					orderedSubmitNodeCollector.submitCustomGeometry(matrixStack, renderLayer, (pose, vertexConsumer) -> {
+						final PoseStack newMatrixStack = createMatrixStack(pose);
+						scheduledRenders.forEach(scheduledRender -> scheduledRender.accept(newMatrixStack, vertexConsumer, offset));
+					});
 				});
 			}
 		}
 
-		CURRENT_TEXT_RENDERS.forEach(scheduledTextRender -> scheduledTextRender.accept(matrixStack, offset));
+		final WorldDrawTarget worldDrawTarget = new WorldDrawTarget(submitNodeCollector);
+		CURRENT_TEXT_RENDERS.forEach(scheduledTextRender -> scheduledTextRender.accept(matrixStack, worldDrawTarget, offset));
+		worldDrawTarget.flush();
+		CURRENT_SUBMITS.forEach(scheduledSubmit -> scheduledSubmit.accept(matrixStack, submitNodeCollector, camera, offset));
 	}
 
 	/**
@@ -257,6 +275,15 @@ public class MainRenderer {
 	}
 
 	/**
+	 * Schedule work that submits directly to the frame's collector later this frame, such as rendering entities.
+	 *
+	 * @param scheduledSubmit the callback invoked during the drain pass
+	 */
+	public static void scheduleSubmit(ScheduledSubmit scheduledSubmit) {
+		SUBMITS.add(scheduledSubmit);
+	}
+
+	/**
 	 * Drop every queued draw associated with the given identifier from both the pending
 	 * and current frame buckets. Called when a dynamic texture is evicted so stale draws
 	 * don't reference a disposed {@link DynamicTexture}.
@@ -286,7 +313,7 @@ public class MainRenderer {
 	 */
 	public static int getFlashingLight() {
 		final int light = (int) Math.round(((Math.sin(Math.PI * 2 * (getTimerMillis() % FLASHING_INTERVAL) / FLASHING_INTERVAL) + 1) / 2) * 0xF);
-		return LightTexture.pack(light, light);
+		return LightCoordsUtil.pack(light, light);
 	}
 
 	public static Color getFlashingColor(Color color, int multiplier) {
@@ -302,7 +329,7 @@ public class MainRenderer {
 		return getFlashingColor(new Color(color), multiplier).getRGB();
 	}
 
-	private static void renderModel(PoseStack matrixStack, Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>>>> modelRenders, Vec3 offset) {
+	private static void renderModel(PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>>>> modelRenders, Vec3 offset) {
 		modelRenders.forEach((newOptimizedModel, modelsForRenderStage) -> modelsForRenderStage.forEach((renderStage, renderDetails) -> {
 			final Identifier texture = newOptimizedModel.texture;
 			final RenderType renderLayer = switch (renderStage) {
@@ -312,15 +339,23 @@ public class MainRenderer {
 				case INTERIOR_TRANSLUCENT -> MoreRenderLayers.getInteriorTranslucent(texture);
 				case EXTERIOR -> MoreRenderLayers.getExterior(texture);
 			};
-			renderLayer.setupRenderState();
-			newOptimizedModel.begin(RenderSystem.getShader());
-			renderDetails.forEach(renderDetailsEntry -> {
-				renderDetailsEntry.left().transform(matrixStack, offset);
-				newOptimizedModel.render(matrixStack.last().pose(), renderStage.isFullBrightness ? 1 : (float) renderDetailsEntry.rightInt() / 0xF, RenderSystem.getShader());
-				matrixStack.popPose();
-			});
-			renderLayer.clearRenderState();
+			final ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>> renderDetailsCopy = new ObjectArrayList<>(renderDetails);
+			submitNodeCollector.submitCustomGeometry(matrixStack, renderLayer, (pose, vertexConsumer) -> renderDetailsCopy.forEach(renderDetailsEntry -> {
+				final PoseStack newMatrixStack = createMatrixStack(pose);
+				renderDetailsEntry.left().transform(newMatrixStack, offset);
+				final int light = renderStage.isFullBrightness ? LightCoordsUtil.FULL_BRIGHT : LightCoordsUtil.pack(renderDetailsEntry.rightInt(), renderDetailsEntry.rightInt());
+				newOptimizedModel.render(vertexConsumer, newMatrixStack.last(), light);
+			}));
 		}));
+	}
+
+	/**
+	 * Submitted geometry is drawn after the submit call returns, so every deferred draw needs its own matrix stack starting from the submitted pose.
+	 */
+	private static PoseStack createMatrixStack(PoseStack.Pose pose) {
+		final PoseStack matrixStack = new PoseStack();
+		matrixStack.last().set(pose);
+		return matrixStack;
 	}
 
 	private static long getMillisElapsed() {
@@ -342,13 +377,27 @@ public class MainRenderer {
 	}
 
 	@FunctionalInterface
+	public interface ScheduledSubmit {
+		/**
+		 * Submit to the frame's collector.
+		 *
+		 * @param matrixStack         the frame's matrix stack, already positioned for world space
+		 * @param submitNodeCollector the collector of the frame
+		 * @param camera              the camera of the frame
+		 * @param offset              camera-relative world offset
+		 */
+		void accept(PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, Vec3 offset);
+	}
+
+	@FunctionalInterface
 	public interface ScheduledTextRender {
 		/**
 		 * Run the deferred text draw against the given buffer and offset.
 		 *
 		 * @param matrixStack the frame's matrix stack, already positioned for world space
+		 * @param drawTarget  the target receiving the text
 		 * @param offset      camera-relative world offset
 		 */
-		void accept(PoseStack matrixStack, Vec3 offset);
+		void accept(PoseStack matrixStack, DrawTarget drawTarget, Vec3 offset);
 	}
 }

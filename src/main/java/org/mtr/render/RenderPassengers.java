@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -171,20 +171,15 @@ public class RenderPassengers {
 		final Minecraft minecraftClient = Minecraft.getInstance();
 		final ClientLevel clientWorld = minecraftClient.level;
 
-		if (clientWorld != null && CullingHelper.getDistanceFromCamera(positionAndYaw.x, positionAndYaw.y, positionAndYaw.z) <= minecraftClient.levelRenderer.getLastViewDistance() * 8) {
-			MainRenderer.scheduleRender(QueuedRenderLayer.EXTERIOR, (matrixStack, vertexConsumer, offset) -> {
+		if (clientWorld != null && CullingHelper.getDistanceFromCamera(positionAndYaw.x, positionAndYaw.y, positionAndYaw.z) <= minecraftClient.options.getEffectiveRenderDistance() * 8) {
+			MainRenderer.scheduleSubmit((matrixStack, submitNodeCollector, camera, offset) -> {
 				matrixStack.pushPose();
 				matrixStack.translate(positionAndYaw.x - offset.x, positionAndYaw.y - offset.y, positionAndYaw.z - offset.z);
 				Drawing.rotateYRadians(matrixStack, (float) (Math.PI / 2 - positionAndYaw.yaw));
 				final RemotePlayer remotePlayer = new RemotePlayer(clientWorld, new GameProfile(new UUID(passenger.getId(), 0), passenger.getName()));
 				final BlockPos blockPos = BlockPos.containing(positionAndYaw.x, positionAndYaw.y, positionAndYaw.z);
-				final int light = LightTexture.pack(clientWorld.getBrightness(LightLayer.BLOCK, blockPos), clientWorld.getBrightness(LightLayer.SKY, blockPos));
-//? if >= 1.21.4 {
-				minecraftClient.getEntityRenderDispatcher().render(remotePlayer, 0, 0, 0, 0, matrixStack, minecraftClient.renderBuffers().bufferSource(), light);
-//? } else {
-				/*minecraftClient.getEntityRenderDispatcher().render(remotePlayer, 0, 0, 0, 0, 0, matrixStack, minecraftClient.renderBuffers().bufferSource(), light);
-//
-*///? }
+				final int light = LightCoordsUtil.pack(clientWorld.getBrightness(LightLayer.BLOCK, blockPos), clientWorld.getBrightness(LightLayer.SKY, blockPos));
+				RenderVehicleHelper.submitEntity(remotePlayer, light, matrixStack, submitNodeCollector, camera);
 				matrixStack.popPose();
 			});
 		}

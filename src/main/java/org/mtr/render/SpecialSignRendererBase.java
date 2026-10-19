@@ -5,12 +5,12 @@ import net.minecraft.resources.Identifier;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.tool.Drawing;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public abstract class SpecialSignRendererBase<T> {
 
 	public abstract void render(
-		Drawing textureDrawing, ObjectArrayList<Consumer<PoseStack>> deferredRenders,
+		Drawing textureDrawing, ObjectArrayList<BiConsumer<PoseStack, DrawTarget>> deferredRenders,
 		float x, float y, float zOffset,
 		float signSize, ObjectArrayList<T> dataList,
 		boolean flipTexture, boolean flipText, boolean small, String customText, Identifier font,

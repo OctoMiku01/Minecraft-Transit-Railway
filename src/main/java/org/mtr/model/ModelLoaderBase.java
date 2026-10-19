@@ -1,6 +1,6 @@
 package org.mtr.model;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.PrimitiveTopology;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p><b>Threading:</b> {@link #addModel(String, NewOptimizedModelGroup)} and
  * {@link #addModelDisplayParts(String, ObjectArrayList)} may be called from any thread.
  * The {@code get(...)} methods must run on the render thread because they upload vertex
- * buffers via {@link NewOptimizedModelGroup#build(com.mojang.blaze3d.vertex.VertexFormat.Mode)}.</p>
+ * buffers via {@link NewOptimizedModelGroup#build(com.mojang.blaze3d.vertex.PrimitiveTopology)}.</p>
  */
 public abstract class ModelLoaderBase {
 
@@ -98,12 +98,12 @@ public abstract class ModelLoaderBase {
 	private Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> builtModel2;
 
 	protected final Identifier defaultTexture;
-	private final VertexFormat.Mode drawMode;
+	private final PrimitiveTopology drawMode;
 
 	private final ConcurrentHashMap<String, NewOptimizedModelGroup> nameToNewOptimizedModelGroup = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<String, ObjectArrayList<ObjectObjectImmutablePair<StoredMatrixTransformations, IntIntImmutablePair>>> nameToRawModelDisplayParts = new ConcurrentHashMap<>();
 
-	protected ModelLoaderBase(Identifier defaultTexture, VertexFormat.Mode drawMode) {
+	protected ModelLoaderBase(Identifier defaultTexture, PrimitiveTopology drawMode) {
 		this.defaultTexture = defaultTexture;
 		this.drawMode = drawMode;
 	}

@@ -56,7 +56,7 @@ public abstract class WindowBase extends WindowScreen {
 		super.onTick();
 		if (closeScreen) {
 			if (previousScreen == null) {
-				Minecraft.getInstance().setScreen(previousScreenLegacy);
+				Minecraft.getInstance().gui.setScreen(previousScreenLegacy);
 			} else {
 				UMinecraft.setCurrentScreenObj(previousScreen);
 			}

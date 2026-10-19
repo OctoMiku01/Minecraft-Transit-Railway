@@ -2,52 +2,55 @@ package org.mtr.tool;
 
 import gg.essential.universal.UMatrixStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.builders.UVPair;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3fc;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.mtr.widget.ImageComponentBase;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class BlockRendererHelper {
 
 	private static final Object2ObjectOpenHashMap<String, ReleasedDynamicTextureRegistry.Holder> BLOCK_TEXTURE_MAP = new Object2ObjectOpenHashMap<>();
-	private static final Object2ObjectOpenHashMap<String, int[]> VERTEX_DATA_MAP = new Object2ObjectOpenHashMap<>();
-
 	public static void renderBlock(UMatrixStack matrixStack, BlockState blockState, long renderKey, double x, double y, double z, double brightness) {
+		final List<BlockStateModelPart> blockStateModelParts = new ArrayList<>();
+		Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(blockState).collectParts(RandomSource.create(), blockStateModelParts);
+		final int shade = (int) Math.floor(0xFF * brightness);
+		final Color color = new Color(shade, shade, shade);
+
 		for (int i = -1; i < Direction.values().length; i++) {
-			final List<BakedQuad> bakedQuads = Minecraft.getInstance().getBlockRenderer().getBlockModel(blockState).getQuads(blockState, i < 0 ? null : Direction.values()[i], RandomSource.create());
+			final Direction direction = i < 0 ? null : Direction.values()[i];
+			for (final BlockStateModelPart blockStateModelPart : blockStateModelParts) {
+				for (final BakedQuad bakedQuad : blockStateModelPart.getQuads(direction)) {
+					final TextureAtlasSprite sprite = bakedQuad.materialInfo().sprite();
+					final Identifier tempIdentifier = sprite.contents().name();
+					final Identifier newIdentifier = Identifier.fromNamespaceAndPath(tempIdentifier.getNamespace(), String.format("textures/%s.png", tempIdentifier.getPath()));
 
-			for (int j = 0; j < bakedQuads.size(); j++) {
-				final BakedQuad bakedQuad = bakedQuads.get(j);
-				final TextureAtlasSprite sprite = bakedQuad.getSprite();
-				final Identifier tempIdentifier = bakedQuad.getSprite().contents().name();
-				final Identifier newIdentifier = Identifier.fromNamespaceAndPath(tempIdentifier.getNamespace(), String.format("textures/%s.png", tempIdentifier.getPath()));
-				final String newRenderKey = String.format("%s_%s_%s_%s", tempIdentifier, i, j, renderKey);
-
-				ImageComponentBase.drawTexture(BLOCK_TEXTURE_MAP.computeIfAbsent(newIdentifier.toString(), key -> ReleasedDynamicTextureRegistry.INSTANCE.create(newIdentifier)).get(), vertexConsumer -> {
-					final int[] vertexData = VERTEX_DATA_MAP.computeIfAbsent(newRenderKey, key -> bakedQuad.getVertices());
-					for (int k = 0; k < vertexData.length; k += 8) {
-						final Color color = new Color(vertexData[k + 3]);
-						final int r = (int) Math.floor(color.getRed() * brightness);
-						final int g = (int) Math.floor(color.getGreen() * brightness);
-						final int b = (int) Math.floor(color.getBlue() * brightness);
-						vertexConsumer.pos(
-							matrixStack,
-							x + Float.intBitsToFloat(vertexData[k]),
-							y + Float.intBitsToFloat(vertexData[k + 1]),
-							z + Float.intBitsToFloat(vertexData[k + 2])
-						).tex(
-							(Float.intBitsToFloat(vertexData[k + 4]) - sprite.getU0()) / (sprite.getU1() - sprite.getU0()),
-							(Float.intBitsToFloat(vertexData[k + 5]) - sprite.getV0()) / (sprite.getV1() - sprite.getV0())
-						).color(new Color(r, g, b)).endVertex();
-					}
-				});
+					ImageComponentBase.drawTexture(BLOCK_TEXTURE_MAP.computeIfAbsent(newIdentifier.toString(), key -> ReleasedDynamicTextureRegistry.INSTANCE.create(newIdentifier)).get(), vertexConsumer -> {
+						for (int k = 0; k < BakedQuad.VERTEX_COUNT; k++) {
+							final Vector3fc position = bakedQuad.position(k);
+							final long packedUV = bakedQuad.packedUV(k);
+							vertexConsumer.pos(
+								matrixStack,
+								x + position.x(),
+								y + position.y(),
+								z + position.z()
+							).tex(
+								(UVPair.unpackU(packedUV) - sprite.getU0()) / (sprite.getU1() - sprite.getU0()),
+								(UVPair.unpackV(packedUV) - sprite.getV0()) / (sprite.getV1() - sprite.getV0())
+							).color(color).endVertex();
+						}
+					});
+				}
 			}
 		}
 	}

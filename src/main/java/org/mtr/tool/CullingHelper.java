@@ -19,10 +19,10 @@ public final class CullingHelper {
 	 */
 	public static double getDistanceFromCamera(double x, double y, double z) {
 		final Minecraft minecraftClient = Minecraft.getInstance();
-		final double renderDistance = minecraftClient.levelRenderer.getLastViewDistance() * 16;
-		final Camera camera = minecraftClient.gameRenderer.getMainCamera();
+		final double renderDistance = minecraftClient.options.getEffectiveRenderDistance() * 16;
+		final Camera camera = minecraftClient.gameRenderer.mainCamera();
 
-		final Vec3 cameraPosition = camera.getPosition();
+		final Vec3 cameraPosition = camera.position();
 		final double orthogonalDistanceFromCamera = Math.abs(x - cameraPosition.x) + Math.abs(y - cameraPosition.y) + Math.abs(z - cameraPosition.z);
 
 		final boolean inFrontOfCamera;
@@ -30,7 +30,7 @@ public final class CullingHelper {
 			inFrontOfCamera = true;
 		} else {
 			final double angleFromCamera = Math.atan2(z - cameraPosition.z, x - cameraPosition.x);
-			double cameraAngleDifference = angleFromCamera - Math.toRadians(camera.getYRot()) - Math.PI / 2;
+			double cameraAngleDifference = angleFromCamera - Math.toRadians(camera.yRot()) - Math.PI / 2;
 			while (cameraAngleDifference < -Math.PI) {
 				cameraAngleDifference += Math.PI * 2;
 			}
@@ -64,8 +64,8 @@ public final class CullingHelper {
 	 */
 	public static double getDistanceFromCameraToBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
 		final Minecraft minecraftClient = Minecraft.getInstance();
-		final double renderDistance = minecraftClient.levelRenderer.getLastViewDistance() * 16;
-		final Vec3 cameraPosition = minecraftClient.gameRenderer.getMainCamera().getPosition();
+		final double renderDistance = minecraftClient.options.getEffectiveRenderDistance() * 16;
+		final Vec3 cameraPosition = minecraftClient.gameRenderer.mainCamera().position();
 
 		final double dx = Math.max(Math.max(minX - cameraPosition.x, 0), cameraPosition.x - maxX);
 		final double dy = Math.max(Math.max(minY - cameraPosition.y, 0), cameraPosition.y - maxY);

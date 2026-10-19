@@ -199,7 +199,7 @@ public final class WorkerThread {
 	}
 
 	private void updateInstance() {
-		final int newRenderDistance = (int) Minecraft.getInstance().levelRenderer.getLastViewDistance();
+		final int newRenderDistance = (int) Minecraft.getInstance().options.getEffectiveRenderDistance();
 		if (renderDistance != newRenderDistance) {
 			renderDistance = newRenderDistance;
 			occlusionCullingInstance = new OcclusionCullingInstance(Math.min(renderDistance, MAX_OCCLUSION_CHUNK_DISTANCE) * 16, new CullingDataProvider());

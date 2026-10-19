@@ -1,10 +1,7 @@
 package org.mtr.registry;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -20,14 +17,11 @@ import java.util.function.Consumer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-//? if >= 1.21.4 {
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
-//? }
 //? }
 
 //? if neoforge {
@@ -149,13 +143,7 @@ public final class EventRegistryClient {
 
 	public static void registerWorldRenderEvent(MTRClient.WorldRenderCallback worldRenderCallback) {
 //? if fabric {
-		WorldRenderEvents.AFTER_ENTITIES.register(worldRenderContext -> {
-			final PoseStack matrixStack = worldRenderContext.matrixStack();
-			final MultiBufferSource vertexConsumerProvider = worldRenderContext.consumers();
-			if (matrixStack != null && vertexConsumerProvider != null) {
-				worldRenderCallback.accept(matrixStack, vertexConsumerProvider, worldRenderContext.camera().getPosition());
-			}
-		});
+		LevelRenderEvents.COLLECT_SUBMITS.register(levelRenderContext -> worldRenderCallback.accept(levelRenderContext.poseStack(), levelRenderContext.submitNodeCollector(), levelRenderContext.levelState().cameraRenderState));
 //? }
 
 //? if neoforge {
@@ -164,14 +152,9 @@ public final class EventRegistryClient {
 *///? }
 	}
 
-	public static void registerHudLayerRenderEvent(Consumer<GuiGraphics> hudLayerRenderCallback) {
+	public static void registerHudLayerRenderEvent(Consumer<GuiGraphicsExtractor> hudLayerRenderCallback) {
 //? if fabric {
-//? if >= 1.21.4 {
-		HudLayerRegistrationCallback.EVENT.register(layeredDrawerWrapper -> layeredDrawerWrapper.attachLayerBefore(IdentifiedLayer.CHAT, Identifier.fromNamespaceAndPath(MTR.MOD_ID, "gui"), (guiGraphics, delta) -> hudLayerRenderCallback.accept(guiGraphics)));
-//? } else {
-		/*HudRenderCallback.EVENT.register((guiGraphics, delta) -> hudLayerRenderCallback.accept(guiGraphics));
-//
-*///? }
+		HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Identifier.fromNamespaceAndPath(MTR.MOD_ID, "gui"), (guiGraphics, deltaTracker) -> hudLayerRenderCallback.accept(guiGraphics));
 //? }
 
 //? if neoforge {

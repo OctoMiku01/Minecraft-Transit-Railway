@@ -8,6 +8,7 @@ import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import org.mtr.tool.Drawing;
+import org.mtr.render.DrawTarget;
 
 import java.util.Locale;
 
@@ -200,7 +201,7 @@ public final class ListItem<T> {
 
 	@FunctionalInterface
 	public interface DeferredDrawIcon {
-		void draw(PoseStack matrixStack, float x, float y);
+		void draw(PoseStack matrixStack, DrawTarget drawTarget, float x, float y);
 	}
 
 	@FunctionalInterface

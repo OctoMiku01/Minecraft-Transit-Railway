@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -23,11 +23,11 @@ import org.mtr.tool.Drawing;
 public class RenderEyeCandy extends BlockEntityRendererExtension<BlockEyeCandy.EyeCandyBlockEntity> implements IGui {
 
 	@Override
-	public void render(BlockEyeCandy.EyeCandyBlockEntity blockEntity, PoseStack matrixStack2, MultiBufferSource vertexConsumerProvider, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
+	public void render(BlockEyeCandy.EyeCandyBlockEntity blockEntity, PoseStack matrixStack2, SubmitNodeCollector submitNodeCollector, ClientLevel world, LocalPlayer player, float tickDelta, int light, int overlay) {
 		final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations(0.5 + blockEntity.getBlockPos().getX(), blockEntity.getBlockPos().getY(), 0.5 + blockEntity.getBlockPos().getZ());
 		final int newLight = blockEntity.isFullBrightness() ? DEFAULT_LIGHT : light;
 
-		if ((RenderRails.isHoldingRailRelated(player) || player.isHolding(Blocks.EYE_CANDY.get().asItem())) && Minecraft.getInstance().screen == null) {
+		if ((RenderRails.isHoldingRailRelated(player) || player.isHolding(Blocks.EYE_CANDY.get().asItem())) && Minecraft.getInstance().gui.screen() == null) {
 			MainRenderer.scheduleRender(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/item/eye_candy.png"), false, QueuedRenderLayer.INTERIOR, (matrixStack, vertexConsumer, offset) -> {
 				storedMatrixTransformations.transform(matrixStack, offset);
 				matrixStack.translate(0, 0.5, 0);

@@ -1,6 +1,5 @@
 package org.mtr.data;
 
-import net.minecraft.client.gui.components.Checkbox;
 import org.jspecify.annotations.Nullable;
 import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -273,12 +272,6 @@ public interface IGui {
 				unicodeBlock == Character.UnicodeBlock.TAI_XUAN_JING_SYMBOLS ||
 				unicodeBlock == Character.UnicodeBlock.IDEOGRAPHIC_DESCRIPTION_CHARACTERS;
 		});
-	}
-
-	static void setChecked(Checkbox checkboxWidget, boolean value) {
-		if (checkboxWidget.selected() != value) {
-			checkboxWidget.onPress();
-		}
 	}
 
 	enum HorizontalAlignment {

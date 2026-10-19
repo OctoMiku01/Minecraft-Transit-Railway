@@ -1,8 +1,5 @@
 package org.mtr.map;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
@@ -17,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 import org.mtr.cache.CachedFileResource;
 import org.mtr.libraries.it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.mtr.model.NewOptimizedModel;
+import org.mtr.render.RecordingVertexConsumer;
 import org.mtr.tool.Drawing;
 
 import java.awt.*;
@@ -26,7 +23,7 @@ import java.nio.file.Path;
 public final class MapTileResource extends CachedFileResource {
 
 	@Nullable
-	private VertexBuffer vertexBuffer;
+	private RecordingVertexConsumer tileVertices;
 
 	private final Level world;
 	private final MapTileProvider.MapType mapType;
@@ -139,59 +136,48 @@ public final class MapTileResource extends CachedFileResource {
 	@Override
 	protected void dataUpdated(byte @Nullable [] data) {
 		if (data == null) {
-			this.vertexBuffer = null;
+			this.tileVertices = null;
 		} else {
-			final boolean[] noVertices = {true};
+			final RecordingVertexConsumer tileVertices = new RecordingVertexConsumer();
+			final Drawing drawing = new Drawing(tileVertices);
+			int pixelOffsetX = 0;
+			int pixelOffsetY = 0;
+			boolean noVertices = true;
 
-			final VertexBuffer vertexBuffer = NewOptimizedModel.createVertexBuffer(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR, vertexConsumer -> {
-				final Drawing drawing = new Drawing(vertexConsumer);
-				int pixelOffsetX = 0;
-				int pixelOffsetY = 0;
+			for (int i = 0; i < data.length; i += 5) {
+				final Color color = new Color(
+					data[i + 1] & 0xFF,
+					data[i + 2] & 0xFF,
+					data[i + 3] & 0xFF,
+					data[i] & 0xFF
+				);
+				int count = (data[i + 4] & 0xFF) + 1;
 
-				for (int i = 0; i < data.length; i += 5) {
-					final Color color = new Color(
-						data[i + 1] & 0xFF,
-						data[i + 2] & 0xFF,
-						data[i + 3] & 0xFF,
-						data[i] & 0xFF
-					);
-					int count = (data[i + 4] & 0xFF) + 1;
+				while (count > 0) {
+					final int length = Math.min(MapTileProvider.TILE_SIZE - pixelOffsetX, count);
 
-					while (count > 0) {
-						final int length = Math.min(MapTileProvider.TILE_SIZE - pixelOffsetX, count);
+					if (color.getAlpha() > 0) {
+						drawing.setVerticesWH(pixelOffsetX, pixelOffsetY, length, 1).setColor(color).draw();
+						noVertices = false;
+					}
 
-						if (color.getAlpha() > 0) {
-							drawing.setVerticesWH(pixelOffsetX, pixelOffsetY, length, 1).setColor(color).draw();
-							noVertices[0] = false;
-						}
+					pixelOffsetX += length;
+					count -= length;
 
-						pixelOffsetX += length;
-						count -= length;
-
-						if (pixelOffsetX == MapTileProvider.TILE_SIZE) {
-							pixelOffsetX = 0;
-							pixelOffsetY++;
-						}
+					if (pixelOffsetX == MapTileProvider.TILE_SIZE) {
+						pixelOffsetX = 0;
+						pixelOffsetY++;
 					}
 				}
-
-				if (noVertices[0]) {
-					drawing.setVertices(0, 0, 1, 1).setColor(0).draw();
-				}
-			});
-
-			if (noVertices[0]) {
-				vertexBuffer.close();
-				this.vertexBuffer = null;
-			} else {
-				this.vertexBuffer = vertexBuffer;
 			}
+
+			this.tileVertices = noVertices ? null : tileVertices;
 		}
 	}
 
 	@Nullable
-	public VertexBuffer getVertexBuffer() {
-		return vertexBuffer;
+	public RecordingVertexConsumer getTileVertices() {
+		return tileVertices;
 	}
 
 	/**
@@ -208,17 +194,17 @@ public final class MapTileResource extends CachedFileResource {
 		final BiomeSpecialEffects biomeEffects = world.getBiome(blockPos).value().getSpecialEffects();
 
 		if (GRASS_COLOR_BLOCKS.contains(block)) {
-			return new Color(biomeEffects.getGrassColorOverride().orElse(defaultColor));
+			return new Color(biomeEffects.grassColorOverride().orElse(defaultColor));
 		} else if (FOLIAGE_COLOR_BLOCKS.contains(block)) {
-			return new Color(biomeEffects.getFoliageColorOverride().orElse(defaultColor));
+			return new Color(biomeEffects.foliageColorOverride().orElse(defaultColor));
 		} else if (block.defaultMapColor() == MapColor.WATER) {
 			for (int i = 1; i < WATER_DEPTH_CHECK; i++) {
 				final BlockPos checkPos = blockPos.below(i);
 				if (world.getBlockState(checkPos).getMapColor(world, checkPos) != MapColor.WATER) {
-					return blendColors(getBlockColor(checkPos), WATER_DEPTH_CHECK - i, new Color(biomeEffects.getWaterColor()), i + WATER_DEPTH_CHECK);
+					return blendColors(getBlockColor(checkPos), WATER_DEPTH_CHECK - i, new Color(biomeEffects.waterColor()), i + WATER_DEPTH_CHECK);
 				}
 			}
-			return new Color(biomeEffects.getWaterColor());
+			return new Color(biomeEffects.waterColor());
 		} else {
 			return new Color(defaultColor);
 		}

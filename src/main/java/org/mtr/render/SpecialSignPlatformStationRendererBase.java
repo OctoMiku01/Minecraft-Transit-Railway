@@ -14,13 +14,13 @@ import org.mtr.resource.SignResource;
 import org.mtr.tool.Drawing;
 import org.mtr.tool.GuiHelper;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public abstract class SpecialSignPlatformStationRendererBase<T extends NameColorDataBase> extends SpecialSignRendererBase<T> {
 
 	@Override
 	public final void render(
-		Drawing textureDrawing, ObjectArrayList<Consumer<PoseStack>> deferredRenders,
+		Drawing textureDrawing, ObjectArrayList<BiConsumer<PoseStack, DrawTarget>> deferredRenders,
 		float x, float y, float zOffset,
 		float signSize, ObjectArrayList<T> dataList,
 		boolean flipTexture, boolean flipText, boolean small, String customText, Identifier font,
@@ -51,11 +51,11 @@ public abstract class SpecialSignPlatformStationRendererBase<T extends NameColor
 				textureDrawing.setVerticesWH(x1, y1 + textureSize * j / colorCount, textureSize, textureSize / colorCount, -zOffset).setColor(GuiHelper.BLACK_COLOR | (colors == null ? GuiHelper.rainbowColor().getRGB() : colors.getInt(j))).setUv(flipTexture ? 1 : 0, (float) j / colorCount, flipTexture ? 0 : 1, (float) (j + 1) / colorCount).draw();
 			}
 
-			deferredRenders.add(matrixStack -> {
+			deferredRenders.add((matrixStack, drawTarget) -> {
 				// Texture overlay text
 				final String overlayText = getOverlayText(data);
 				if (overlayText != null) {
-					FontRenderHelper.render(matrixStack, overlayText, FontRenderOptions.builder()
+					FontRenderHelper.render(matrixStack, drawTarget, overlayText, FontRenderOptions.builder()
 						.font(font)
 						.horizontalSpace(textureSize * 0.75F)
 						.verticalSpace(textureSize * 0.75F)
@@ -75,7 +75,7 @@ public abstract class SpecialSignPlatformStationRendererBase<T extends NameColor
 				// Text
 				final float textSpace = totalSpace - textureSize - signSize * SignResource.SMALL_SIGN_PADDING;
 				if (textSpace > 0) {
-					FontRenderHelper.render(matrixStack, dataColorsAndDestinations == null ? customText : dataColorsAndDestinations.right(), FontRenderOptions.builder()
+					FontRenderHelper.render(matrixStack, drawTarget, dataColorsAndDestinations == null ? customText : dataColorsAndDestinations.right(), FontRenderOptions.builder()
 						.font(font)
 						.horizontalSpace(textSpace)
 						.verticalSpace(Math.min(signSize * (1 - SignResource.SMALL_SIGN_PADDING * 2), smallTextureSize))

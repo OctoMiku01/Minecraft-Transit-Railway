@@ -3,7 +3,7 @@ package org.mtr.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
@@ -18,6 +18,7 @@ import org.mtr.font.FontRenderOptions;
 import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.libraries.com.google.gson.JsonObject;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.*;
+import org.mtr.render.DrawTarget;
 import org.mtr.resource.VehicleResource;
 import org.mtr.tool.Drawing;
 import org.mtr.tool.GuiHelper;
@@ -89,13 +90,13 @@ public final class VehicleSelectorScreen extends ScreenBase {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		super.render(context, mouseX, mouseY, delta);
+	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+		super.extractRenderState(context, mouseX, mouseY, delta);
 		final int columnWidth = width / 3;
 
-		context.drawString(font, FILTERS_TEXT, (columnWidth - filtersTextWidth) / 2, GuiHelper.DEFAULT_PADDING, GuiHelper.WHITE_COLOR, false);
-		context.drawString(font, AVAILABLE_TEXT, (columnWidth * 3 - availableTextWidth) / 2, GuiHelper.DEFAULT_PADDING, GuiHelper.WHITE_COLOR, false);
-		context.drawString(font, SELECTED_TEXT, (columnWidth * 5 - selectedTextWidth) / 2, GuiHelper.DEFAULT_PADDING, GuiHelper.WHITE_COLOR, false);
+		context.text(font, FILTERS_TEXT, (columnWidth - filtersTextWidth) / 2, GuiHelper.DEFAULT_PADDING, GuiHelper.WHITE_COLOR, false);
+		context.text(font, AVAILABLE_TEXT, (columnWidth * 3 - availableTextWidth) / 2, GuiHelper.DEFAULT_PADDING, GuiHelper.WHITE_COLOR, false);
+		context.text(font, SELECTED_TEXT, (columnWidth * 5 - selectedTextWidth) / 2, GuiHelper.DEFAULT_PADDING, GuiHelper.WHITE_COLOR, false);
 
 		final VehicleResource hoverVehicleResource = availableVehiclesListWidget.getHoverData();
 		if (hoverVehicleResource != null) {
@@ -121,7 +122,7 @@ public final class VehicleSelectorScreen extends ScreenBase {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 		context.fill(0, 0, width, height, GuiHelper.BACKGROUND_COLOR);
 	}
 
@@ -219,7 +220,7 @@ public final class VehicleSelectorScreen extends ScreenBase {
 				// Build the child list item
 				final ListItem<VehicleResource> childListItem = ListItem.createChild(
 					(drawing, x, y) -> drawVehicleIcon(drawing, (int) x, y, canAddCar, true, vehicleResource.getColor()),
-					(matrixStack, x, y) -> drawVehicleIcon(matrixStack, (int) x, y, canAddCar),
+					(matrixStack, drawTarget, x, y) -> drawVehicleIcon(matrixStack, drawTarget, (int) x, y, canAddCar),
 					GuiHelper.DEFAULT_PADDING + GuiHelper.MINECRAFT_FONT_SIZE,
 					vehicleResource,
 					vehicleResource.getName().getString(),
@@ -258,7 +259,7 @@ public final class VehicleSelectorScreen extends ScreenBase {
 				final boolean canAddCar = availableVehicleFamily.children.stream().anyMatch(ObjectBooleanImmutablePair::rightBoolean);
 				return ListItem.createParent(
 					(drawing, x, y) -> drawVehicleIcon(drawing, (int) x, y, canAddCar, false, availableVehicleFamily.color),
-					(matrixStack, x, y) -> drawVehicleIcon(matrixStack, (int) x, y, canAddCar),
+					(matrixStack, drawTarget, x, y) -> drawVehicleIcon(matrixStack, drawTarget, (int) x, y, canAddCar),
 					GuiHelper.DEFAULT_PADDING + GuiHelper.MINECRAFT_FONT_SIZE,
 					availableVehicleFamily.family,
 					availableVehicleFamily.family,
@@ -278,7 +279,7 @@ public final class VehicleSelectorScreen extends ScreenBase {
 				final boolean canAddCar = canAddCar(currentVehicleCars, vehicleResourceDetails.left());
 				selectedVehicleListItems.add(ListItem.createChild(
 					(drawing, x, y) -> drawVehicleIcon(drawing, (int) x, y, canAddCar, false, vehicleResourceDetails.left().getColor()),
-					(matrixStack, x, y) -> drawVehicleIcon(matrixStack, (int) x, y, canAddCar),
+					(matrixStack, drawTarget, x, y) -> drawVehicleIcon(matrixStack, drawTarget, (int) x, y, canAddCar),
 					GuiHelper.DEFAULT_PADDING + GuiHelper.MINECRAFT_FONT_SIZE,
 					vehicleResourceDetails.left(),
 					vehicleResourceDetails.left().getName().getString(),
@@ -299,15 +300,15 @@ public final class VehicleSelectorScreen extends ScreenBase {
 		selectedVehiclesListWidget.setData(selectedVehicleListItems);
 	}
 
-	private int drawWrappedText(GuiGraphics context, MutableComponent component, int y, int color) {
+	private int drawWrappedText(GuiGraphicsExtractor context, MutableComponent component, int y, int color) {
 		int newY = y;
 		for (final FormattedCharSequence orderedText : font.split(component, Math.max(0, width / 3 - GuiHelper.DEFAULT_PADDING))) {
 			final int nextY = newY + GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT;
 			if (nextY > height - GuiHelper.DEFAULT_PADDING - GuiHelper.MINECRAFT_FONT_SIZE) {
-				context.drawString(font, "...", GuiHelper.DEFAULT_PADDING, newY, color, false);
+				context.text(font, "...", GuiHelper.DEFAULT_PADDING, newY, color, false);
 				return height;
 			} else {
-				context.drawString(font, orderedText, GuiHelper.DEFAULT_PADDING, newY, color, false);
+				context.text(font, orderedText, GuiHelper.DEFAULT_PADDING, newY, color, false);
 			}
 			newY = nextY;
 		}
@@ -329,9 +330,9 @@ public final class VehicleSelectorScreen extends ScreenBase {
 		}
 	}
 
-	private static void drawVehicleIcon(PoseStack matrixStack, int x, double y, boolean canAddCar) {
+	private static void drawVehicleIcon(PoseStack matrixStack, DrawTarget drawTarget, int x, double y, boolean canAddCar) {
 		if (!canAddCar) {
-			FontRenderHelper.render(matrixStack, "!", FontRenderOptions.builder()
+			FontRenderHelper.render(matrixStack, drawTarget, "!", FontRenderOptions.builder()
 				.color(Color.WHITE)
 				.offsetX(x)
 				.offsetY((float) y)

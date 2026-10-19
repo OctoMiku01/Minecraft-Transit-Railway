@@ -1,6 +1,7 @@
 package org.mtr.render;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
@@ -27,27 +28,27 @@ public class MoreRenderLayers {
 	}
 
 	public static RenderType getLight(Identifier texture, boolean isTranslucent) {
-		return checkCache(texture, () -> RenderType.beaconBeam(texture, isTranslucent), isTranslucent ? LIGHT_TRANSLUCENT_CACHE : LIGHT_CACHE);
+		return checkCache(texture, () -> RenderTypes.beaconBeam(texture, isTranslucent), isTranslucent ? LIGHT_TRANSLUCENT_CACHE : LIGHT_CACHE);
 	}
 
 	public static RenderType getLight2(Identifier texture) {
-		return checkCache(texture, () -> RenderType.text(texture), LIGHT_2_CACHE);
+		return checkCache(texture, () -> RenderTypes.text(texture), LIGHT_2_CACHE);
 	}
 
 	public static RenderType getInterior(Identifier texture) {
-		return checkCache(texture, () -> RenderType.entityCutout(texture), INTERIOR_CACHE);
+		return checkCache(texture, () -> RenderTypes.entityCutout(texture), INTERIOR_CACHE);
 	}
 
 	public static RenderType getInteriorTranslucent(Identifier texture) {
-		return checkCache(texture, () -> RenderType.itemEntityTranslucentCull(texture), INTERIOR_TRANSLUCENT_CACHE);
+		return checkCache(texture, () -> RenderTypes.entityTranslucentCullItemTarget(texture), INTERIOR_TRANSLUCENT_CACHE);
 	}
 
 	public static RenderType getExterior(Identifier texture) {
-		return checkCache(texture, () -> RenderType.entityCutout(texture), EXTERIOR_CACHE);
+		return checkCache(texture, () -> RenderTypes.entityCutout(texture), EXTERIOR_CACHE);
 	}
 
 	public static RenderType getExteriorTranslucent(Identifier texture) {
-		return checkCache(texture, () -> RenderType.itemEntityTranslucentCull(texture), EXTERIOR_TRANSLUCENT_CACHE);
+		return checkCache(texture, () -> RenderTypes.entityTranslucentCullItemTarget(texture), EXTERIOR_TRANSLUCENT_CACHE);
 	}
 
 	private static RenderType checkCache(Identifier identifier, Supplier<RenderType> supplier, Object2ObjectOpenHashMap<Identifier, RenderType> cache) {
