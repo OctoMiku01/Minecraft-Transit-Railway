@@ -5,6 +5,7 @@ import gg.essential.universal.UMatrixStack;
 import gg.essential.universal.render.ScissorState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import org.joml.Matrix4f;
 import org.jspecify.annotations.Nullable;
 import org.mtr.core.tool.Utilities;
 import org.mtr.registry.UConverters;
@@ -40,6 +41,10 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 	 */
 	private static final float DEFAULT_VISIBLE_BLOCKS = 4;
 	private static final float ZOOM_STEP = 0.1F;
+	/**
+	 * Distance of the virtual camera from the centre of the preview in blocks. Larger values give a weaker perspective.
+	 */
+	private static final float CAMERA_DISTANCE = 8;
 
 	public PreviewBoxComponent(boolean allowPan, boolean allowRotation, boolean allowZoom, Consumer<PoseStack> onDraw) {
 		setBackgroundColor(Color.BLACK);
@@ -84,8 +89,8 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 	}
 
 	/**
-	 * TODO 26.2 port: older versions rendered the preview with a perspective projection into a separate framebuffer.
-	 * The preview is currently drawn directly into the GUI with an orthographic projection, clipped to the preview area.
+	 * Older versions rendered the preview with a perspective projection into a separate framebuffer.
+	 * The preview is now drawn directly into the GUI, clipped to the preview area, with the perspective built into the pose (see {@link #createPerspectiveMatrix}).
 	 */
 	@Override
 	public void draw(UMatrixStack matrixStack) {
@@ -101,11 +106,12 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 			(int) Math.round((getHeight() - 2) * guiScale)
 		).activate();
 
-		final float scale = (getHeight() - 2) / DEFAULT_VISIBLE_BLOCKS * Math.max(ZOOM_STEP, 1 + zoom * ZOOM_STEP);
 		final PoseStack poseStack = UConverters.convert(matrixStack);
 		poseStack.pushPose();
-		poseStack.translate((getLeft() + getRight()) / 2 + panX * scale, (getTop() + getBottom()) / 2 + panY * scale, 0);
-		poseStack.scale(scale, -scale, scale);
+		poseStack.mulPose(createPerspectiveMatrix((getLeft() + getRight()) / 2, (getTop() + getBottom()) / 2, (getHeight() - 2) / DEFAULT_VISIBLE_BLOCKS));
+		poseStack.translate(panX, -panY, 0);
+		final float zoomScale = Math.max(ZOOM_STEP, 1 + zoom * ZOOM_STEP);
+		poseStack.scale(zoomScale, zoomScale, zoomScale);
 		Drawing.rotateXDegrees(poseStack, rotationY);
 		Drawing.rotateYDegrees(poseStack, rotationX);
 		onDraw.accept(poseStack);
@@ -120,6 +126,25 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 		rotationY = previewBoxComponent.rotationY;
 		rotationX = previewBoxComponent.rotationX;
 		zoom = previewBoxComponent.zoom;
+	}
+
+	/**
+	 * Maps view space (in blocks, y up, camera looking towards negative z) to GUI coordinates with a perspective projection.
+	 * The GUI projection is orthographic but keeps the w component, so the GPU's perspective division still applies.
+	 * Points at depth 0 are scaled by {@code pixelsPerBlock}; closer points get bigger and further points smaller.
+	 *
+	 * @param centerX        the GUI x coordinate of the view centre
+	 * @param centerY        the GUI y coordinate of the view centre
+	 * @param pixelsPerBlock how many GUI pixels one block at depth 0 covers
+	 */
+	private static Matrix4f createPerspectiveMatrix(float centerX, float centerY, float pixelsPerBlock) {
+		// Columns: x' = s * x + cx * w, y' = -s * y + cy * w, z' = s * z, w = 1 - z / distance
+		return new Matrix4f(
+			pixelsPerBlock, 0, 0, 0,
+			0, -pixelsPerBlock, 0, 0,
+			-centerX / CAMERA_DISTANCE, -centerY / CAMERA_DISTANCE, pixelsPerBlock, -1 / CAMERA_DISTANCE,
+			centerX, centerY, 0, 1
+		);
 	}
 
 	private static float getPlayerYaw() {
