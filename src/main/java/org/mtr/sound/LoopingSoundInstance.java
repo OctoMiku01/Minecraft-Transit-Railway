@@ -6,7 +6,7 @@ import net.minecraft.client.resources.sounds.AbstractSoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
@@ -17,7 +17,7 @@ public class LoopingSoundInstance extends AbstractSoundInstance implements Ticka
 	private static final int MAX_DISTANCE = 32;
 
 	public LoopingSoundInstance(String soundId) {
-		super(SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, soundId)), SoundSource.BLOCKS, new SingleThreadedRandomSource(0));
+		super(SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(MTR.MOD_ID, soundId)), SoundSource.BLOCKS, new SingleThreadedRandomSource(0));
 		looping = true;
 	}
 

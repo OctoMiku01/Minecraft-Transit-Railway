@@ -1,7 +1,7 @@
 package org.mtr.resource;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.core.serializer.ReaderBase;
 import org.mtr.generated.resource.LiftResourceSchema;
 
@@ -24,7 +24,7 @@ public final class LiftResource extends LiftResourceSchema implements Comparable
 		return CustomResourceTools.colorStringToInt(color);
 	}
 
-	public ResourceLocation getTexture() {
+	public Identifier getTexture() {
 		return CustomResourceTools.formatIdentifierWithDefault(textureResource, "png");
 	}
 

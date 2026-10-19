@@ -1,6 +1,6 @@
 package org.mtr.resource;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.client.CustomResourceLoader;
@@ -92,7 +92,7 @@ public final class VehicleModelWrapper extends VehicleModelWrapperSchema {
 		});
 
 		final boolean isMinecraftResource = CustomResourceLoader.getMinecraftModelResources().stream().anyMatch(minecraftModelResource -> minecraftModelResource.matchesModelResource(modelResource));
-		final String modelPropertiesResource = isMinecraftResource ? minecraftModelPropertiesResource : ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, String.format("properties_%s.json", MTR.randomString())).toString();
+		final String modelPropertiesResource = isMinecraftResource ? minecraftModelPropertiesResource : Identifier.fromNamespaceAndPath(MTR.MOD_ID, String.format("properties_%s.json", MTR.randomString())).toString();
 		final ModelProperties modelProperties = new ModelProperties(
 			modelPropertiesPartList,
 			modelYOffset,
@@ -117,7 +117,7 @@ public final class VehicleModelWrapper extends VehicleModelWrapperSchema {
 			barrierYOffset,
 			barrierZOffset
 		);
-		final String positionDefinitionsResource = isMinecraftResource ? minecraftPositionDefinitionsResource : ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, String.format("definition_%s.json", MTR.randomString())).toString();
+		final String positionDefinitionsResource = isMinecraftResource ? minecraftPositionDefinitionsResource : Identifier.fromNamespaceAndPath(MTR.MOD_ID, String.format("definition_%s.json", MTR.randomString())).toString();
 		final PositionDefinitions positionDefinitions = new PositionDefinitions(positionDefinitionList);
 
 		if (!isMinecraftResource && modelPropertiesMap != null && positionDefinitionsMap != null) {

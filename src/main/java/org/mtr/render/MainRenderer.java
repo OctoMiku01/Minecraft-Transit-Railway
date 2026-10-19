@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTRClient;
@@ -45,7 +45,7 @@ import java.util.function.Consumer;
  *       riding state, and the arrivals cache, then dispatches into the per-domain
  *       renderers ({@link RenderVehicles}, {@link RenderLifts}, {@link RenderRails}).</li>
  *   <li><b>Batched draw scheduling</b> — code anywhere in the mod can call
- *       {@link #scheduleRender(ResourceLocation, boolean, QueuedRenderLayer, ScheduledRender)} or
+ *       {@link #scheduleRender(Identifier, boolean, QueuedRenderLayer, ScheduledRender)} or
  *       {@link #renderModel(Object2ObjectOpenHashMap, StoredMatrixTransformations, int)} to
  *       enqueue draw work for the current frame. The drains at the end of
  *       {@link #render(PoseStack, MultiBufferSource, Vec3)} sort and dispatch by
@@ -96,9 +96,9 @@ public class MainRenderer {
 	/**
 	 * Reusable identifier for {@link #scheduleRender(QueuedRenderLayer, ScheduledRender)} — see {@code docs/PERFORMANCE.md} §4.3.
 	 */
-	private static final ResourceLocation EMPTY_IDENTIFIER = ResourceLocation.parse("");
-	private static final ObjectArrayList<ObjectArrayList<Object2ObjectArrayMap<ResourceLocation, ObjectArrayList<ScheduledRender>>>> RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
-	private static final ObjectArrayList<ObjectArrayList<Object2ObjectArrayMap<ResourceLocation, ObjectArrayList<ScheduledRender>>>> CURRENT_RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
+	private static final Identifier EMPTY_IDENTIFIER = Identifier.parse("");
+	private static final ObjectArrayList<ObjectArrayList<Object2ObjectArrayMap<Identifier, ObjectArrayList<ScheduledRender>>>> RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
+	private static final ObjectArrayList<ObjectArrayList<Object2ObjectArrayMap<Identifier, ObjectArrayList<ScheduledRender>>>> CURRENT_RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
 	private static final ObjectArrayList<ScheduledTextRender> TEXT_RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
 	private static final ObjectArrayList<ScheduledTextRender> CURRENT_TEXT_RENDERS = new ObjectArrayList<>(TOTAL_RENDER_STAGES);
 	private static final Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>>>> MODEL_RENDERS = new Object2ObjectOpenHashMap<>();
@@ -107,8 +107,8 @@ public class MainRenderer {
 	static {
 		for (int i = 0; i < TOTAL_RENDER_STAGES; i++) {
 			final int renderStageCount = QUEUED_RENDER_LAYERS.length;
-			final ObjectArrayList<Object2ObjectArrayMap<ResourceLocation, ObjectArrayList<ScheduledRender>>> rendersList = new ObjectArrayList<>(renderStageCount);
-			final ObjectArrayList<Object2ObjectArrayMap<ResourceLocation, ObjectArrayList<ScheduledRender>>> currentRendersList = new ObjectArrayList<>(renderStageCount);
+			final ObjectArrayList<Object2ObjectArrayMap<Identifier, ObjectArrayList<ScheduledRender>>> rendersList = new ObjectArrayList<>(renderStageCount);
+			final ObjectArrayList<Object2ObjectArrayMap<Identifier, ObjectArrayList<ScheduledRender>>> currentRendersList = new ObjectArrayList<>(renderStageCount);
 
 			for (int j = 0; j < renderStageCount; j++) {
 				rendersList.add(j, new Object2ObjectArrayMap<>());
@@ -232,7 +232,7 @@ public class MainRenderer {
 	 * @param queuedRenderLayer the render-layer family to dispatch into
 	 * @param scheduledRender   the draw callback invoked during the drain pass
 	 */
-	public static void scheduleRender(@Nullable ResourceLocation identifier, boolean priority, QueuedRenderLayer queuedRenderLayer, ScheduledRender scheduledRender) {
+	public static void scheduleRender(@Nullable Identifier identifier, boolean priority, QueuedRenderLayer queuedRenderLayer, ScheduledRender scheduledRender) {
 		if (identifier != null) {
 			RENDERS.get(priority ? 1 : 0).get(queuedRenderLayer.ordinal()).computeIfAbsent(identifier, key -> new ObjectArrayList<>()).add(scheduledRender);
 		}
@@ -240,7 +240,7 @@ public class MainRenderer {
 
 	/**
 	 * Convenience overload of
-	 * {@link #scheduleRender(ResourceLocation, boolean, QueuedRenderLayer, ScheduledRender)}
+	 * {@link #scheduleRender(Identifier, boolean, QueuedRenderLayer, ScheduledRender)}
 	 * for draws that aren't keyed to a specific texture (e.g. line / debug renders).
 	 */
 	public static void scheduleRender(QueuedRenderLayer queuedRenderLayer, ScheduledRender scheduledRender) {
@@ -261,7 +261,7 @@ public class MainRenderer {
 	 * and current frame buckets. Called when a dynamic texture is evicted so stale draws
 	 * don't reference a disposed {@link DynamicTexture}.
 	 */
-	public static void cancelRender(ResourceLocation identifier) {
+	public static void cancelRender(Identifier identifier) {
 		RENDERS.forEach(renderForPriority -> renderForPriority.forEach(renderForPriorityAndQueuedRenderLayer -> renderForPriorityAndQueuedRenderLayer.remove(identifier)));
 		CURRENT_RENDERS.forEach(renderForPriority -> renderForPriority.forEach(renderForPriorityAndQueuedRenderLayer -> renderForPriorityAndQueuedRenderLayer.remove(identifier)));
 	}
@@ -304,7 +304,7 @@ public class MainRenderer {
 
 	private static void renderModel(PoseStack matrixStack, Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<ObjectIntImmutablePair<StoredMatrixTransformations>>>> modelRenders, Vec3 offset) {
 		modelRenders.forEach((newOptimizedModel, modelsForRenderStage) -> modelsForRenderStage.forEach((renderStage, renderDetails) -> {
-			final ResourceLocation texture = newOptimizedModel.texture;
+			final Identifier texture = newOptimizedModel.texture;
 			final RenderType renderLayer = switch (renderStage) {
 				case LIGHT -> MoreRenderLayers.getLight(texture, false);
 				case ALWAYS_ON_LIGHT -> MoreRenderLayers.getLight(texture, true);

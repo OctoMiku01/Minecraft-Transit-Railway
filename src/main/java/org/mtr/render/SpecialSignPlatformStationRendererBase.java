@@ -1,7 +1,7 @@
 package org.mtr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.core.data.NameColorDataBase;
 import org.mtr.core.tool.Utilities;
@@ -23,7 +23,7 @@ public abstract class SpecialSignPlatformStationRendererBase<T extends NameColor
 		Drawing textureDrawing, ObjectArrayList<Consumer<PoseStack>> deferredRenders,
 		float x, float y, float zOffset,
 		float signSize, ObjectArrayList<T> dataList,
-		boolean flipTexture, boolean flipText, boolean small, String customText, ResourceLocation font,
+		boolean flipTexture, boolean flipText, boolean small, String customText, Identifier font,
 		float totalSpace, boolean renderPlaceholder
 	) {
 		if (dataList.isEmpty() && !renderPlaceholder) {

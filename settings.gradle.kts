@@ -4,12 +4,11 @@ pluginManagement {
 		maven("https://maven.kikugie.dev/releases")
 		maven("https://maven.kikugie.dev/snapshots")
 		maven("https://maven.fabricmc.net/")
-		maven("https://maven.neoforged.net/releases/")
 	}
 }
 
 plugins {
-	id("dev.kikugie.stonecutter") version "+"
+	id("dev.kikugie.stonecutter") version "0.10-beta.1"
 	id("org.gradle.toolchains.foojay-resolver-convention") version "+"
 }
 
@@ -20,13 +19,10 @@ stonecutter {
 		}
 
 		versions(
-			"1.21.1-fabric" to "1.21.1",
-			"1.21.1-neoforge" to "1.21.1",
-			"1.21.4-fabric" to "1.21.4",
-			"1.21.4-neoforge" to "1.21.4",
+			"26.2-fabric" to "26.2",
 		)
 
-		vcsVersion = "1.21.4-fabric"
+		vcsVersion = "26.2-fabric"
 	}
 }
 

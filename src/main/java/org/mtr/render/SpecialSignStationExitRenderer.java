@@ -1,7 +1,7 @@
 package org.mtr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.core.data.StationExit;
 import org.mtr.core.tool.Utilities;
@@ -20,7 +20,7 @@ public final class SpecialSignStationExitRenderer extends SpecialSignRouteStatio
 	}
 
 	@Override
-	protected void renderOverlayText(PoseStack matrixStack, String overlayText, ResourceLocation font, float x, float y, float zOffset, float width, float height, float padding, boolean flipText) {
+	protected void renderOverlayText(PoseStack matrixStack, String overlayText, Identifier font, float x, float y, float zOffset, float width, float height, float padding, boolean flipText) {
 		renderText(matrixStack, overlayText, font, x, y, zOffset * 2, width - padding * 2, height);
 	}
 
@@ -40,7 +40,7 @@ public final class SpecialSignStationExitRenderer extends SpecialSignRouteStatio
 		return data == null ? DEFAULT_EXIT_NAMES[(int) (System.currentTimeMillis() / 2000) % DEFAULT_EXIT_NAMES.length] : data.getName();
 	}
 
-	public static void renderText(PoseStack matrixStack, String stationExitName, ResourceLocation font, float x, float y, float zOffset, float width, float height) {
+	public static void renderText(PoseStack matrixStack, String stationExitName, Identifier font, float x, float y, float zOffset, float width, float height) {
 		final String[] stationExitNameSplit = DataHelper.getSplitStationExitName(stationExitName);
 		final float textSize = height * GuiHelper.MINECRAFT_FONT_SIZE / GuiHelper.MINECRAFT_TEXT_LINE_HEIGHT;
 		final float width1 = FontRenderHelper.render(null, stationExitNameSplit[0], FontRenderOptions.builder().maxFontSize(textSize).build()).leftFloat();

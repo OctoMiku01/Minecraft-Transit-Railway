@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
@@ -57,12 +57,12 @@ import java.util.function.BooleanSupplier;
 
 public final class RenderRails implements IGui {
 
-	private static final ResourceLocation IRON_BLOCK_TEXTURE = ResourceLocation.parse("textures/block/iron_block.png");
-	private static final ResourceLocation METAL_TEXTURE = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/metal.png");
-	private static final ResourceLocation RAIL_PREVIEW_TEXTURE = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/rail_preview.png");
-	private static final ResourceLocation RAIL_TEXTURE = ResourceLocation.parse("textures/block/rail.png");
-	private static final ResourceLocation WOOL_TEXTURE = ResourceLocation.parse("textures/block/white_wool.png");
-	private static final ResourceLocation ONE_WAY_RAIL_ARROW_TEXTURE = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/one_way_rail_arrow.png");
+	private static final Identifier IRON_BLOCK_TEXTURE = Identifier.parse("textures/block/iron_block.png");
+	private static final Identifier METAL_TEXTURE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/metal.png");
+	private static final Identifier RAIL_PREVIEW_TEXTURE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/rail_preview.png");
+	private static final Identifier RAIL_TEXTURE = Identifier.parse("textures/block/rail.png");
+	private static final Identifier WOOL_TEXTURE = Identifier.parse("textures/block/white_wool.png");
+	private static final Identifier ONE_WAY_RAIL_ARROW_TEXTURE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/one_way_rail_arrow.png");
 	private static final int INVALID_NODE_CHECK_RADIUS = 16;
 	private static final double LIGHT_REFERENCE_OFFSET = 0.1;
 	private static final int SIGNAL_DOTTED_LINE_SCALE = 4;
@@ -252,7 +252,7 @@ public final class RenderRails implements IGui {
 		renderRailStandard(clientWorld, rail, 0.065625F, renderState, railWidth, renderState.hasColor ? RAIL_PREVIEW_TEXTURE : RAIL_TEXTURE, -1, -1, -1, -1);
 	}
 
-	private static void renderRailStandard(ClientLevel clientWorld, Rail rail, float yOffset, RenderState renderState, float railWidth, ResourceLocation defaultTexture, float u1, float v1, float u2, float v2) {
+	private static void renderRailStandard(ClientLevel clientWorld, Rail rail, float yOffset, RenderState renderState, float railWidth, Identifier defaultTexture, float u1, float v1, float u2, float v2) {
 		// Render rail models
 		final boolean[] renderType = {false, false}; // render default rail, rendered something
 		for (final String style : rail.getStyles()) {
@@ -289,7 +289,7 @@ public final class RenderRails implements IGui {
 		if (renderType[0] || renderState.hasColor) {
 			final int color = renderState.hasColor ? renderState == RenderState.FLASHING ? MainRenderer.getFlashingColor(RailType.getRailColor(rail), 1) : RailType.getRailColor(rail) : ARGB_WHITE;
 
-			final ResourceLocation texture = renderType[1] && !renderType[0] ? IRON_BLOCK_TEXTURE : defaultTexture;
+			final Identifier texture = renderType[1] && !renderType[0] ? IRON_BLOCK_TEXTURE : defaultTexture;
 			renderWithinRenderDistance(rail, (blockPos, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, tiltAngle) -> {
 				final float textureOffset = (((int) (x1 + z1)) % 4) * 0.25F;
 				final int light = renderState == RenderState.FLASHING || renderState == RenderState.COLORED ? DEFAULT_LIGHT : LightTexture.pack(clientWorld.getBrightness(LightLayer.BLOCK, blockPos), clientWorld.getBrightness(LightLayer.SKY, blockPos));
@@ -355,7 +355,7 @@ public final class RenderRails implements IGui {
 				matrixStack.scale(4, 0.5F, 0.5F);
 				matrixStack.translate(-0.5, 0, -0.5);
 			});
-			MainRenderer.scheduleRender(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png"), false, QueuedRenderLayer.LIGHT, (matrixStack, vertexConsumer, offset) -> {
+			MainRenderer.scheduleRender(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png"), false, QueuedRenderLayer.LIGHT, (matrixStack, vertexConsumer, offset) -> {
 				storedMatrixTransformations.transform(matrixStack, offset);
 				RenderPSDAPGDoor.MODEL_SMALL_CUBE.render(matrixStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY);
 				matrixStack.popPose();

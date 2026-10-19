@@ -7,7 +7,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -70,7 +70,7 @@ public abstract class RenderSignalBase<T extends BlockSignalBase.BlockEntityBase
 						final boolean occupied = aspectState.occupiedColors.contains(signalColor);
 						final float x = xStart + j * 0.03125F;
 						final float width = 0.03125F / (filterColors.isEmpty() || filterColors.contains(signalColor) ? 1 : 8);
-						MainRenderer.scheduleRender(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png"), false, occupied ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.LIGHT, (matrixStack, vertexConsumer, offset) -> {
+						MainRenderer.scheduleRender(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png"), false, occupied ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.LIGHT, (matrixStack, vertexConsumer, offset) -> {
 							storedMatrixTransformationsNew.transform(matrixStack, offset);
 							IDrawing.drawTexture(
 								matrixStack, vertexConsumer,

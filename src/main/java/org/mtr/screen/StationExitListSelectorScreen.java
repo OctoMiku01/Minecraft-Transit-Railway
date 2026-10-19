@@ -1,6 +1,6 @@
 package org.mtr.screen;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.core.data.StationExit;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectCollection;
@@ -17,7 +17,7 @@ public final class StationExitListSelectorScreen extends ListSelectorScreen<Stat
 	}
 
 	@Override
-	protected void setData(ListComponent<StationExit> listComponent, ObjectCollection<StationExit> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<StationExit>>> actions) {
+	protected void setData(ListComponent<StationExit> listComponent, ObjectCollection<StationExit> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<StationExit>>> actions) {
 		ListComponent.setStationExits(listComponent, dataList, true, actions);
 	}
 }

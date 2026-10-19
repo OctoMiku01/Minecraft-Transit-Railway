@@ -10,7 +10,7 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
@@ -494,12 +494,12 @@ public final class RenderVehicles {
 
 	private static void renderConnection(
 		boolean shouldRender1, boolean shouldRender2, boolean canHaveLight, PreviousConnectionPositions previousConnectionPositions,
-		@Nullable ResourceLocation innerSideTexture,
-		@Nullable ResourceLocation innerTopTexture,
-		@Nullable ResourceLocation innerBottomTexture,
-		@Nullable ResourceLocation outerSideTexture,
-		@Nullable ResourceLocation outerTopTexture,
-		@Nullable ResourceLocation outerBottomTexture,
+		@Nullable Identifier innerSideTexture,
+		@Nullable Identifier innerTopTexture,
+		@Nullable Identifier innerBottomTexture,
+		@Nullable Identifier outerSideTexture,
+		@Nullable Identifier outerTopTexture,
+		@Nullable Identifier outerBottomTexture,
 		PositionAndRotation positionAndRotation, boolean useOffset,
 		double vehicleLength, double width, double height, double yOffset, double zOffset, double oscillationAmount, boolean isOnRoute
 	) {

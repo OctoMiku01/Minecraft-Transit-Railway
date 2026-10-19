@@ -1,6 +1,6 @@
 package org.mtr.screen;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.core.data.NameColorDataBase;
 import org.mtr.core.data.Station;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -18,7 +18,7 @@ public final class StationListSelectorScreen extends ListSelectorScreen<Station,
 	}
 
 	@Override
-	protected void setData(ListComponent<Station> listComponent, ObjectCollection<Station> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Station>>> actions) {
+	protected void setData(ListComponent<Station> listComponent, ObjectCollection<Station> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Station>>> actions) {
 		ListComponent.setAreas(listComponent, dataList, null, actions);
 	}
 }

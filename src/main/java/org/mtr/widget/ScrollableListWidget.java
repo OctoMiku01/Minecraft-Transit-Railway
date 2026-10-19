@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.client.CustomResourceLoader;
 import org.mtr.core.data.*;
@@ -203,7 +203,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		return fontRenderOptionsBuilder;
 	}
 
-	public static <T extends AreaBase<T, U>, U extends SavedRailBase<U, T>> void setAreas(ScrollableListWidget<T> scrollableListWidget, ObjectArraySet<T> areas, @Nullable TransportMode transportMode, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<T>>> actions) {
+	public static <T extends AreaBase<T, U>, U extends SavedRailBase<U, T>> void setAreas(ScrollableListWidget<T> scrollableListWidget, ObjectArraySet<T> areas, @Nullable TransportMode transportMode, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<T>>> actions) {
 		final ObjectArrayList<T> sortedAreas = new ObjectArrayList<>();
 		areas.forEach(route -> {
 			if (transportMode == null || route.isTransportMode(transportMode)) {
@@ -225,7 +225,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		scrollableListWidget.setData(dataList);
 	}
 
-	public static <T extends AreaBase<T, U>, U extends SavedRailBase<U, T>> void setSavedRails(ScrollableListWidget<U> scrollableListWidget, ObjectArraySet<U> savedRails, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<U>>> actions) {
+	public static <T extends AreaBase<T, U>, U extends SavedRailBase<U, T>> void setSavedRails(ScrollableListWidget<U> scrollableListWidget, ObjectArraySet<U> savedRails, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<U>>> actions) {
 		final ObjectArrayList<U> sortedSavedRails = new ObjectArrayList<>(savedRails);
 		Collections.sort(sortedSavedRails);
 		final ObjectArrayList<ListItem<U>> dataList = new ObjectArrayList<>();
@@ -270,7 +270,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		scrollableListWidget.setData(dataList);
 	}
 
-	public static void setRoutes(ScrollableListWidget<Route> scrollableListWidget, ObjectArraySet<Route> routes, @Nullable TransportMode transportMode, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Route>>> actions) {
+	public static void setRoutes(ScrollableListWidget<Route> scrollableListWidget, ObjectArraySet<Route> routes, @Nullable TransportMode transportMode, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Route>>> actions) {
 		final ObjectArrayList<Route> sortedRoutes = new ObjectArrayList<>();
 		routes.forEach(route -> {
 			if (transportMode == null || route.isTransportMode(transportMode)) {
@@ -308,7 +308,7 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		scrollableListWidget.setData(groupedRoutes);
 	}
 
-	public static void setRoutePlatforms(ScrollableListWidget<RoutePlatformData> scrollableListWidget, ObjectArrayList<RoutePlatformData> routePlatforms, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<RoutePlatformData>>> actions) {
+	public static void setRoutePlatforms(ScrollableListWidget<RoutePlatformData> scrollableListWidget, ObjectArrayList<RoutePlatformData> routePlatforms, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<RoutePlatformData>>> actions) {
 		final ObjectArrayList<ListItem<RoutePlatformData>> dataList = new ObjectArrayList<>();
 
 		routePlatforms.forEach(routePlatformData -> {
@@ -330,11 +330,11 @@ public final class ScrollableListWidget<T> extends ScrollablePanelWidget {
 		scrollableListWidget.setData(dataList);
 	}
 
-	public static <T, U> ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<T>> createUpButton(ObjectArrayList<U> dataList, @Nullable Runnable onSort) {
+	public static <T, U> ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<T>> createUpButton(ObjectArrayList<U> dataList, @Nullable Runnable onSort) {
 		return new ObjectObjectImmutablePair<>(GuiHelper.UP_TEXTURE_ID, (indexList, data) -> moveListItem(dataList, indexList, -1, onSort));
 	}
 
-	public static <T, U> ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<T>> createDownButton(ObjectArrayList<U> dataList, @Nullable Runnable onSort) {
+	public static <T, U> ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<T>> createDownButton(ObjectArrayList<U> dataList, @Nullable Runnable onSort) {
 		return new ObjectObjectImmutablePair<>(GuiHelper.DOWN_TEXTURE_ID, (indexList, data) -> moveListItem(dataList, indexList, 1, onSort));
 	}
 

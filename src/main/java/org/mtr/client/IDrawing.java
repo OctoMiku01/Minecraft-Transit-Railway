@@ -15,7 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -44,7 +44,7 @@ public interface IDrawing {
 	}
 
 	static void drawStringWithFont(PoseStack matrixStack, MultiBufferSource vertexConsumers, String text, IGui.HorizontalAlignment horizontalAlignment, IGui.VerticalAlignment verticalAlignment, IGui.HorizontalAlignment xAlignment, float x, float y, float maxWidth, float maxHeight, float scale, int textColorCjk, int textColor, float fontSizeRatio, boolean shadow, int light, @Nullable DrawingCallback drawingCallback) {
-		final Style style = Config.getClient().getUseMTRFont() ? Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "mtr")) : Style.EMPTY;
+		final Style style = Config.getClient().getUseMTRFont() ? Style.EMPTY.withFont(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "mtr")) : Style.EMPTY;
 
 		while (text.contains("||")) {
 			text = text.replace("||", "|");
@@ -218,7 +218,7 @@ public interface IDrawing {
 	}
 
 	static MutableComponent withMTRFont(MutableComponent text) {
-		return Config.getClient().getUseMTRFont() ? text.setStyle(Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "mtr"))) : text;
+		return Config.getClient().getUseMTRFont() ? text.setStyle(Style.EMPTY.withFont(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "mtr"))) : text;
 	}
 
 	static void changeShaderColor(Color color, Runnable callback) {

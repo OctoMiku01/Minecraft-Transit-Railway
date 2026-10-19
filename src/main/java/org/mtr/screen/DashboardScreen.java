@@ -5,12 +5,12 @@ import gg.essential.elementa.components.UIContainer;
 import gg.essential.elementa.components.UIWrappedText;
 import gg.essential.elementa.constraints.*;
 import gg.essential.universal.UMinecraft;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.MTRClient;
@@ -282,7 +282,7 @@ public final class DashboardScreen extends WindowBase {
 		switch (currentTab) {
 			case STATIONS -> {
 				if (editingArea == null) {
-					final ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Station>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, station) -> mapComponent.find(station)));
+					final ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Station>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, station) -> mapComponent.find(station)));
 					if (hasPermission) {
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.SELECT_TEXTURE_ID, (indexList, station) -> startEditingArea(station)));
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.EDIT_TEXTURE_ID, (indexList, station) -> UMinecraft.setCurrentScreenObj(new StationScreen(station, this))));
@@ -295,14 +295,14 @@ public final class DashboardScreen extends WindowBase {
 			}
 			case ROUTES -> {
 				if (editingRoute == null) {
-					final ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Route>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.EDIT_TEXTURE_ID, (indexList, route) -> UMinecraft.setCurrentScreenObj(new RouteScreen(route, this))));
+					final ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Route>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.EDIT_TEXTURE_ID, (indexList, route) -> UMinecraft.setCurrentScreenObj(new RouteScreen(route, this))));
 					if (hasPermission) {
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.SELECT_TEXTURE_ID, (indexList, route) -> startEditingRoute(route)));
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.DELETE_TEXTURE_ID, (indexList, route) -> onDeleteData(route, new DeleteDataRequest().addRouteId(route.getId()))));
 					}
 					ListComponent.setRoutes(routesListComponent, MinecraftClientData.getDashboardInstance().routes, transportMode, false, actions);
 				} else {
-					final ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<RoutePlatformData>>> actions = hasPermission ? ObjectArrayList.of(
+					final ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<RoutePlatformData>>> actions = hasPermission ? ObjectArrayList.of(
 						new ObjectObjectImmutablePair<>(GuiHelper.EDIT_TEXTURE_ID, (indexList, routePlatformData) -> startEditingRouteDestination(indexList.getFirst())),
 						ListComponent.createUpButton(editingRoute.getRoutePlatforms(), null),
 						ListComponent.createDownButton(editingRoute.getRoutePlatforms(), null),
@@ -313,7 +313,7 @@ public final class DashboardScreen extends WindowBase {
 			}
 			case DEPOTS -> {
 				if (editingArea == null) {
-					final ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Depot>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, depot) -> mapComponent.find(depot)));
+					final ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Depot>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, depot) -> mapComponent.find(depot)));
 					if (hasPermission) {
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.SELECT_TEXTURE_ID, (indexList, depot) -> startEditingArea(depot)));
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.EDIT_TEXTURE_ID, (indexList, depot) -> UMinecraft.setCurrentScreenObj(new DepotScreen(depot, this))));
@@ -326,7 +326,7 @@ public final class DashboardScreen extends WindowBase {
 			}
 			case HOMES -> {
 				if (editingArea == null) {
-					final ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Home>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, home) -> mapComponent.find(home)));
+					final ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Home>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, home) -> mapComponent.find(home)));
 					if (hasPermission) {
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.SELECT_TEXTURE_ID, (indexList, home) -> startEditingArea(home)));
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.EDIT_TEXTURE_ID, (indexList, home) -> UMinecraft.setCurrentScreenObj(new HomeScreen(home, this))));
@@ -337,7 +337,7 @@ public final class DashboardScreen extends WindowBase {
 			}
 			case LANDMARKS -> {
 				if (editingArea == null) {
-					final ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Landmark>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, landmark) -> mapComponent.find(landmark)));
+					final ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Landmark>>> actions = ObjectArrayList.of(new ObjectObjectImmutablePair<>(GuiHelper.FIND_TEXTURE_ID, (indexList, landmark) -> mapComponent.find(landmark)));
 					if (hasPermission) {
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.SELECT_TEXTURE_ID, (indexList, landmark) -> startEditingArea(landmark)));
 						actions.add(new ObjectObjectImmutablePair<>(GuiHelper.EDIT_TEXTURE_ID, (indexList, landmark) -> UMinecraft.setCurrentScreenObj(new LandmarkScreen(landmark, this))));

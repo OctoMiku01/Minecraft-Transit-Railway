@@ -1,6 +1,6 @@
 package org.mtr.sound;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.IOUtils;
 import org.mtr.MTR;
 import org.mtr.resource.ResourceManagerHelper;
@@ -16,12 +16,12 @@ public class BveVehicleSoundConfig {
 	public final BveMotorDataBase motorData;
 
 	public BveVehicleSoundConfig(String baseName) {
-		final ResourceLocation baseLocation = baseName.contains(":") ? ResourceLocation.parse(baseName) : ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, baseName);
+		final Identifier baseLocation = baseName.contains(":") ? Identifier.parse(baseName) : Identifier.fromNamespaceAndPath(MTR.MOD_ID, baseName);
 
 		this.baseName = baseLocation.toString();
 		final String configBaseName = baseLocation.getNamespace() + ":sounds/" + baseLocation.getPath();
 		audioBaseName = baseLocation.getNamespace() + ":" + baseLocation.getPath() + "_";
-		config = new BveConfigFile(readResource(ResourceLocation.parse(configBaseName + "/sound.cfg")), this);
+		config = new BveConfigFile(readResource(Identifier.parse(configBaseName + "/sound.cfg")), this);
 		if (config.motorNoiseDataType == 4) {
 			motorData = new BveMotorData4(configBaseName);
 		} else {
@@ -29,7 +29,7 @@ public class BveVehicleSoundConfig {
 		}
 	}
 
-	public static String readResource(ResourceLocation location) {
+	public static String readResource(Identifier location) {
 		final String[] result = {""};
 		ResourceManagerHelper.readResource(location, inputStream -> {
 			try {

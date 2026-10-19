@@ -1,7 +1,7 @@
 package org.mtr.model;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 import org.mtr.libraries.it.unimi.dsi.fastutil.ints.IntIntImmutablePair;
@@ -97,13 +97,13 @@ public abstract class ModelLoaderBase {
 	@Nullable
 	private Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> builtModel2;
 
-	protected final ResourceLocation defaultTexture;
+	protected final Identifier defaultTexture;
 	private final VertexFormat.Mode drawMode;
 
 	private final ConcurrentHashMap<String, NewOptimizedModelGroup> nameToNewOptimizedModelGroup = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<String, ObjectArrayList<ObjectObjectImmutablePair<StoredMatrixTransformations, IntIntImmutablePair>>> nameToRawModelDisplayParts = new ConcurrentHashMap<>();
 
-	protected ModelLoaderBase(ResourceLocation defaultTexture, VertexFormat.Mode drawMode) {
+	protected ModelLoaderBase(Identifier defaultTexture, VertexFormat.Mode drawMode) {
 		this.defaultTexture = defaultTexture;
 		this.drawMode = drawMode;
 	}

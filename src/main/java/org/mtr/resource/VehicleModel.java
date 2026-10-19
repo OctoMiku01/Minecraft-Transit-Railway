@@ -1,6 +1,6 @@
 package org.mtr.resource;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -168,7 +168,7 @@ public final class VehicleModel extends VehicleModelSchema {
 	 * see {@code docs/MIGRATIONS.md} §6 for the consolidation plan.</p>
 	 */
 	public static ModelLoaderBase getModelLoaderBase(String modelResource, String textureResource, ResourceProvider resourceProvider, boolean flipTextureV) {
-		final ResourceLocation texture = CustomResourceTools.formatIdentifierWithDefault(textureResource, "png");
+		final Identifier texture = CustomResourceTools.formatIdentifierWithDefault(textureResource, "png");
 		final ModelLoaderBase modelLoaderBase;
 
 		if (modelResource.endsWith(".bbmodel")) {
@@ -185,7 +185,7 @@ public final class VehicleModel extends VehicleModelSchema {
 			objModelLoader.loadModel(
 				resourceProvider.get(CustomResourceTools.formatIdentifierWithDefault(modelResource, "obj")),
 				mtlString -> resourceProvider.get(CustomResourceTools.getResourceFromSamePath(modelResource, mtlString, "mtl")),
-				textureString -> StringUtils.isEmpty(textureString) ? ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png") : StringUtils.equals(textureString, "default.png") ? texture : CustomResourceTools.getResourceFromSamePath(modelResource, textureString, "png"),
+				textureString -> StringUtils.isEmpty(textureString) ? Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png") : StringUtils.equals(textureString, "default.png") ? texture : CustomResourceTools.getResourceFromSamePath(modelResource, textureString, "png"),
 				true, flipTextureV
 			);
 			// TODO transform object if needed

@@ -5,7 +5,7 @@ import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.tool.Drawing;
 import org.mtr.tool.GuiHelper;
@@ -20,14 +20,14 @@ public final class BetterButtonWidget extends ClickableWidgetBase {
 	private int textColor = GuiHelper.WHITE_COLOR;
 
 	@Nullable
-	private final ResourceLocation icon;
+	private final Identifier icon;
 	@Nullable
 	private final String text;
 	private final int textWidth;
 	private final int fixedWidth;
 	private final Runnable onPress;
 
-	public BetterButtonWidget(@Nullable ResourceLocation icon, @Nullable String text, int width, Runnable onPress) {
+	public BetterButtonWidget(@Nullable Identifier icon, @Nullable String text, int width, Runnable onPress) {
 		this.icon = icon;
 		this.text = text;
 		textWidth = text == null ? 0 : Minecraft.getInstance().font.width(text);

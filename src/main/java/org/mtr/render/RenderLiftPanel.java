@@ -6,7 +6,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,7 +37,7 @@ public class RenderLiftPanel<T extends BlockLiftPanelBase.BlockEntityBase> exten
 	private final boolean isOdd;
 	private final boolean isFlat;
 
-	private static final ResourceLocation ARROW_TEXTURE = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/lift_arrow.png");
+	private static final Identifier ARROW_TEXTURE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/lift_arrow.png");
 	private static final float ARROW_SPEED = 0.04F;
 	private static final int SLIDE_TIME = 5;
 	private static final int SLIDE_INTERVAL = 50;

@@ -1,6 +1,6 @@
 package org.mtr.resource;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -37,7 +37,7 @@ public interface StoredModelResourceBase {
 	default Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> load(String modelResource, String textureResource, boolean flipTextureV, double modelYOffset, ResourceProvider resourceProvider) {
 		final boolean isBlockbench = modelResource.endsWith(".bbmodel");
 		final boolean isObj = modelResource.endsWith(".obj");
-		final ResourceLocation defaultTexture = CustomResourceTools.formatIdentifierWithDefault(textureResource, "png");
+		final Identifier defaultTexture = CustomResourceTools.formatIdentifierWithDefault(textureResource, "png");
 		final Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> models;
 
 		if (isBlockbench) {
@@ -50,7 +50,7 @@ public interface StoredModelResourceBase {
 			objModelLoader.loadModel(
 				resourceProvider.get(CustomResourceTools.formatIdentifierWithDefault(modelResource, "obj")),
 				mtlString -> resourceProvider.get(CustomResourceTools.getResourceFromSamePath(modelResource, mtlString, "mtl")),
-				textureString -> StringUtils.isEmpty(textureString) ? ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png") : (StringUtils.equals(textureString, "default.png") ? defaultTexture : CustomResourceTools.getResourceFromSamePath(modelResource, textureString, "png")),
+				textureString -> StringUtils.isEmpty(textureString) ? Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png") : (StringUtils.equals(textureString, "default.png") ? defaultTexture : CustomResourceTools.getResourceFromSamePath(modelResource, textureString, "png")),
 				true, flipTextureV
 			);
 			// TODO transform object if needed

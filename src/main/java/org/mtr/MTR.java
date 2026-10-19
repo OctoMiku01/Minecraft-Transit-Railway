@@ -9,11 +9,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.apache.commons.io.FileUtils;
@@ -82,8 +82,8 @@ public final class MTR {
 	private static Consumer<Webserver> webserverSetup;
 
 	public static final String MOD_ID = "mtr";
-	public static final CustomPacketPayload.Type<CustomPacketS2C> PACKET_IDENTIFIER_S2C = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(MOD_ID, "packet_s2c"));
-	public static final CustomPacketPayload.Type<CustomPacketC2S> PACKET_IDENTIFIER_C2S = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(MOD_ID, "packet_c2s"));
+	public static final CustomPacketPayload.Type<CustomPacketS2C> PACKET_IDENTIFIER_S2C = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(MOD_ID, "packet_s2c"));
+	public static final CustomPacketPayload.Type<CustomPacketC2S> PACKET_IDENTIFIER_C2S = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(MOD_ID, "packet_c2s"));
 	public static final Logger LOGGER = LogManager.getLogger("MinecraftTransitRailway");
 	public static final int SECONDS_PER_MC_HOUR = 50;
 	public static final int AUTOSAVE_INTERVAL = 30000;
@@ -325,7 +325,7 @@ public final class MTR {
 	}
 
 	public static String getWorldId(Level world) {
-		final ResourceLocation identifier = world.dimension().location();
+		final Identifier identifier = world.dimension().location();
 		return String.format("%s/%s", identifier.getNamespace(), identifier.getPath());
 	}
 

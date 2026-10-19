@@ -1,6 +1,6 @@
 package org.mtr.resource;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -280,7 +280,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema {
 		}
 
 		if (color != 0) {
-			MainRenderer.scheduleRender(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, String.format("textures/block/%s.png", displayType == DisplayType.ROUTE_COLOR ? "white" : "sign/circle")), true, QueuedRenderLayer.INTERIOR, (matrixStack, vertexConsumer, offset) -> {
+			MainRenderer.scheduleRender(Identifier.fromNamespaceAndPath(MTR.MOD_ID, String.format("textures/block/%s.png", displayType == DisplayType.ROUTE_COLOR ? "white" : "sign/circle")), true, QueuedRenderLayer.INTERIOR, (matrixStack, vertexConsumer, offset) -> {
 				storedMatrixTransformations.transform(matrixStack, offset);
 				matrixStack.translate(modelDisplayPart.x, modelDisplayPart.y, modelDisplayPart.z);
 				Drawing.rotateYDegrees(matrixStack, modelDisplayPart.flipped ? 180 : 0);
@@ -306,7 +306,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema {
 
 		if (!text.isEmpty()) {
 			final FontRenderOptions.Alignment horizontalAlignment = getHorizontalAlignment(false);
-			MainRenderer.scheduleRender(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/overlay/seven_segment.png"), true, QueuedRenderLayer.LIGHT_2, (matrixStack, vertexConsumer, offset) -> {
+			MainRenderer.scheduleRender(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/overlay/seven_segment.png"), true, QueuedRenderLayer.LIGHT_2, (matrixStack, vertexConsumer, offset) -> {
 				storedMatrixTransformations.transform(matrixStack, offset);
 				matrixStack.translate(modelDisplayPart.x, modelDisplayPart.y, modelDisplayPart.z);
 				Drawing.rotateYDegrees(matrixStack, modelDisplayPart.flipped ? 180 : 0);

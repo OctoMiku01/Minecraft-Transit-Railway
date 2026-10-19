@@ -1,6 +1,6 @@
 package org.mtr.screen;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.core.data.NameColorDataBase;
 import org.mtr.core.data.Platform;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -22,7 +22,7 @@ public final class PlatformListSelectorScreen extends ListSelectorScreen<Platfor
 	}
 
 	@Override
-	protected void setData(ListComponent<Platform> listComponent, ObjectCollection<Platform> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Platform>>> actions) {
+	protected void setData(ListComponent<Platform> listComponent, ObjectCollection<Platform> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Platform>>> actions) {
 		ListComponent.setSavedRails(listComponent, dataList, actions);
 	}
 }

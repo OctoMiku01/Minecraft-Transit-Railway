@@ -3,7 +3,7 @@ package org.mtr.model;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.Nullable;
 
@@ -32,7 +32,7 @@ import net.minecraft.client.renderer.CompiledShaderProgram;
  */
 public final class NewOptimizedModel {
 
-	public final ResourceLocation texture;
+	public final Identifier texture;
 	@Nullable
 	private final VertexBuffer vertexBuffer;
 	private final VertexFormat.Mode drawMode;
@@ -69,7 +69,7 @@ public final class NewOptimizedModel {
 	 * @param callback the vertex-emitter callback invoked exactly once to populate the
 	 *                 buffer, or {@code null} to skip buffer creation entirely
 	 */
-	public NewOptimizedModel(ResourceLocation texture, VertexFormat.Mode drawMode, @Nullable Consumer<VertexConsumer> callback) {
+	public NewOptimizedModel(Identifier texture, VertexFormat.Mode drawMode, @Nullable Consumer<VertexConsumer> callback) {
 		this.vertexBuffer = callback == null ? null : createVertexBuffer(drawMode, DefaultVertexFormat.NEW_ENTITY, callback);
 		this.texture = texture;
 		this.drawMode = drawMode;

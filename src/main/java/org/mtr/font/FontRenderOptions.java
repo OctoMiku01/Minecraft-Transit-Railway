@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.data.IGui;
 import org.mtr.tool.GuiHelper;
@@ -22,7 +22,7 @@ public final class FontRenderOptions {
 	 */
 	@Builder.Default
 	@Nullable
-	private ResourceLocation font = null;
+	private Identifier font = null;
 	/**
 	 * Colour of the text
 	 */

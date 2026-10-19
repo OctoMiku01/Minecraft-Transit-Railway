@@ -3,7 +3,7 @@ package org.mtr.client;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -66,15 +66,15 @@ public class DynamicTextureCache implements IGui {
 	private final Object2ObjectLinkedOpenHashMap<String, DynamicResource> dynamicResources = new Object2ObjectLinkedOpenHashMap<>();
 	private final ObjectOpenHashSet<String> generatingResources = new ObjectOpenHashSet<>();
 	private final MessageQueue<Runnable> resourceRegistryQueue = new MessageQueue<>();
-	private final Object2LongArrayMap<ResourceLocation> deletedResources = new Object2LongArrayMap<>();
+	private final Object2LongArrayMap<Identifier> deletedResources = new Object2LongArrayMap<>();
 
 	public static DynamicTextureCache instance = new DynamicTextureCache();
 
 	public static final float LINE_HEIGHT_MULTIPLIER = 1.25F;
 	private static final int COOLDOWN_TIME = 10000; // Images not requested within the last 10 seconds will be unregistered
-	private static final ResourceLocation DEFAULT_BLACK_RESOURCE = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/black.png");
-	private static final ResourceLocation DEFAULT_WHITE_RESOURCE = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png");
-	private static final ResourceLocation DEFAULT_TRANSPARENT_RESOURCE = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/transparent.png");
+	private static final Identifier DEFAULT_BLACK_RESOURCE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/black.png");
+	private static final Identifier DEFAULT_WHITE_RESOURCE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/white.png");
+	private static final Identifier DEFAULT_TRANSPARENT_RESOURCE = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/transparent.png");
 	private static final int MAX_IMAGE_SIZE = 2048;
 
 	/**
@@ -114,7 +114,7 @@ public class DynamicTextureCache implements IGui {
 		});
 		keysToRemove.forEach(dynamicResources::remove);
 
-		final ObjectArrayList<ResourceLocation> deletedResourcesToRemove = new ObjectArrayList<>();
+		final ObjectArrayList<Identifier> deletedResourcesToRemove = new ObjectArrayList<>();
 		deletedResources.forEach((identifier, expiryTime) -> {
 			if (expiryTime < currentTimeMillis) {
 				Minecraft.getInstance().getTextureManager().release(identifier);
@@ -302,7 +302,7 @@ public class DynamicTextureCache implements IGui {
 
 		MainRenderer.WORKER_THREAD.scheduleDynamicTextures(() -> {
 			while (font == null) {
-				ResourceManagerHelper.readResource(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "font/noto-sans-semibold.ttf"), inputStream -> {
+				ResourceManagerHelper.readResource(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "font/noto-sans-semibold.ttf"), inputStream -> {
 					try {
 						font = Font.createFont(Font.TRUETYPE_FONT, inputStream);
 					} catch (Exception e) {
@@ -312,7 +312,7 @@ public class DynamicTextureCache implements IGui {
 			}
 
 			while (fontCjk == null) {
-				ResourceManagerHelper.readResource(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "font/noto-serif-tc-semibold.ttf"), inputStream -> {
+				ResourceManagerHelper.readResource(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "font/noto-serif-tc-semibold.ttf"), inputStream -> {
 					try {
 						fontCjk = Font.createFont(Font.TRUETYPE_FONT, inputStream);
 					} catch (Exception e) {
@@ -346,7 +346,7 @@ public class DynamicTextureCache implements IGui {
 					}
 
 					final DynamicTexture nativeImageBackedTexture = new DynamicTexture(newNativeImage);
-					final ResourceLocation identifier = ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "id_" + MTR.randomString());
+					final Identifier identifier = Identifier.fromNamespaceAndPath(MTR.MOD_ID, "id_" + MTR.randomString());
 					Minecraft.getInstance().getTextureManager().register(identifier, nativeImageBackedTexture);
 					dynamicResourceNew = new DynamicResource(identifier, nativeImageBackedTexture);
 					dynamicResources.put(key, dynamicResourceNew);
@@ -370,7 +370,7 @@ public class DynamicTextureCache implements IGui {
 	/**
 	 * Generated-texture handle returned by every {@code getXxx(...)} accessor.
 	 *
-	 * <p>Holds the GL {@link ResourceLocation} to bind plus the rendered pixel dimensions.
+	 * <p>Holds the GL {@link Identifier} to bind plus the rendered pixel dimensions.
 	 * Instances are short-lived: a fresh one is allocated each time a texture is
 	 * regenerated, and {@link #remove()} cancels any in-flight scheduled renders and
 	 * evicts cached render-layer entries.</p>
@@ -381,9 +381,9 @@ public class DynamicTextureCache implements IGui {
 		private boolean needsRefresh;
 		public final int width;
 		public final int height;
-		public final ResourceLocation identifier;
+		public final Identifier identifier;
 
-		private DynamicResource(ResourceLocation identifier, @Nullable DynamicTexture nativeImageBackedTexture) {
+		private DynamicResource(Identifier identifier, @Nullable DynamicTexture nativeImageBackedTexture) {
 			this.identifier = identifier;
 			if (nativeImageBackedTexture != null) {
 				final NativeImage nativeImage = nativeImageBackedTexture.getPixels();
@@ -413,7 +413,7 @@ public class DynamicTextureCache implements IGui {
 
 		private final DynamicResource dynamicResource;
 
-		DefaultRenderingColor(ResourceLocation identifier) {
+		DefaultRenderingColor(Identifier identifier) {
 			dynamicResource = new DynamicResource(identifier, null);
 		}
 	}

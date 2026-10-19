@@ -1,6 +1,6 @@
 package org.mtr.resource;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.core.serializer.SerializedDataBase;
@@ -12,25 +12,25 @@ import java.util.stream.Collectors;
 public interface CustomResourceTools extends SerializedDataBase {
 
 	@Nullable
-	static ResourceLocation formatIdentifier(String identifierString, String extension) {
+	static Identifier formatIdentifier(String identifierString, String extension) {
 		final String newIdentifierString = formatIdentifierString(identifierString);
 		if (newIdentifierString.isEmpty()) {
 			return null;
 		} else {
-			return ResourceLocation.parse(String.format("%s.%s", newIdentifierString.split("\\.")[0], extension));
+			return Identifier.parse(String.format("%s.%s", newIdentifierString.split("\\.")[0], extension));
 		}
 	}
 
-	static ResourceLocation formatIdentifierWithDefault(String identifierString, String extension) {
-		final ResourceLocation identifier = formatIdentifier(identifierString, extension);
-		return identifier == null ? ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/transparent.png") : identifier;
+	static Identifier formatIdentifierWithDefault(String identifierString, String extension) {
+		final Identifier identifier = formatIdentifier(identifierString, extension);
+		return identifier == null ? Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/transparent.png") : identifier;
 	}
 
 	static String formatIdentifierString(String text) {
 		return Arrays.stream(text.toLowerCase(Locale.ENGLISH).split(":")).map(textPart -> textPart.replaceAll("[^a-z0-9/._-]", "_")).collect(Collectors.joining(":"));
 	}
 
-	static ResourceLocation getResourceFromSamePath(String basePath, String resource, String extension) {
+	static Identifier getResourceFromSamePath(String basePath, String resource, String extension) {
 		if (resource.contains(":")) { // Assume it is already an identifier
 			return formatIdentifierWithDefault(resource, extension);
 		} else {

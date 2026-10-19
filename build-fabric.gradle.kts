@@ -4,8 +4,7 @@ import org.mtr.core.Generator
 import org.mtr.core.WebserverSetup
 
 plugins {
-	id("net.fabricmc.fabric-loom-remap")
-	id("dev.kikugie.fletching-table.fabric") version "+"
+	id("net.fabricmc.fabric-loom")
 	id("io.freefair.lombok") version "+"
 	id("com.gradleup.shadow") version "+"
 }
@@ -28,10 +27,7 @@ repositories {
 }
 
 val buildTools = BuildTools(sc.current.version, "fabric", project.property("mod.version").toString(), project.rootDir)
-val requiredJava = when {
-	sc.current.parsed < "26.0" -> JavaVersion.VERSION_21
-	else -> JavaVersion.VERSION_26
-}
+val requiredJava = JavaVersion.VERSION_25
 
 configurations {
 	create("shadowBundle") {
@@ -46,11 +42,6 @@ java {
 	sourceCompatibility = requiredJava
 }
 
-fun DependencyHandlerScope.modImplementationAndInclude(notation: Any) {
-	modImplementation(notation)
-	include(notation)
-}
-
 fun DependencyHandlerScope.implementationAndInclude(notation: Any) {
 	implementation(notation)
 	include(notation)
@@ -63,12 +54,11 @@ fun DependencyHandlerScope.implementationAndShadow(notation: Any) {
 
 dependencies {
 	minecraft("com.mojang:minecraft:${sc.current.version}")
-	mappings(loom.officialMojangMappings())
 
-	modImplementation("net.fabricmc:fabric-loader:${property("dependency.fabric_loader")}")
-	modImplementation("net.fabricmc.fabric-api:fabric-api:${property("dependency.fabric_api")}")
-	modImplementation(fletchingTable.modrinth("modmenu", sc.current.version))
-	modImplementationAndInclude("gg.essential:universalcraft-${property("dependency.universal_craft_minecraft")}-fabric:${property("dependency.universal_craft")}")
+	implementation("net.fabricmc:fabric-loader:${property("dependency.fabric_loader")}")
+	implementation("net.fabricmc.fabric-api:fabric-api:${property("dependency.fabric_api")}")
+	implementation("maven.modrinth:modmenu:${property("dependency.modmenu")}")
+	implementationAndInclude("gg.essential:universalcraft-${property("dependency.universal_craft_minecraft")}-fabric:${property("dependency.universal_craft")}")
 
 	implementationAndShadow("org.mtr:transport-simulation-core:+")
 	implementationAndShadow("com.logisticscraft:occlusionculling:+")
@@ -120,17 +110,14 @@ tasks {
 		relocate("de.javagl", "org.mtr.libraries.de.javagl")
 	}
 
-	remapJar {
-		inputFile.set(shadowJar.get().archiveFile)
-	}
-
 	withType<JavaCompile>().configureEach {
 		options.compilerArgs.addAll(
 			listOf(
 				"-Xlint:all",
 				"-Xlint:-serial",     // No Java serialization
 				"-Xlint:-processing", // Lombok annotation processor noise
-				"-Xlint:-this-escape" // Safe: schema constructor pattern
+				"-Xlint:-this-escape", // Safe: schema constructor pattern
+				"-Xmaxerrs", "100000" // TODO remove after the 26.2 port
 			)
 		)
 	}
@@ -139,7 +126,7 @@ tasks {
 		description = "Builds the mod and collects the JAR and sources JAR into the build/libs directory with versioned naming."
 		group = "build"
 		outputs.upToDateWhen { false }
-		from(remapJar.map { it.archiveFile }, remapSourcesJar.map { it.archiveFile })
+		from(shadowJar.map { it.archiveFile }, named<Jar>("sourcesJar").map { it.archiveFile })
 		into(rootProject.layout.buildDirectory.file("release"))
 		rename("${project.property("mod.id")}-([^-]+)-([^-]+)-([a-z]+)(-sources|)\\.jar", "${project.property("mod.id").toString().uppercase()}-$3-$1-$2$4.jar")
 		dependsOn("build")

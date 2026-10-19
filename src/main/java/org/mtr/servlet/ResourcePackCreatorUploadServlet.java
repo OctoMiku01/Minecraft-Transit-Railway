@@ -1,9 +1,9 @@
 package org.mtr.servlet;
 
 import gg.essential.universal.UMinecraft;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.IOUtils;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -100,7 +100,7 @@ public final class ResourcePackCreatorUploadServlet extends AbstractResourcePack
 		final Minecraft minecraftClient = Minecraft.getInstance();
 		minecraftClient.execute(() -> texturesToDestroy.forEach(texture -> {
 			try {
-				minecraftClient.getTextureManager().release(ResourceLocation.parse(texture));
+				minecraftClient.getTextureManager().release(Identifier.parse(texture));
 			} catch (Exception e) {
 				MTR.LOGGER.error("", e);
 			}
@@ -223,7 +223,7 @@ public final class ResourcePackCreatorUploadServlet extends AbstractResourcePack
 					packObject.add("pack", packInfoObject);
 					IOUtils.write(Utilities.prettyPrint(packObject), zipOutputStream, StandardCharsets.UTF_8);
 
-					ResourceManagerHelper.readResource(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/sign/logo_grayscale.png"), inputStream -> {
+					ResourceManagerHelper.readResource(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/sign/logo_grayscale.png"), inputStream -> {
 						try {
 							zipOutputStream.putNextEntry(new ZipEntry("pack.png"));
 							IOUtils.write(IOUtils.toByteArray(inputStream), zipOutputStream);

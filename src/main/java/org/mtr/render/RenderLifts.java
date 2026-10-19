@@ -7,7 +7,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -68,7 +68,7 @@ public class RenderLifts implements IGui {
 				lift.iterateFloors(liftFloor -> {
 					final Position position = liftFloor.getPosition();
 					final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations(position.getX(), position.getY(), position.getZ());
-					MainRenderer.scheduleRender(ResourceLocation.parse("textures/block/redstone_block.png"), false, QueuedRenderLayer.LIGHT, (matrixStack, vertexConsumer, offset) -> {
+					MainRenderer.scheduleRender(Identifier.parse("textures/block/redstone_block.png"), false, QueuedRenderLayer.LIGHT, (matrixStack, vertexConsumer, offset) -> {
 						storedMatrixTransformations.transform(matrixStack, offset);
 						RenderPSDAPGDoor.MODEL_SMALL_CUBE.render(matrixStack, vertexConsumer, DEFAULT_LIGHT, OverlayTexture.NO_OVERLAY);
 						matrixStack.popPose();
@@ -239,7 +239,7 @@ public class RenderLifts implements IGui {
 		});
 
 		if (liftDirection != LiftDirection.NONE) {
-			MainRenderer.scheduleRender(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/sign/lift_arrow.png"), false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (matrixStack, vertexConsumer, offset) -> {
+			MainRenderer.scheduleRender(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/block/sign/lift_arrow.png"), false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (matrixStack, vertexConsumer, offset) -> {
 				storedMatrixTransformations.transform(matrixStack, offset);
 				IDrawing.drawTexture(matrixStack, vertexConsumer, -width / 6, 0, width / 3, width / 3, 0, liftDirection == LiftDirection.UP ? 0 : 1, 1, liftDirection == LiftDirection.UP ? 1 : 0, Direction.UP, LIFT_DISPLAY_COLOR, DEFAULT_LIGHT);
 				matrixStack.popPose();

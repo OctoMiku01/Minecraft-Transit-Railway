@@ -1,6 +1,6 @@
 package org.mtr.legacy.resource;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.client.CustomResourceLoader;
@@ -88,7 +88,7 @@ public final class LegacyVehicleResource extends VehicleResourceSchema {
 			baseObject.addProperty("legacyDoorCloseSoundTime", door_close_sound_time == 0 ? 0.5 : door_close_sound_time); // MTR 3.x.x defaults to 0.5 s if not specified
 
 			if (baseVehicleResource[0] == null) {
-				final JsonObject propertiesObject = model_properties.isEmpty() ? null : Utilities.parseJson(resourceProvider.get(ResourceLocation.parse(model_properties)));
+				final JsonObject propertiesObject = model_properties.isEmpty() ? null : Utilities.parseJson(resourceProvider.get(Identifier.parse(model_properties)));
 				if (propertiesObject == null) {
 					continue;
 				}

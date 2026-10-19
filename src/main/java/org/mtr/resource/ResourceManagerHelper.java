@@ -2,7 +2,7 @@ package org.mtr.resource;
 
 import net.minecraft.DetectedVersion;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
@@ -32,7 +32,7 @@ public final class ResourceManagerHelper {
 	 * resource's input stream. If the resource is absent or the read throws, the consumer
 	 * is not invoked and the failure is logged.
 	 */
-	public static void readResource(ResourceLocation identifier, Consumer<InputStream> consumer) {
+	public static void readResource(Identifier identifier, Consumer<InputStream> consumer) {
 		try {
 			final Optional<Resource> optionalResource = Minecraft.getInstance().getResourceManager().getResource(identifier);
 			optionalResource.ifPresent(resource -> readResource(resource, consumer));
@@ -46,11 +46,11 @@ public final class ResourceManagerHelper {
 	 * empty string if the resource is missing or decoding fails.
 	 *
 	 * <p><b>Performance:</b> prefer
-	 * {@link #readResource(ResourceLocation, Consumer)} when the caller already plans to feed the
+	 * {@link #readResource(Identifier, Consumer)} when the caller already plans to feed the
 	 * stream into another parser — it avoids the intermediate {@link String} allocation
 	 * (see {@code docs/PERFORMANCE.md} §1.1).</p>
 	 */
-	public static String readResource(ResourceLocation identifier) {
+	public static String readResource(Identifier identifier) {
 		final String[] string = {""};
 		readResource(identifier, inputStream -> {
 			try {
@@ -67,7 +67,7 @@ public final class ResourceManagerHelper {
 	 * invoking the consumer once per pack. Used to merge data from packs that all ship the
 	 * same well-known manifest path (e.g. {@code mtr:mtr_custom_resources.json}).
 	 */
-	public static void readAllResources(ResourceLocation identifier, Consumer<InputStream> consumer) {
+	public static void readAllResources(Identifier identifier, Consumer<InputStream> consumer) {
 		try {
 			Minecraft.getInstance().getResourceManager().getResourceStack(identifier).forEach(resource -> readResource(resource, consumer));
 		} catch (Exception e) {
@@ -80,7 +80,7 @@ public final class ResourceManagerHelper {
 	 * The consumer receives each file's identifier (so the caller can recover its
 	 * namespace / leaf name) and the open input stream.
 	 */
-	public static void readDirectory(String path, BiConsumer<ResourceLocation, InputStream> consumer) {
+	public static void readDirectory(String path, BiConsumer<Identifier, InputStream> consumer) {
 		try {
 			Minecraft.getInstance().getResourceManager()
 				.listResourceStacks(path, identifier -> true)

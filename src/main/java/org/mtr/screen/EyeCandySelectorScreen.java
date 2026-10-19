@@ -1,6 +1,6 @@
 package org.mtr.screen;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectCollection;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
@@ -17,7 +17,7 @@ public final class EyeCandySelectorScreen extends ListSelectorScreen<ObjectResou
 	}
 
 	@Override
-	protected void setData(ListComponent<ObjectResource> listComponent, ObjectCollection<ObjectResource> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<ObjectResource>>> actions) {
+	protected void setData(ListComponent<ObjectResource> listComponent, ObjectCollection<ObjectResource> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<ObjectResource>>> actions) {
 		ListComponent.setGeneric(listComponent, dataList, ObjectResource::getName, ObjectResource::getColor, actions);
 	}
 }

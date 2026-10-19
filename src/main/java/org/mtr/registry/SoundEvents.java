@@ -1,6 +1,6 @@
 package org.mtr.registry;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import org.mtr.MTR;
 
@@ -29,6 +29,6 @@ public final class SoundEvents {
 	}
 
 	private static ObjectHolder<SoundEvent> registerSoundEvent(String registryName) {
-		return RegistryServer.registerSoundEvent(registryName, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, registryName)));
+		return RegistryServer.registerSoundEvent(registryName, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(MTR.MOD_ID, registryName)));
 	}
 }

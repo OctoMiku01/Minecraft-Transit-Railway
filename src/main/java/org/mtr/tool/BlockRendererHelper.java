@@ -2,10 +2,10 @@ package org.mtr.tool;
 
 import gg.essential.universal.UMatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -26,8 +26,8 @@ public final class BlockRendererHelper {
 			for (int j = 0; j < bakedQuads.size(); j++) {
 				final BakedQuad bakedQuad = bakedQuads.get(j);
 				final TextureAtlasSprite sprite = bakedQuad.getSprite();
-				final ResourceLocation tempIdentifier = bakedQuad.getSprite().contents().name();
-				final ResourceLocation newIdentifier = ResourceLocation.fromNamespaceAndPath(tempIdentifier.getNamespace(), String.format("textures/%s.png", tempIdentifier.getPath()));
+				final Identifier tempIdentifier = bakedQuad.getSprite().contents().name();
+				final Identifier newIdentifier = Identifier.fromNamespaceAndPath(tempIdentifier.getNamespace(), String.format("textures/%s.png", tempIdentifier.getPath()));
 				final String newRenderKey = String.format("%s_%s_%s_%s", tempIdentifier, i, j, renderKey);
 
 				ImageComponentBase.drawTexture(BLOCK_TEXTURE_MAP.computeIfAbsent(newIdentifier.toString(), key -> ReleasedDynamicTextureRegistry.INSTANCE.create(newIdentifier)).get(), vertexConsumer -> {

@@ -6,7 +6,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  */
 public final class BlockbenchModelLoader extends ModelLoaderBase {
 
-	public BlockbenchModelLoader(ResourceLocation defaultTexture) {
+	public BlockbenchModelLoader(Identifier defaultTexture) {
 		super(defaultTexture, VertexFormat.Mode.QUADS);
 	}
 

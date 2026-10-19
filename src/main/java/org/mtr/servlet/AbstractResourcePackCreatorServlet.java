@@ -5,7 +5,7 @@ import gg.essential.universal.UMinecraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.client.CustomResourceLoader;
@@ -65,7 +65,7 @@ public abstract class AbstractResourcePackCreatorServlet extends HttpServlet {
 				resourceWrapper.addTextureResource(name);
 				TEXTURES.put(name, bytes);
 				try {
-					final ResourceLocation identifier = ResourceLocation.parse(name);
+					final Identifier identifier = Identifier.parse(name);
 					final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bytes.length);
 					byteBuffer.put(bytes);
 					byteBuffer.rewind();
@@ -87,8 +87,8 @@ public abstract class AbstractResourcePackCreatorServlet extends HttpServlet {
 				resourceWrapper.addModelResource(new ModelWrapper(name, modelParts));
 				MODELS.put(name, modelObject.toString());
 			} else if (name.endsWith(".obj")) {
-				final ObjModelLoader objModelLoader = new ObjModelLoader(ResourceLocation.parse(""));
-				objModelLoader.loadModel(content, mtlString -> "", textureString -> ResourceLocation.parse(""), true, false);
+				final ObjModelLoader objModelLoader = new ObjModelLoader(Identifier.parse(""));
+				objModelLoader.loadModel(content, mtlString -> "", textureString -> Identifier.parse(""), true, false);
 				resourceWrapper.addModelResource(new ModelWrapper(name, objModelLoader.getNames()));
 				MODELS.put(name, content);
 			} else if (name.endsWith(".mtl")) {

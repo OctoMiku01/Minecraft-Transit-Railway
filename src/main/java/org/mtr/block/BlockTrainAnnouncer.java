@@ -6,7 +6,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -98,7 +98,7 @@ public class BlockTrainAnnouncer extends BlockTrainSensorBase {
 					tasks.add(() -> {
 						final LocalPlayer clientPlayerEntity = Minecraft.getInstance().player;
 						if (clientPlayerEntity != null) {
-							clientPlayerEntity.playSound(SoundEvent.createVariableRangeEvent(ResourceLocation.parse(soundId)), 1000, 1);
+							clientPlayerEntity.playSound(SoundEvent.createVariableRangeEvent(Identifier.parse(soundId)), 1000, 1);
 						}
 					});
 				}

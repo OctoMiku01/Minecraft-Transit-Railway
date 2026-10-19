@@ -5,7 +5,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -127,10 +127,10 @@ public final class EventRegistryClient {
 
 	public static void registerResourceReloadEvent(Runnable runnable) {
 //? if fabric {
-		final ResourceLocation identifier = ResourceLocation.fromNamespaceAndPath(Integer.toHexString(new Random().nextInt()), "resource");
+		final Identifier identifier = Identifier.fromNamespaceAndPath(Integer.toHexString(new Random().nextInt()), "resource");
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
 			@Override
-			public ResourceLocation getFabricId() {
+			public Identifier getFabricId() {
 				return identifier;
 			}
 
@@ -167,7 +167,7 @@ public final class EventRegistryClient {
 	public static void registerHudLayerRenderEvent(Consumer<GuiGraphics> hudLayerRenderCallback) {
 //? if fabric {
 //? if >= 1.21.4 {
-		HudLayerRegistrationCallback.EVENT.register(layeredDrawerWrapper -> layeredDrawerWrapper.attachLayerBefore(IdentifiedLayer.CHAT, ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "gui"), (guiGraphics, delta) -> hudLayerRenderCallback.accept(guiGraphics)));
+		HudLayerRegistrationCallback.EVENT.register(layeredDrawerWrapper -> layeredDrawerWrapper.attachLayerBefore(IdentifiedLayer.CHAT, Identifier.fromNamespaceAndPath(MTR.MOD_ID, "gui"), (guiGraphics, delta) -> hudLayerRenderCallback.accept(guiGraphics)));
 //? } else {
 		/*HudRenderCallback.EVENT.register((guiGraphics, delta) -> hudLayerRenderCallback.accept(guiGraphics));
 //

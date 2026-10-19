@@ -1,7 +1,7 @@
 package org.mtr.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.libraries.it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
@@ -34,17 +34,17 @@ public final class ListItem<T> {
 	@Nullable
 	private final ObjectArrayList<ListItem<T>> children;
 	@Nullable
-	private final ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ActionConsumer<T>>> actions;
+	private final ObjectArrayList<ObjectObjectImmutablePair<Identifier, ActionConsumer<T>>> actions;
 
 	public static <T> ListItem<T> createParent(@Nullable DrawIcon drawIcon, @Nullable DeferredDrawIcon deferredDrawIcon, int iconWidth, String text, String key, ObjectArrayList<ListItem<T>> children) {
 		return new ListItem<>(drawIcon, deferredDrawIcon, iconWidth, null, text, key, children, null);
 	}
 
-	public static <T> ListItem<T> createChild(@Nullable DrawIcon drawIcon, @Nullable DeferredDrawIcon deferredDrawIcon, int iconWidth, T data, String text, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ActionConsumer<T>>> actions) {
+	public static <T> ListItem<T> createChild(@Nullable DrawIcon drawIcon, @Nullable DeferredDrawIcon deferredDrawIcon, int iconWidth, T data, String text, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ActionConsumer<T>>> actions) {
 		return new ListItem<>(drawIcon, deferredDrawIcon, iconWidth, data, text, null, null, actions);
 	}
 
-	private ListItem(@Nullable DrawIcon drawIcon, @Nullable DeferredDrawIcon deferredDrawIcon, int iconWidth, @Nullable T data, String text, @Nullable String parentKey, @Nullable ObjectArrayList<ListItem<T>> children, @Nullable ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ActionConsumer<T>>> actions) {
+	private ListItem(@Nullable DrawIcon drawIcon, @Nullable DeferredDrawIcon deferredDrawIcon, int iconWidth, @Nullable T data, String text, @Nullable String parentKey, @Nullable ObjectArrayList<ListItem<T>> children, @Nullable ObjectArrayList<ObjectObjectImmutablePair<Identifier, ActionConsumer<T>>> actions) {
 		this.drawIcon = drawIcon;
 		this.deferredDrawIcon = deferredDrawIcon;
 		this.iconWidth = iconWidth;
@@ -81,7 +81,7 @@ public final class ListItem<T> {
 	public void iterateActions(IntArrayList indexList, ActionsConsumer consumer) {
 		if (actions != null && !isParent()) {
 			for (int i = 0; i < actions.size(); i++) {
-				final ObjectObjectImmutablePair<ResourceLocation, ActionConsumer<T>> action = actions.get(i);
+				final ObjectObjectImmutablePair<Identifier, ActionConsumer<T>> action = actions.get(i);
 				consumer.accept(i, action.left(), () -> action.right().accept(indexList, data));
 			}
 		}
@@ -205,7 +205,7 @@ public final class ListItem<T> {
 
 	@FunctionalInterface
 	public interface ActionsConsumer {
-		void accept(int index, ResourceLocation identifier, Runnable callback);
+		void accept(int index, Identifier identifier, Runnable callback);
 	}
 
 	@FunctionalInterface

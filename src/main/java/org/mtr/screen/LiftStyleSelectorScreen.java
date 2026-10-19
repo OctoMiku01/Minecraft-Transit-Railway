@@ -1,6 +1,6 @@
 package org.mtr.screen;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectCollection;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
@@ -17,7 +17,7 @@ public final class LiftStyleSelectorScreen extends ListSelectorScreen<LiftResour
 	}
 
 	@Override
-	protected void setData(ListComponent<LiftResource> listComponent, ObjectCollection<LiftResource> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<LiftResource>>> actions) {
+	protected void setData(ListComponent<LiftResource> listComponent, ObjectCollection<LiftResource> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<LiftResource>>> actions) {
 		ListComponent.setGeneric(listComponent, dataList, LiftResource::getName, LiftResource::getColor, actions);
 	}
 }

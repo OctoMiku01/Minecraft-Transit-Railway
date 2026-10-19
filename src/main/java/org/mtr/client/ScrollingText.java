@@ -3,7 +3,7 @@ package org.mtr.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTRClient;
 import org.mtr.data.IGui;
@@ -33,7 +33,7 @@ public class ScrollingText {
 	}
 
 	@Nullable
-	public ResourceLocation getTextureId() {
+	public Identifier getTextureId() {
 		return dynamicResource == null ? null : dynamicResource.identifier;
 	}
 

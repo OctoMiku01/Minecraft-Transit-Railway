@@ -1,6 +1,6 @@
 package org.mtr.screen;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectCollection;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
@@ -17,7 +17,7 @@ public final class RailStyleSelectorScreen extends ListSelectorScreen<RailResour
 	}
 
 	@Override
-	protected void setData(ListComponent<RailResource> listComponent, ObjectCollection<RailResource> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<RailResource>>> actions) {
+	protected void setData(ListComponent<RailResource> listComponent, ObjectCollection<RailResource> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<RailResource>>> actions) {
 		ListComponent.setGeneric(listComponent, dataList, RailResource::getName, RailResource::getColor, actions);
 	}
 }

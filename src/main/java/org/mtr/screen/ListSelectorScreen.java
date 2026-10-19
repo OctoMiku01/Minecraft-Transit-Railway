@@ -3,7 +3,7 @@ package org.mtr.screen;
 import gg.essential.elementa.components.UIContainer;
 import gg.essential.elementa.components.UIText;
 import gg.essential.elementa.constraints.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -82,7 +82,7 @@ public abstract class ListSelectorScreen<T extends U, U extends Comparable<U>> e
 		}
 	}
 
-	protected abstract void setData(ListComponent<T> listComponent, ObjectCollection<T> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<T>>> actions);
+	protected abstract void setData(ListComponent<T> listComponent, ObjectCollection<T> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<T>>> actions);
 
 	private ListComponent<T> createMainComponents(TranslationProvider.TranslationHolder title) {
 		final UIContainer container = (UIContainer) new UIContainer()
@@ -124,7 +124,7 @@ public abstract class ListSelectorScreen<T extends U, U extends Comparable<U>> e
 			Collections.sort(selectedData);
 		}
 
-		final ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<T>> deleteAction = new ObjectObjectImmutablePair<>(GuiHelper.DELETE_TEXTURE_ID, (indexList, data) -> {
+		final ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<T>> deleteAction = new ObjectObjectImmutablePair<>(GuiHelper.DELETE_TEXTURE_ID, (indexList, data) -> {
 			selectedData.remove(data);
 			if (!availableData.contains(data)) {
 				availableData.add(data);

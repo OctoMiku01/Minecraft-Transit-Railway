@@ -18,7 +18,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -340,7 +340,7 @@ public final class MapComponent extends UIComponent {
 				matrixStack.pushPose();
 				matrixStack.translate(left + x, top + y, 5);
 				Drawing.rotateZDegrees(matrixStack, player.getYRot() + 180);
-				new Drawing(matrixStack, GuiHelper.getGuiTexturedRenderType(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, "textures/gui/dashboard_player_arrow.png")))
+				new Drawing(matrixStack, GuiHelper.getGuiTexturedRenderType(Identifier.fromNamespaceAndPath(MTR.MOD_ID, "textures/gui/dashboard_player_arrow.png")))
 					.setVerticesWH(-PLAYER_ARROW_SIZE / 2F, -PLAYER_ARROW_SIZE / 2F, PLAYER_ARROW_SIZE, PLAYER_ARROW_SIZE)
 					.setUv()
 					.draw();

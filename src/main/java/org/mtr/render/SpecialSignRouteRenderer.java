@@ -1,7 +1,7 @@
 package org.mtr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import org.mtr.core.data.Route;
 import org.mtr.font.FontRenderHelper;
@@ -16,7 +16,7 @@ public final class SpecialSignRouteRenderer extends SpecialSignRouteStationExitR
 	}
 
 	@Override
-	protected void renderOverlayText(PoseStack matrixStack, String overlayText, ResourceLocation font, float x, float y, float zOffset, float width, float height, float padding, boolean flipText) {
+	protected void renderOverlayText(PoseStack matrixStack, String overlayText, Identifier font, float x, float y, float zOffset, float width, float height, float padding, boolean flipText) {
 		FontRenderHelper.render(matrixStack, overlayText, FontRenderOptions.builder()
 			.font(font)
 			.horizontalPositioning(FontRenderOptions.Alignment.CENTER)

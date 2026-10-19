@@ -1,6 +1,6 @@
 package org.mtr.screen;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.core.data.NameColorDataBase;
 import org.mtr.core.data.Route;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -23,7 +23,7 @@ public final class RouteListSelectorScreen extends ListSelectorScreen<Route, Nam
 	}
 
 	@Override
-	protected void setData(ListComponent<Route> listComponent, ObjectCollection<Route> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<ResourceLocation, ListItem.ActionConsumer<Route>>> actions) {
+	protected void setData(ListComponent<Route> listComponent, ObjectCollection<Route> dataList, boolean isSelectedList, ObjectArrayList<ObjectObjectImmutablePair<Identifier, ListItem.ActionConsumer<Route>>> actions) {
 		if (canSelectDuplicateAndCanManuallySortSelectedList && isSelectedList) {
 			ListComponent.setGeneric(listComponent, dataList, NameColorDataBase::getName, NameColorDataBase::getColor, actions);
 		} else {

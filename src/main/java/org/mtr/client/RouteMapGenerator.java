@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
@@ -792,7 +792,7 @@ public class RouteMapGenerator implements IGui {
 	}
 
 	private static void drawResource(NativeImage nativeImage, String resource, int x, int y, int width, int height, boolean flipX, float v1, float v2, int color, boolean useActualColor) {
-		ResourceManagerHelper.readResource(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, resource), inputStream -> {
+		ResourceManagerHelper.readResource(Identifier.fromNamespaceAndPath(MTR.MOD_ID, resource), inputStream -> {
 			try {
 				final NativeImage nativeImageResource = NativeImage.read(NativeImage.Format.RGBA, inputStream);
 				final int resourceWidth = nativeImageResource.getWidth();

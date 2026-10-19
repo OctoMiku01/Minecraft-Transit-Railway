@@ -1,13 +1,13 @@
 package org.mtr.screen;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.mtr.client.IDrawing;
 import org.mtr.config.Config;
 import org.mtr.core.tool.Utilities;
@@ -61,9 +61,9 @@ public class BetaWarningScreen extends ScreenBase implements IGui, Utilities {
 		context.drawCenteredString(font, openTime < FORCE_OPEN_DURATION ? String.format("Please read the above carefully to continue! (%s)", (FORCE_OPEN_DURATION - openTime) / MILLIS_PER_SECOND) : "Press ESC to continue", 0, 0, ARGB_WHITE);
 		context.pose().popPose();
 
-		drawSprite(context, ResourceLocation.parse("mtr/patreon"), width / 2 - BUTTON_WIDTH / 2 - SQUARE_SIZE, height - SQUARE_SIZE * 3 - TEXT_PADDING, SQUARE_SIZE, SQUARE_SIZE);
+		drawSprite(context, Identifier.parse("mtr/patreon"), width / 2 - BUTTON_WIDTH / 2 - SQUARE_SIZE, height - SQUARE_SIZE * 3 - TEXT_PADDING, SQUARE_SIZE, SQUARE_SIZE);
 		final int youTubeIconPadding = Math.round(SQUARE_SIZE * (90F / 64 - 1) / 2);
-		drawSprite(context, ResourceLocation.parse("mtr/youtube"), width / 2 + BUTTON_WIDTH / 2 - youTubeIconPadding, height - SQUARE_SIZE * 3 - TEXT_PADDING, SQUARE_SIZE * 90 / 64, SQUARE_SIZE);
+		drawSprite(context, Identifier.parse("mtr/youtube"), width / 2 + BUTTON_WIDTH / 2 - youTubeIconPadding, height - SQUARE_SIZE * 3 - TEXT_PADDING, SQUARE_SIZE * 90 / 64, SQUARE_SIZE);
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class BetaWarningScreen extends ScreenBase implements IGui, Utilities {
 		}
 	}
 
-	private static void drawSprite(GuiGraphics context, ResourceLocation resourceLocation, int x, int y, int width, int height) {
+	private static void drawSprite(GuiGraphics context, Identifier resourceLocation, int x, int y, int width, int height) {
 //? if >= 1.21.4 {
 		context.blitSprite(RenderType::guiTextured, resourceLocation, x, y, width, height);
 //? } else {

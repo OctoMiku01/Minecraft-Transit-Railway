@@ -1,7 +1,7 @@
 package org.mtr.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.IOUtils;
 import org.jspecify.annotations.Nullable;
 import org.mtr.Keys;
@@ -122,7 +122,7 @@ public class CustomResourceLoader {
 		RAILS.add(defaultRailResource);
 		RAILS_CACHE.put(DEFAULT_RAIL_ID, defaultRailResource);
 
-		ResourceManagerHelper.readAllResources(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, CUSTOM_RESOURCES_ID + ".json"), inputStream -> {
+		ResourceManagerHelper.readAllResources(Identifier.fromNamespaceAndPath(MTR.MOD_ID, CUSTOM_RESOURCES_ID + ".json"), inputStream -> {
 			try {
 				final CustomResources customResources = CustomResourcesConverter.convert(Config.readResource(inputStream).getAsJsonObject(), CustomResourceLoader::readResource);
 				customResources.iterateVehicles(vehicleResource -> registerVehicle(vehicleResource, false));
@@ -152,7 +152,7 @@ public class CustomResourceLoader {
 		});
 
 		// TODO temporary code for loading models pending migration
-		ResourceManagerHelper.readAllResources(ResourceLocation.fromNamespaceAndPath(MTR.MOD_ID, CUSTOM_RESOURCES_PENDING_MIGRATION_ID + ".json"), inputStream -> {
+		ResourceManagerHelper.readAllResources(Identifier.fromNamespaceAndPath(MTR.MOD_ID, CUSTOM_RESOURCES_PENDING_MIGRATION_ID + ".json"), inputStream -> {
 			try {
 				CustomResourcesConverter.convert(Config.readResource(inputStream).getAsJsonObject(), CustomResourceLoader::readResource).iterateVehicles(vehicleResource -> registerVehicle(vehicleResource, false));
 			} catch (Exception e) {
@@ -392,7 +392,7 @@ public class CustomResourceLoader {
 		}
 	}
 
-	private static String readResource(ResourceLocation identifier) {
+	private static String readResource(Identifier identifier) {
 		final String identifierString = identifier.toString();
 		// computeIfAbsent guarantees a single resource fetch per key even when multiple
 		// worker threads request the same file concurrently (e.g. several vehicles sharing
