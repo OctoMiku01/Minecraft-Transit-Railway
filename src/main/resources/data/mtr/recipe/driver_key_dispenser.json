@@ -3,7 +3,7 @@
 	"ingredients": [
 		"#c:iron_ingots",
 		"#c:iron_nuggets",
-		"minecraft:chain",
+		"minecraft:iron_chain",
 		"minecraft:dispenser"
 	],
 	"result": {
