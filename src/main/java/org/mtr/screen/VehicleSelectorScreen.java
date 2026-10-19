@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.jspecify.annotations.Nullable;
+import org.mtr.Keys;
 import org.mtr.MTR;
 import org.mtr.client.CustomResourceLoader;
 import org.mtr.core.data.Siding;
@@ -50,6 +51,10 @@ public final class VehicleSelectorScreen extends ScreenBase {
 	private static final String AVAILABLE_TEXT = TranslationProvider.GUI_MTR_AVAILABLE.getString();
 	private static final String SELECTED_TEXT = TranslationProvider.GUI_MTR_SELECTED.getString();
 	private static final Object2ObjectAVLTreeMap<String, String> WIKIPEDIA_ARTICLES = new Object2ObjectAVLTreeMap<>();
+	/**
+	 * Wikipedia rejects requests with the default Java user agent, see https://meta.wikimedia.org/wiki/User-Agent_policy
+	 */
+	private static final String WIKIPEDIA_USER_AGENT = String.format("MinecraftTransitRailway/%s (https://github.com/Minecraft-Transit-Railway/Minecraft-Transit-Railway)", Keys.MOD_VERSION);
 	private static final String FAMILY_TAG = "family";
 
 	public VehicleSelectorScreen(Siding siding, WindowBase previousScreen) {
@@ -351,7 +356,7 @@ public final class VehicleSelectorScreen extends ScreenBase {
 			CompletableFuture.runAsync(() -> MTR.openConnectionSafeJson("https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&explaintext&exintro&titles=" + wikipediaArticle, jsonElement -> {
 				final JsonObject pagesObject = jsonElement.getAsJsonObject().getAsJsonObject("query").getAsJsonObject("pages");
 				pagesObject.entrySet().stream().findFirst().ifPresent(entry -> WIKIPEDIA_ARTICLES.put(wikipediaArticle, pagesObject.getAsJsonObject(entry.getKey()).get("extract").getAsString()));
-			}));
+			}, "User-Agent", WIKIPEDIA_USER_AGENT));
 			WIKIPEDIA_ARTICLES.put(wikipediaArticle, "");
 			return "";
 		} else {
