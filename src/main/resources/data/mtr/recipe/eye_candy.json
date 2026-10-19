@@ -6,12 +6,8 @@
 		" E "
 	],
 	"key": {
-		"E": {
-			"item": "minecraft:ender_eye"
-		},
-		"B": {
-			"item": "mtr:brush"
-		}
+		"E": "minecraft:ender_eye",
+		"B": "mtr:brush"
 	},
 	"result": {
 		"id": "mtr:eye_candy",

@@ -1,12 +1,8 @@
 {
 	"type": "minecraft:crafting_shapeless",
 	"ingredients": [
-		{
-			"item": "mtr:signal_connector_red"
-		},
-		{
-			"tag": "c:redstone_dusts"
-		}
+		"mtr:signal_connector_red",
+		"#c:redstone_dusts"
 	],
 	"result": {
 		"id": "mtr:advanced_signal_connector_red"

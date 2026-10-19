@@ -6,12 +6,8 @@
 		"S S"
 	],
 	"key": {
-		"N": {
-			"item": "mtr:station_name_tall_wall"
-		},
-		"S": {
-			"item": "minecraft:stick"
-		}
+		"N": "mtr:station_name_tall_wall",
+		"S": "minecraft:stick"
 	},
 	"result": {
 		"id": "mtr:station_name_tall_standing"

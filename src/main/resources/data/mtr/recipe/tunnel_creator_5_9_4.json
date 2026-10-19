@@ -6,9 +6,7 @@
 		"T"
 	],
 	"key": {
-		"T": {
-			"item": "mtr:tunnel_creator_6_9"
-		}
+		"T": "mtr:tunnel_creator_6_9"
 	},
 	"result": {
 		"id": "mtr:tunnel_creator_5_9"
