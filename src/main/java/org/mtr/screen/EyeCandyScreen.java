@@ -19,12 +19,17 @@ import org.mtr.block.IBlock;
 import org.mtr.client.CustomResourceLoader;
 import org.mtr.core.tool.Utilities;
 import org.mtr.generated.lang.TranslationProvider;
+import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectImmutableList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
+import org.mtr.model.NewOptimizedModel;
 import org.mtr.packet.PacketUpdateEyeCandyConfig;
 import org.mtr.registry.UConverters;
 import org.mtr.resource.ObjectResource;
+import org.mtr.resource.RenderStage;
 import org.mtr.tool.BlockRendererHelper;
+import org.mtr.tool.Drawing;
 import org.mtr.tool.GuiHelper;
 import org.mtr.tool.ReleasedDynamicTextureRegistry;
 import org.mtr.widget.*;
@@ -158,12 +163,24 @@ public final class EyeCandyScreen extends WindowBase {
 			}
 		}
 
-		final String modelId = blockEntity.getModelId();
-		if (modelId != null) {
+		if (selectedModelId != null) {
+			// Same transformations as RenderEyeCandy, relative to the block centre instead of the bottom of the block
 			final Direction facing = IBlock.getStatePropertySafe(clientWorld.getBlockState(blockPos), BlockStateProperties.HORIZONTAL_FACING);
-			CustomResourceLoader.getObjectById(modelId, objectResource -> objectResource.getOptimizedModel().forEach((renderStage, newOptimizedModels) -> newOptimizedModels.forEach(newOptimizedModel -> {
-				// TODO render model preview
-			})));
+			matrixStack.pushPose();
+			matrixStack.translate(translateXInputComponent.getValue(), translateYInputComponent.getValue() - 0.5, translateZInputComponent.getValue());
+			Drawing.rotateYDegrees(matrixStack, 180 - facing.toYRot());
+			Drawing.rotateXRadians(matrixStack, (float) Math.toRadians(rotateXInputComponent.getValue()) + (float) Math.PI);
+			Drawing.rotateYRadians(matrixStack, (float) Math.toRadians(rotateYInputComponent.getValue()));
+			Drawing.rotateZRadians(matrixStack, (float) Math.toRadians(rotateZInputComponent.getValue()));
+			CustomResourceLoader.getObjectById(selectedModelId, objectResource -> {
+				final Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<NewOptimizedModel>> optimizedModel = objectResource.getOptimizedModel();
+				if (optimizedModel != null) {
+					objectResource.applyTransformations(matrixStack);
+					final UMatrixStack modelMatrixStack = UConverters.convert(matrixStack);
+					optimizedModel.forEach((renderStage, newOptimizedModels) -> newOptimizedModels.forEach(newOptimizedModel -> BlockRendererHelper.renderModel(modelMatrixStack, newOptimizedModel, 1)));
+				}
+			});
+			matrixStack.popPose();
 		}
 	}
 

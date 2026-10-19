@@ -4,14 +4,15 @@ import gg.essential.universal.UMatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3fc;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.mtr.model.NewOptimizedModel;
 import org.mtr.widget.ImageComponentBase;
 
 import java.awt.*;
@@ -53,5 +54,19 @@ public final class BlockRendererHelper {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Draw an optimised model in a GUI preview, using the same texture cache as the block previews.
+	 */
+	public static void renderModel(UMatrixStack matrixStack, NewOptimizedModel newOptimizedModel, double brightness) {
+		final Identifier texture = newOptimizedModel.texture;
+		ImageComponentBase.drawTexture(BLOCK_TEXTURE_MAP.computeIfAbsent(texture.toString(), key -> ReleasedDynamicTextureRegistry.INSTANCE.create(texture)).get(), vertexConsumer -> newOptimizedModel.forEachQuadVertex(storedVertexData -> {
+			final Color color = storedVertexData.color();
+			vertexConsumer.pos(matrixStack, storedVertexData.x(), storedVertexData.y(), storedVertexData.z())
+				.tex(storedVertexData.u(), storedVertexData.v())
+				.color((int) Math.floor(color.getRed() * brightness), (int) Math.floor(color.getGreen() * brightness), (int) Math.floor(color.getBlue() * brightness), color.getAlpha())
+				.endVertex();
+		}));
 	}
 }

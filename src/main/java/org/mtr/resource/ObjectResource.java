@@ -1,5 +1,6 @@
 package org.mtr.resource;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 import org.mtr.config.Config;
@@ -43,15 +44,19 @@ public final class ObjectResource extends ObjectResourceSchema implements Stored
 	@Override
 	public void render(StoredMatrixTransformations storedMatrixTransformations, int light) {
 		final StoredMatrixTransformations newStoredMatrixTransformations = storedMatrixTransformations.copy();
-		newStoredMatrixTransformations.add(matrixStack -> {
-				matrixStack.translate(translation.getX(), translation.getY(), translation.getZ());
-				Drawing.rotateXDegrees(matrixStack, (float) rotation.getX());
-				Drawing.rotateYDegrees(matrixStack, (float) rotation.getY());
-				Drawing.rotateZDegrees(matrixStack, (float) rotation.getZ() + 180);
-				matrixStack.scale(clampNumber(scale.getX()), clampNumber(scale.getY()), clampNumber(scale.getZ()));
-			}
-		);
+		newStoredMatrixTransformations.add(this::applyTransformations);
 		StoredModelResourceBase.super.render(newStoredMatrixTransformations, light);
+	}
+
+	/**
+	 * Apply the translation, rotation and scale defined by the resource pack. Also used by the model preview of the eye candy screen.
+	 */
+	public void applyTransformations(PoseStack matrixStack) {
+		matrixStack.translate(translation.getX(), translation.getY(), translation.getZ());
+		Drawing.rotateXDegrees(matrixStack, (float) rotation.getX());
+		Drawing.rotateYDegrees(matrixStack, (float) rotation.getY());
+		Drawing.rotateZDegrees(matrixStack, (float) rotation.getZ() + 180);
+		matrixStack.scale(clampNumber(scale.getX()), clampNumber(scale.getY()), clampNumber(scale.getZ()));
 	}
 
 	public String getId() {

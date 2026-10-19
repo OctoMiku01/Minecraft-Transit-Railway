@@ -361,6 +361,7 @@ public final class RailModifierScreen extends WindowBase {
 			.setX(new SiblingConstraint(GuiHelper.DEFAULT_PADDING))
 			.setWidth(new SubtractiveConstraint(new FillConstraint(), new PixelConstraint(GuiHelper.DEFAULT_PADDING)))
 			.setHeight(new RelativeConstraint());
+		previewBoxComponent.setVisibleBlocks(Math.max(rail.railMath.maxX - rail.railMath.minX, Math.max(rail.railMath.maxY - rail.railMath.minY, rail.railMath.maxZ - rail.railMath.minZ)) * 1.2F);
 
 		return new ObjectObjectImmutablePair<>(scrollComponent, previewBoxComponent);
 	}

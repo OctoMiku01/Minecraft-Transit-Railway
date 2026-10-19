@@ -31,6 +31,10 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 	private float rotationX = getPlayerYaw();
 
 	private float zoom = 1;
+	/**
+	 * How many blocks fit into the height of the preview at the default zoom level.
+	 */
+	private float visibleBlocks = DEFAULT_VISIBLE_BLOCKS;
 
 	private final Consumer<PoseStack> onDraw;
 
@@ -42,14 +46,17 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 	private static final float DEFAULT_VISIBLE_BLOCKS = 4;
 	private static final float ZOOM_STEP = 0.1F;
 	/**
-	 * Distance of the virtual camera from the centre of the preview in blocks. Larger values give a weaker perspective.
+	 * Distance of the virtual camera from the centre of the preview, relative to the visible size. Larger values give a weaker perspective.
 	 */
-	private static final float CAMERA_DISTANCE = 8;
+	private static final float CAMERA_DISTANCE_RATIO = 2;
 	/**
 	 * The GUI only draws depths between 0 and 10000, so the preview is moved in front of the GUI at this depth.
 	 */
 	private static final float DEPTH_CENTER = 1000;
-	private static final float DEPTH_PER_BLOCK = 100;
+	/**
+	 * Depth range used by the visible size of the preview, which keeps any preview size inside the depth range of the GUI.
+	 */
+	private static final float DEPTH_RANGE = 400;
 
 	public PreviewBoxComponent(boolean allowPan, boolean allowRotation, boolean allowZoom, Consumer<PoseStack> onDraw) {
 		setBackgroundColor(Color.BLACK);
@@ -113,8 +120,9 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 
 		final PoseStack poseStack = UConverters.convert(matrixStack);
 		poseStack.pushPose();
-		poseStack.mulPose(createPerspectiveMatrix((getLeft() + getRight()) / 2, (getTop() + getBottom()) / 2, (getHeight() - 2) / DEFAULT_VISIBLE_BLOCKS));
-		poseStack.translate(panX, -panY, 0);
+		poseStack.mulPose(createPerspectiveMatrix((getLeft() + getRight()) / 2, (getTop() + getBottom()) / 2, (getHeight() - 2) / visibleBlocks));
+		final float panScale = visibleBlocks / DEFAULT_VISIBLE_BLOCKS;
+		poseStack.translate(panX * panScale, -panY * panScale, 0);
 		final float zoomScale = Math.max(ZOOM_STEP, 1 + zoom * ZOOM_STEP);
 		poseStack.scale(zoomScale, zoomScale, zoomScale);
 		Drawing.rotateXDegrees(poseStack, rotationY);
@@ -123,6 +131,14 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 		poseStack.popPose();
 
 		previousScissorState.activate();
+	}
+
+	/**
+	 * Set how many blocks fit into the height of the preview at the default zoom level, so that larger objects fit into the preview.
+	 */
+	public PreviewBoxComponent setVisibleBlocks(float visibleBlocks) {
+		this.visibleBlocks = Math.max(DEFAULT_VISIBLE_BLOCKS, visibleBlocks);
+		return this;
 	}
 
 	public void updateFrom(PreviewBoxComponent previewBoxComponent) {
@@ -143,12 +159,14 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 	 * @param centerY        the GUI y coordinate of the view centre
 	 * @param pixelsPerBlock how many GUI pixels one block at depth 0 covers
 	 */
-	private static Matrix4f createPerspectiveMatrix(float centerX, float centerY, float pixelsPerBlock) {
+	private Matrix4f createPerspectiveMatrix(float centerX, float centerY, float pixelsPerBlock) {
+		final float cameraDistance = visibleBlocks * CAMERA_DISTANCE_RATIO;
+		final float depthPerBlock = DEPTH_RANGE / visibleBlocks;
 		// Columns: x' = s * x + cx * w, y' = -s * y + cy * w, z' = d * z + dc * w, w = 1 - z / distance
 		return new Matrix4f(
 			pixelsPerBlock, 0, 0, 0,
 			0, -pixelsPerBlock, 0, 0,
-			-centerX / CAMERA_DISTANCE, -centerY / CAMERA_DISTANCE, DEPTH_PER_BLOCK - DEPTH_CENTER / CAMERA_DISTANCE, -1 / CAMERA_DISTANCE,
+			-centerX / cameraDistance, -centerY / cameraDistance, depthPerBlock - DEPTH_CENTER / cameraDistance, -1 / cameraDistance,
 			centerX, centerY, DEPTH_CENTER, 1
 		);
 	}

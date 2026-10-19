@@ -126,24 +126,31 @@ public final class NewOptimizedModel {
 	}
 
 	/**
-	 * Triangles are written as quads with a repeated last vertex, since the render types only draw quads.
-	 * Brightness is applied through the colour modulator at draw time, so the vertices are full-bright.
+	 * Visit the vertices of this mesh as quads, for example to draw it outside the world in a GUI preview.
+	 * Triangles are visited as quads with a repeated last vertex.
 	 */
-	private void writeVertices(VertexConsumer vertexConsumer) {
+	public void forEachQuadVertex(Consumer<StoredVertexData> consumer) {
 		if (storedVertexDataList == null) {
 			return;
 		}
 
 		if (drawMode == PrimitiveTopology.TRIANGLES) {
 			for (int i = 0; i + 2 < storedVertexDataList.size(); i += 3) {
-				writeVertex(vertexConsumer, storedVertexDataList.get(i));
-				writeVertex(vertexConsumer, storedVertexDataList.get(i + 1));
-				writeVertex(vertexConsumer, storedVertexDataList.get(i + 2));
-				writeVertex(vertexConsumer, storedVertexDataList.get(i + 2));
+				consumer.accept(storedVertexDataList.get(i));
+				consumer.accept(storedVertexDataList.get(i + 1));
+				consumer.accept(storedVertexDataList.get(i + 2));
+				consumer.accept(storedVertexDataList.get(i + 2));
 			}
 		} else {
-			storedVertexDataList.forEach(storedVertexData -> writeVertex(vertexConsumer, storedVertexData));
+			storedVertexDataList.forEach(consumer);
 		}
+	}
+
+	/**
+	 * Brightness is applied through the colour modulator at draw time, so the vertices are full-bright.
+	 */
+	private void writeVertices(VertexConsumer vertexConsumer) {
+		forEachQuadVertex(storedVertexData -> writeVertex(vertexConsumer, storedVertexData));
 	}
 
 	/**
