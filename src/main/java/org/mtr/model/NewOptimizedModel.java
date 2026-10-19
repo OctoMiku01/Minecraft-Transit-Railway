@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.LightCoordsUtil;
 import org.jspecify.annotations.Nullable;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
@@ -46,31 +48,34 @@ public final class NewOptimizedModel {
 	 *
 	 * @param vertexConsumer the vertex consumer of the render type matching this mesh
 	 * @param pose           the per-instance transformation
-	 * @param light          the packed lightmap coordinates
+	 * @param brightness     brightness scale in {@code [0, 1]} applied to the vertex colours; {@code 1} for full-bright stages
 	 */
-	public void render(VertexConsumer vertexConsumer, PoseStack.Pose pose, int light) {
+	public void render(VertexConsumer vertexConsumer, PoseStack.Pose pose, float brightness) {
 		if (storedVertexDataList == null) {
 			return;
 		}
 
 		if (drawMode == PrimitiveTopology.TRIANGLES) {
 			for (int i = 0; i + 2 < storedVertexDataList.size(); i += 3) {
-				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i), light);
-				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i + 1), light);
-				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i + 2), light);
-				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i + 2), light);
+				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i), brightness);
+				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i + 1), brightness);
+				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i + 2), brightness);
+				writeVertex(vertexConsumer, pose, storedVertexDataList.get(i + 2), brightness);
 			}
 		} else {
-			storedVertexDataList.forEach(storedVertexData -> writeVertex(vertexConsumer, pose, storedVertexData, light));
+			storedVertexDataList.forEach(storedVertexData -> writeVertex(vertexConsumer, pose, storedVertexData, brightness));
 		}
 	}
 
-	private static void writeVertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, StoredVertexData storedVertexData, int light) {
+	/**
+	 * Like the colour modulator of older versions, the brightness scales the vertex colour while the lightmap stays at full brightness.
+	 */
+	private static void writeVertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, StoredVertexData storedVertexData, float brightness) {
 		vertexConsumer.addVertex(pose, storedVertexData.x(), storedVertexData.y(), storedVertexData.z())
-			.setColor(storedVertexData.color().getRGB())
+			.setColor(ARGB.scaleRGB(storedVertexData.color().getRGB(), brightness))
 			.setUv(storedVertexData.u(), storedVertexData.v())
 			.setOverlay(OverlayTexture.NO_OVERLAY)
-			.setLight(light)
+			.setLight(LightCoordsUtil.FULL_BRIGHT)
 			.setNormal(pose, storedVertexData.normalX(), storedVertexData.normalY(), storedVertexData.normalZ());
 	}
 }

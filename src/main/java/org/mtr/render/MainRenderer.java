@@ -343,8 +343,7 @@ public class MainRenderer {
 			submitNodeCollector.submitCustomGeometry(matrixStack, renderLayer, (pose, vertexConsumer) -> renderDetailsCopy.forEach(renderDetailsEntry -> {
 				final PoseStack newMatrixStack = createMatrixStack(pose);
 				renderDetailsEntry.left().transform(newMatrixStack, offset);
-				final int light = renderStage.isFullBrightness ? LightCoordsUtil.FULL_BRIGHT : LightCoordsUtil.pack(renderDetailsEntry.rightInt(), renderDetailsEntry.rightInt());
-				newOptimizedModel.render(vertexConsumer, newMatrixStack.last(), light);
+				newOptimizedModel.render(vertexConsumer, newMatrixStack.last(), renderStage.isFullBrightness ? 1 : (float) renderDetailsEntry.rightInt() / 0xF);
 			}));
 		}));
 	}
