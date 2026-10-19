@@ -124,8 +124,7 @@ tasks {
 				"-Xlint:all",
 				"-Xlint:-serial",     // No Java serialization
 				"-Xlint:-processing", // Lombok annotation processor noise
-				"-Xlint:-this-escape", // Safe: schema constructor pattern
-				"-Xmaxerrs", "100000" // TODO remove after the 26.2 port
+				"-Xlint:-this-escape" // Safe: schema constructor pattern
 			)
 		)
 	}
