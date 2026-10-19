@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -23,12 +24,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
-
 public class BlockEscalatorStep extends BlockEscalatorBase {
 
 	public static final BooleanProperty DIRECTION = BooleanProperty.create("direction");
@@ -39,21 +34,11 @@ public class BlockEscalatorStep extends BlockEscalatorBase {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
-//? } else {
-	/*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-//
-*///? }
 		if (direction == Direction.UP && !(world.getBlockState(pos.above()).getBlock() instanceof BlockEscalatorSide)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-//? if >= 1.21.4 {
 			return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-//? } else {
-			/*return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
-//
-*///? }
 		}
 	}
 

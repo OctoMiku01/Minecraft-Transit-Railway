@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -16,12 +17,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.mtr.registry.BlockEntityTypes;
 import org.mtr.registry.Items;
 
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
-
 public class BlockLiftDoorOdd extends BlockPSDAPGDoorBase implements TripleHorizontalBlock {
 
 	public BlockLiftDoorOdd(BlockBehaviour.Properties settings) {
@@ -29,13 +24,8 @@ public class BlockLiftDoorOdd extends BlockPSDAPGDoorBase implements TripleHoriz
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
 		return TripleHorizontalBlock.updateShape(state, direction, neighborState.is(this), super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random));
-//? } else {
-	/*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-		return TripleHorizontalBlock.updateShape(state, direction, neighborState.is(this), super.updateShape(state, direction, neighborState, world, pos, neighborPos));
-*///? }
 	}
 
 	@Override

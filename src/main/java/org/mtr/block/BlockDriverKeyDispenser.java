@@ -4,8 +4,6 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,6 +22,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.jspecify.annotations.Nullable;
@@ -37,10 +38,6 @@ import org.mtr.item.ItemDepotDriverKey;
 import org.mtr.packet.PacketOpenBlockEntityScreen;
 import org.mtr.registry.BlockEntityTypes;
 import org.mtr.registry.Items;
-
-//? if >= 1.21.4 {
-import net.minecraft.world.level.redstone.Orientation;
-//? }
 
 public class BlockDriverKeyDispenser extends BlockWaterloggable implements EntityBlock {
 
@@ -61,12 +58,7 @@ public class BlockDriverKeyDispenser extends BlockWaterloggable implements Entit
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, @Nullable Orientation wireOrientation, boolean notify) {
-//? } else {
-  /*public void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
-//
-*///? }
 		final boolean hasPower = isReceivingRedstonePower(world, pos) || isReceivingRedstonePower(world, pos.above());
 		final boolean isTriggered = state.getValue(TRIGGERED);
 		if (hasPower && !isTriggered) {

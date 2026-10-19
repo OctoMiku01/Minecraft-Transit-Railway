@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -17,12 +18,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jspecify.annotations.Nullable;
 
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
-
 public abstract class BlockPIDSVerticalBase extends BlockPIDSBase implements IBlock {
 
 	public BlockPIDSVerticalBase(BlockBehaviour.Properties settings, int maxArrivals) {
@@ -30,13 +25,8 @@ public abstract class BlockPIDSVerticalBase extends BlockPIDSBase implements IBl
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
 		return DoubleVerticalBlock.updateShape(state, direction, neighborState.is(this), super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random));
-//? } else {
-  /*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-		return DoubleVerticalBlock.updateShape(state, direction, neighborState.is(this), super.updateShape(state, direction, neighborState, world, pos, neighborPos));
-*///? }
 	}
 
 	@Override

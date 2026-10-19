@@ -3,6 +3,7 @@ package org.mtr.item;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
@@ -21,13 +22,6 @@ import org.mtr.packet.PacketOpenDashboardScreen;
 
 import java.util.Comparator;
 
-//? if >= 1.21.4 {
-import net.minecraft.world.InteractionResult;
-//? } else {
-/*import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.item.ItemStack;
-*///? }
-
 public class ItemDashboard extends Item {
 
 	private final TransportMode transportMode;
@@ -40,12 +34,7 @@ public class ItemDashboard extends Item {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	public InteractionResult use(Level world, Player user, InteractionHand hand) {
-//? } else {
-	/*public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
-//
-*///? }
 		if (Keys.DEBUG && user.isShiftKeyDown()) {
 			if (world.isClientSide()) {
 				CustomResourceLoader.reload();

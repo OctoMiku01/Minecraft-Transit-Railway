@@ -25,12 +25,7 @@ public class BlockStationColorGlass extends BlockStationColor {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected boolean propagatesSkylightDown(BlockState state) {
-//? } else {
-	/*protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-//
-*///? }
 		return true;
 	}
 }

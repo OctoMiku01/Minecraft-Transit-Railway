@@ -18,12 +18,7 @@ public abstract class BlockPSDAPGBase extends BlockDirectionalDoubleBlockBase {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state, boolean includeData) {
-//? } else {
-	/*public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-//
-*///? }
 		return new ItemStack(asItem());
 	}
 

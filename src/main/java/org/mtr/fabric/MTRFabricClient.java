@@ -1,7 +1,5 @@
 package org.mtr.fabric;
 
-//? if fabric {
-
 import net.fabricmc.api.ClientModInitializer;
 import org.mtr.MTRClient;
 
@@ -13,4 +11,3 @@ public final class MTRFabricClient implements ClientModInitializer {
 	}
 }
 
-//? }

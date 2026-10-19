@@ -13,12 +13,12 @@
 At runtime, model data goes through five stages:
 
 1. **Resource reload and registration**
-   - Entry point: `common/src/main/java/org/mtr/client/CustomResourceLoader.java` -> `reload()`.
+   - Entry point: `src/main/java/org/mtr/client/CustomResourceLoader.java` -> `reload()`.
    - Clears caches, reads resource-pack manifests, creates `VehicleResource`/`RailResource`/`ObjectResource`/`LiftResource` entries.
 
 2. **Model-loader dispatch (OBJ vs Blockbench)**
-   - Vehicle path: `common/src/main/java/org/mtr/resource/VehicleModel.java`.
-   - Rail/object path: `common/src/main/java/org/mtr/resource/StoredModelResourceBase.java`.
+   - Vehicle path: `src/main/java/org/mtr/resource/VehicleModel.java`.
+   - Rail/object path: `src/main/java/org/mtr/resource/StoredModelResourceBase.java`.
    - Dispatches to `ObjModelLoader` or `BlockbenchModelLoader`.
 
 3. **Async parsing on worker threads**
@@ -83,7 +83,7 @@ This ensures preload does not race with unfinished parse tasks. Without this wai
 
 ## 4. Worker thread model
 
-`common/src/main/java/org/mtr/render/WorkerThread.java` is the shared background coordinator.
+`src/main/java/org/mtr/render/WorkerThread.java` is the shared background coordinator.
 
 ### Dynamic texture queue
 
@@ -126,7 +126,7 @@ This ensures preload does not race with unfinished parse tasks. Without this wai
 
 ### Current flow
 
-Rail rendering happens in `common/src/main/java/org/mtr/render/RenderRails.java`.
+Rail rendering happens in `src/main/java/org/mtr/render/RenderRails.java`.
 
 - rail selection and mode dispatch (`TRAIN`/`BOAT`/`CABLE_CAR`/`AIRPLANE`)
 - textured rail quads and style-specific 3D model rendering
@@ -182,14 +182,14 @@ Tracked in: [MIGRATIONS.md](MIGRATIONS.md), [PENDING.md](PENDING.md), and [PERFO
 
 ## 9. File index (quick jump)
 
-- `common/src/main/java/org/mtr/client/CustomResourceLoader.java`
-- `common/src/main/java/org/mtr/model/ModelLoaderBase.java`
-- `common/src/main/java/org/mtr/model/ObjModelLoader.java`
-- `common/src/main/java/org/mtr/model/BlockbenchModelLoader.java`
-- `common/src/main/java/org/mtr/resource/VehicleModel.java`
-- `common/src/main/java/org/mtr/resource/StoredModelResourceBase.java`
-- `common/src/main/java/org/mtr/render/WorkerThread.java`
-- `common/src/main/java/org/mtr/render/MainRenderer.java`
-- `common/src/main/java/org/mtr/model/NewOptimizedModel.java`
-- `common/src/main/java/org/mtr/render/RenderRails.java`
-- `common/src/main/java/org/mtr/tool/CullingHelper.java`
+- `src/main/java/org/mtr/client/CustomResourceLoader.java`
+- `src/main/java/org/mtr/model/ModelLoaderBase.java`
+- `src/main/java/org/mtr/model/ObjModelLoader.java`
+- `src/main/java/org/mtr/model/BlockbenchModelLoader.java`
+- `src/main/java/org/mtr/resource/VehicleModel.java`
+- `src/main/java/org/mtr/resource/StoredModelResourceBase.java`
+- `src/main/java/org/mtr/render/WorkerThread.java`
+- `src/main/java/org/mtr/render/MainRenderer.java`
+- `src/main/java/org/mtr/model/NewOptimizedModel.java`
+- `src/main/java/org/mtr/render/RenderRails.java`
+- `src/main/java/org/mtr/tool/CullingHelper.java`

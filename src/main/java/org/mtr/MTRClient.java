@@ -3,12 +3,12 @@ package org.mtr;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
@@ -405,12 +405,7 @@ public final class MTRClient {
 	}
 
 	public static float getGameTimeDeltaTicks() {
-//? if >= 1.21.4 {
 		return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
-//? } else {
-		/*return Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
-//
-*///? }
 	}
 
 	public static void processUniqueWorldId(String uniqueWorldId) {

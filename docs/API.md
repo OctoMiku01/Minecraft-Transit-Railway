@@ -6,7 +6,7 @@
 
 - These endpoints are served by embedded/local servlet handlers in the mod runtime.
 - Most routes are intended for in-game UI tools, not for external public internet exposure.
-- Behaviour described here is based on current handlers in `common/src/main/java/org/mtr/servlet/`.
+- Behaviour described here is based on current handlers in `src/main/java/org/mtr/servlet/`.
 
 ## Servlet map
 
@@ -90,5 +90,5 @@
 
 ## Related runtime entry points
 
-- Message fan-out and response processing: `common/src/main/java/org/mtr/servlet/MinecraftOperationProcessor.java`
-- Client/server packet bridge abstractions: `common/src/main/java/org/mtr/packet/`
+- Message fan-out and response processing: `src/main/java/org/mtr/servlet/MinecraftOperationProcessor.java`
+- Client/server packet bridge abstractions: `src/main/java/org/mtr/packet/`

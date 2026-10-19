@@ -4,8 +4,6 @@ import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
@@ -18,6 +16,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -26,6 +25,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -33,14 +34,7 @@ import org.jspecify.annotations.Nullable;
 import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.registry.Items;
 
-import java.util.List;
-
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
 import java.util.function.Consumer;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
 
 public abstract class BlockLiftPanelBase extends Block implements IBlock, TripleHorizontalBlock, EntityBlock, IBlockTooltip {
 
@@ -54,19 +48,9 @@ public abstract class BlockLiftPanelBase extends Block implements IBlock, Triple
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
-//? } else {
-	/*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-//
-*///? }
 		if (isOdd) {
-//? if >= 1.21.4 {
 			return TripleHorizontalBlock.updateShape(state, direction, neighborState.is(this), super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random));
-//? } else {
-			/*return TripleHorizontalBlock.updateShape(state, direction, neighborState.is(this), super.updateShape(state, direction, neighborState, world, pos, neighborPos));
-//
-*///? }
 		} else {
 			if (IBlock.getSideDirection(state) == direction && !neighborState.is(this)) {
 				return Blocks.AIR.defaultBlockState();

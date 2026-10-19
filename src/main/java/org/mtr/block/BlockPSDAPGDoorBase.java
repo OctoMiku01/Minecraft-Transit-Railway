@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -32,12 +33,6 @@ import org.mtr.data.IGui;
 import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.render.RenderVehicleHelper;
 
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
-
 public abstract class BlockPSDAPGDoorBase extends BlockPSDAPGBase implements EntityBlock {
 
 	public static final BooleanProperty END = BooleanProperty.create("end");
@@ -48,21 +43,11 @@ public abstract class BlockPSDAPGDoorBase extends BlockPSDAPGBase implements Ent
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
-//? } else {
-	/*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-//
-*///? }
 		if (IBlock.getSideDirection(state) == direction && !neighborState.is(this)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-//? if >= 1.21.4 {
 			final BlockState superState = super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-//? } else {
-			/*final BlockState superState = super.updateShape(state, direction, neighborState, world, pos, neighborPos);
-//
-*///? }
 			if (superState.getBlock().equals(Blocks.AIR)) {
 				return superState;
 			} else {

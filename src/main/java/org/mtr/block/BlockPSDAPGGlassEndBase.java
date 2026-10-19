@@ -6,6 +6,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -17,12 +18,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
-
 public abstract class BlockPSDAPGGlassEndBase extends BlockPSDAPGGlassBase {
 
 	public static final EnumProperty<EnumPSDAPGGlassEndSide> TOUCHING_LEFT = EnumProperty.create("touching_left", EnumPSDAPGGlassEndSide.class);
@@ -33,13 +28,8 @@ public abstract class BlockPSDAPGGlassEndBase extends BlockPSDAPGGlassBase {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
 		final BlockState superState = super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-//? } else {
-	/*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-		final BlockState superState = super.updateShape(state, direction, neighborState, world, pos, neighborPos);
-*///? }
 		if (superState.getBlock().equals(Blocks.AIR)) {
 			return superState;
 		} else {

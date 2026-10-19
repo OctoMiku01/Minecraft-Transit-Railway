@@ -2,8 +2,6 @@ package org.mtr.block;
 
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -19,6 +17,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -44,12 +44,7 @@ public class BlockEyeCandy extends BlockWaterloggable implements EntityBlock {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected VoxelShape getOcclusionShape(BlockState state) {
-//? } else {
-	/*protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-//
-*///? }
 		// Prevents culling optimization mods from culling our fully transparent block
 		return Shapes.empty();
 	}

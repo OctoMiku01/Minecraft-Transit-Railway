@@ -1,6 +1,5 @@
 package org.mtr.screen;
 
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -8,6 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import org.mtr.client.IDrawing;
 import org.mtr.config.Config;
 import org.mtr.core.tool.Utilities;
@@ -109,11 +109,6 @@ public class BetaWarningScreen extends ScreenBase implements IGui, Utilities {
 	}
 
 	private static void drawSprite(GuiGraphicsExtractor context, Identifier resourceLocation, int x, int y, int width, int height) {
-//? if >= 1.21.4 {
 		context.blitSprite(RenderPipelines.GUI_TEXTURED, resourceLocation, x, y, width, height);
-//? } else {
-		/*context.blitSprite(resourceLocation, x, y, width, height);
-//
-*///? }
 	}
 }

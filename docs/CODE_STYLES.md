@@ -3,9 +3,9 @@
 > Conventions enforced across the Minecraft Transit Railway codebase. New rules land here as
 > they're agreed.
 
-These rules apply to **both** the Java code in `common/src/main/java/org/mtr/...` and the
+These rules apply to **both** the Java code in `src/main/java/org/mtr/...` and the
 Angular frontend in `website/` unless otherwise noted. Anything not listed here defers to the
-project's compiler/linter settings (Java 21 `javac` warnings, Angular CLI/TypeScript checks).
+project's compiler/linter settings (Java 25 `javac` warnings, Angular CLI/TypeScript checks).
 
 For an overview of the system the rules apply to, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -17,11 +17,11 @@ in new build logic. When editing build scripts, prefer:
 - Explicit types for task configurations (`tasks.withType<JavaCompile>()`)
 - Named arguments for filter/map operations (see existing `generateVersion` task)
 
-Multi-platform and multi-version builds are managed by **Stonecutter** (`stonecutter.gradle.kts`,
-`settings.gradle.kts`). Platform-specific code blocks use Stonecutter directives
-(`//? if fabric {` / `//? if neoforge {`). All variants compile against **official Mojang
-mappings** — do not use Fabric Yarn names in shared code. See [ARCHITECTURE.md](ARCHITECTURE.md)
-for the full version/loader matrix and [BUILD.md](BUILD.md) for build commands.
+The build is managed by **Stonecutter** (`stonecutter.gradle.kts`, `settings.gradle.kts`) and
+currently targets Minecraft 26.2 with Fabric only. If more versions or loaders are added, code
+that differs between them uses Stonecutter directives (for example `//? if fabric {`). The code
+uses the **official Mojang names** shipped with Minecraft 26.x. See [ARCHITECTURE.md](ARCHITECTURE.md)
+and [BUILD.md](BUILD.md) for build commands.
 
 ## 1. Naming
 
@@ -313,7 +313,7 @@ classloader along.
 	  classes where the boilerplate is otherwise pure noise. Records are still preferred for
 	  immutable value types in Java 21.
   - The schema-generated classes under
-    [`common/src/main/java/org/mtr/generated/`](../common/src/main/java/org/mtr/generated/)
+    [`src/main/java/org/mtr/generated/`](../src/main/java/org/mtr/generated/)
     are Lombok-free by design — they're produced by generation tasks in `buildSrc/`.
 
 ### 3.7 JSpecify nullness
@@ -332,7 +332,7 @@ import org.jspecify.annotations.NullMarked;
 - Do not use `Optional` for fields or method parameters — `Optional` is for return values
   only (Java's official guidance). Use `@Nullable` instead.
 - The schema-generated classes under
-  [`common/src/main/java/org/mtr/generated/`](../common/src/main/java/org/mtr/generated/) and
+  [`src/main/java/org/mtr/generated/`](../src/main/java/org/mtr/generated/) and
   the generated `package-info.java` files are also JSpecify-annotated; the generator
   task emits the correct imports automatically.
 - The frontend's TypeScript counterpart is `strictNullChecks: true` (already on by default
@@ -373,7 +373,7 @@ templates.
 
 ### 3.11 Schema-driven code is generated, not hand-written
 
-Anything under `common/src/main/java/org/mtr/generated/` and
+Anything under `src/main/java/org/mtr/generated/` and
 `website/src/app/entity/generated/` is produced by the `Generator` task in `buildSrc/`. **Do
 not edit these files by hand** — they will be overwritten on the next build. Edit the
 authoring JSON schema under `buildSrc/src/main/resources/schema/<area>/` instead, then run

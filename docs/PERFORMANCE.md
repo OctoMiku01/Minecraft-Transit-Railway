@@ -22,15 +22,15 @@
 Resource loading happens on `/reload`, when the player joins a world with a custom resource
 pack, when the resource pack creator submits a preview, and in the in-game previewer. The
 hot path is `CustomResourceLoader.reload()`
-([`common/src/main/java/org/mtr/client/CustomResourceLoader.java:60-187`](../common/src/main/java/org/mtr/client/CustomResourceLoader.java)).
+([`src/main/java/org/mtr/client/CustomResourceLoader.java:60-187`](../src/main/java/org/mtr/client/CustomResourceLoader.java)).
 
 ### 1.1 Resource files are decoded to `String`, then re-encoded to `InputStream`
 
 **Where**
-- [`CustomResourceLoader.readResource(Identifier)`](../common/src/main/java/org/mtr/client/CustomResourceLoader.java) at lines 302–323.
-- [`ObjModelLoader.loadModel(...)`](../common/src/main/java/org/mtr/model/ObjModelLoader.java) at lines 26–52, in particular `IOUtils.toInputStream(objString, StandardCharsets.UTF_8)`.
-- [`VehicleModel`](../common/src/main/java/org/mtr/resource/VehicleModel.java) — every constructor does `Utilities.parseJson(resourceProvider.get(...))` and then `getModelLoaderBase(...)` which re-wraps strings.
-- [`ResourceManagerHelper.readResource(Identifier) -> String`](../common/src/main/java/org/mtr/resource/ResourceManagerHelper.java) lines 32–42.
+- [`CustomResourceLoader.readResource(Identifier)`](../src/main/java/org/mtr/client/CustomResourceLoader.java) at lines 302–323.
+- [`ObjModelLoader.loadModel(...)`](../src/main/java/org/mtr/model/ObjModelLoader.java) at lines 26–52, in particular `IOUtils.toInputStream(objString, StandardCharsets.UTF_8)`.
+- [`VehicleModel`](../src/main/java/org/mtr/resource/VehicleModel.java) — every constructor does `Utilities.parseJson(resourceProvider.get(...))` and then `getModelLoaderBase(...)` which re-wraps strings.
+- [`ResourceManagerHelper.readResource(Identifier) -> String`](../src/main/java/org/mtr/resource/ResourceManagerHelper.java) lines 32–42.
 
 **Why it costs**
 
@@ -68,7 +68,7 @@ then delete the `String` API once nothing calls it.
 
 ### 1.2 OBJ parsing happens on the calling thread, only mesh build is async
 
-**Where** — [`ObjModelLoader.loadModel`](../common/src/main/java/org/mtr/model/ObjModelLoader.java) lines 26–52.
+**Where** — [`ObjModelLoader.loadModel`](../src/main/java/org/mtr/model/ObjModelLoader.java) lines 26–52.
 
 **Why it costs**
 
@@ -87,7 +87,7 @@ inside the `worker.submit(...)` block. Note this requires the `mtlResolver` and
 for a `ConcurrentHashMap` or pre-resolve the strings on the main thread before submitting
 (safer, no concurrency surface).
 
-Apply the same change to `BlockbenchModelLoader` (`common/src/main/java/org/mtr/model/BlockbenchModelLoader.java`) — its `loadModel` currently parses the entire `.bbmodel` JSON on the caller thread.
+Apply the same change to `BlockbenchModelLoader` (`src/main/java/org/mtr/model/BlockbenchModelLoader.java`) — its `loadModel` currently parses the entire `.bbmodel` JSON on the caller thread.
 
 **Risk / scope** — Low. The worker executor is `Executors.newVirtualThreadPerTaskExecutor()` so it scales fine.
 
@@ -137,7 +137,7 @@ least-recently-read entry.
 
 ### 1.5 `validateDataset` uses `ObjectOpenHashSet` of `String` ids but iterates as `List`
 
-**Where** — [`CustomResourceLoader.validateDataset`](../common/src/main/java/org/mtr/client/CustomResourceLoader.java) lines 290–300.
+**Where** — [`CustomResourceLoader.validateDataset`](../src/main/java/org/mtr/client/CustomResourceLoader.java) lines 290–300.
 
 Minor: works correctly but allocates strings for `getId.apply(data)` twice in the duplicate
 case. Acceptable; flagged only for completeness.
@@ -185,12 +185,12 @@ not regress.
 The dynamic texture path is `DynamicTextureCache.getResource(...)` →
 `MainRenderer.WORKER_THREAD.scheduleDynamicTextures(...)` →
 `WorkerThread` polls → main-thread `registerTexture`.
-([`DynamicTextureCache.java:243-321`](../common/src/main/java/org/mtr/client/DynamicTextureCache.java),
-[`WorkerThread.java:30-88`](../common/src/main/java/org/mtr/render/WorkerThread.java).)
+([`DynamicTextureCache.java:243-321`](../src/main/java/org/mtr/client/DynamicTextureCache.java),
+[`WorkerThread.java:30-88`](../src/main/java/org/mtr/render/WorkerThread.java).)
 
 ### 2.1 BUG — only one dynamic-texture task survives per worker tick
 
-**Where** — [`WorkerThread.dynamicTextureQueue`](../common/src/main/java/org/mtr/render/WorkerThread.java) line 31, and `scheduleDynamicTextures` line 86–88.
+**Where** — [`WorkerThread.dynamicTextureQueue`](../src/main/java/org/mtr/render/WorkerThread.java) line 31, and `scheduleDynamicTextures` line 86–88.
 
 ```java
 private final AtomicReference<@Nullable Runnable> dynamicTextureQueue = new AtomicReference<>();
@@ -235,7 +235,7 @@ helper at lines 102–111.
 
 ### 2.2 Font fallback scans every system font, per missing character
 
-**Where** — [`DynamicTextureCache.getTextPixels`](../common/src/main/java/org/mtr/client/DynamicTextureCache.java) lines 188–196.
+**Where** — [`DynamicTextureCache.getTextPixels`](../src/main/java/org/mtr/client/DynamicTextureCache.java) lines 188–196.
 
 ```java
 for (final Font testFont : GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts()) {
@@ -287,7 +287,7 @@ case.
 
 ### 2.4 Main-thread image downscale loop
 
-**Where** — [`DynamicTextureCache.getResource` lines 289–299](../common/src/main/java/org/mtr/client/DynamicTextureCache.java).
+**Where** — [`DynamicTextureCache.getResource` lines 289–299](../src/main/java/org/mtr/client/DynamicTextureCache.java).
 
 When a generated `NativeImage` exceeds `newMaxImageSize`, the code allocates a new image
 and copies pixels with:
@@ -379,11 +379,11 @@ and verify each is intentional. Document the contract on the method.
 
 The render path is `MainRenderer.render` → `RenderVehicles.render` / `RenderLifts.render` /
 `RenderRails.render` → schedule → drain (lines 71–137 of
-[`MainRenderer.java`](../common/src/main/java/org/mtr/render/MainRenderer.java)).
+[`MainRenderer.java`](../src/main/java/org/mtr/render/MainRenderer.java)).
 
 ### 3.1 `MODEL_RENDERS` cleared and rebuilt every frame, with `computeIfAbsent` chains
 
-**Where** — [`MainRenderer.java:83-84, 105-106, 139-145`](../common/src/main/java/org/mtr/render/MainRenderer.java).
+**Where** — [`MainRenderer.java:83-84, 105-106, 139-145`](../src/main/java/org/mtr/render/MainRenderer.java).
 
 `MODEL_RENDERS` and `MODEL_RENDERS_TRANSLUCENT` are `Object2ObjectOpenHashMap<NewOptimizedModel, Object2ObjectOpenHashMap<RenderStage, ObjectArrayList<...>>>`. Every frame:
 
@@ -410,8 +410,8 @@ view, peak first-frame allocations are in the thousands.
 
 ### 3.2 Per-instance GPU state changes in `renderModel`
 
-**Where** — [`MainRenderer.renderModel`](../common/src/main/java/org/mtr/render/MainRenderer.java) lines 186–205 and
-[`NewOptimizedModel.render`](../common/src/main/java/org/mtr/model/NewOptimizedModel.java) lines 30–42.
+**Where** — [`MainRenderer.renderModel`](../src/main/java/org/mtr/render/MainRenderer.java) lines 186–205 and
+[`NewOptimizedModel.render`](../src/main/java/org/mtr/model/NewOptimizedModel.java) lines 30–42.
 
 For every instance of every model, `NewOptimizedModel.render` does:
 
@@ -451,7 +451,7 @@ laptop iGPUs this is the dominant cost.
 
 ### 3.3 `QueuedRenderLayer.values()` allocated per frame
 
-**Where** — [`MainRenderer.render`](../common/src/main/java/org/mtr/render/MainRenderer.java) lines 109–117.
+**Where** — [`MainRenderer.render`](../src/main/java/org/mtr/render/MainRenderer.java) lines 109–117.
 
 ```java
 for (int j = 0; j < QueuedRenderLayer.values().length; j++) {
@@ -472,7 +472,7 @@ any other enum used in render loops.
 
 ### 3.4 `cancelRender` is O(stages × priorities × map.size)
 
-**Where** — [`MainRenderer.cancelRender`](../common/src/main/java/org/mtr/render/MainRenderer.java) lines 157–160.
+**Where** — [`MainRenderer.cancelRender`](../src/main/java/org/mtr/render/MainRenderer.java) lines 157–160.
 
 ```java
 RENDERS.forEach(renderForPriority -> renderForPriority.forEach(renderForPriorityAndQueuedRenderLayer -> renderForPriorityAndQueuedRenderLayer.remove(identifier)));
@@ -493,7 +493,7 @@ once and removes all identifiers in one pass.
 
 ### 3.5 Heavy `Collectors.toCollection` chains inside per-vehicle loops
 
-**Where** — [`RenderVehicles.render`](../common/src/main/java/org/mtr/render/RenderVehicles.java) lines 66–75.
+**Where** — [`RenderVehicles.render`](../src/main/java/org/mtr/render/RenderVehicles.java) lines 66–75.
 
 ```java
 final ObjectArrayList<...> vehiclePropertiesList = vehicle.getSmoothedVehicleCarsAndPositions(millisElapsed)
@@ -523,7 +523,7 @@ vehicles by clearing between iterations.
 
 ### 3.6 `getInterchangeRouteNames` allocates per call
 
-**Where** — [`MainRenderer.getInterchangeRouteNames`](../common/src/main/java/org/mtr/render/MainRenderer.java) lines 162–166.
+**Where** — [`MainRenderer.getInterchangeRouteNames`](../src/main/java/org/mtr/render/MainRenderer.java) lines 162–166.
 
 `new ObjectArrayList<>()` plus `IGui.mergeStationsWithCommas` (which itself iterates +
 concatenates). Called per station-name sign per frame.
@@ -537,7 +537,7 @@ or language setting changes, both rare. Invalidate from the same hook that calls
 ### 3.7 Rendering pipeline does not skip work for off-screen / far-away vehicles early enough
 
 The occlusion-culling integration runs on the worker thread (see
-[`WorkerThread.scheduleVehicles`](../common/src/main/java/org/mtr/render/WorkerThread.java)
+[`WorkerThread.scheduleVehicles`](../src/main/java/org/mtr/render/WorkerThread.java)
 lines 74–84), but the main thread in `RenderVehicles.render` still walks **every** vehicle
 to compute smoothed positions and stream lists before checking
 `CullingHelper.getDistanceFromCamera` (line 99). Move the distance check to be the very
@@ -567,11 +567,11 @@ add an `assert` and a debug log when `vertexBuffer == null` to surface dangling 
 ### 3.10 Per-rail segment rendering — abrupt cutoffs and per-segment churn
 
 **Where**
-- [`RenderRails.render`](../common/src/main/java/org/mtr/render/RenderRails.java) — rail
+- [`RenderRails.render`](../src/main/java/org/mtr/render/RenderRails.java) — rail
   collection and dispatch loop.
-- [`RenderRails.renderWithinRenderDistance`](../common/src/main/java/org/mtr/render/RenderRails.java) — the per-segment walk.
-- [`RenderRails.renderRailStandard`](../common/src/main/java/org/mtr/render/RenderRails.java) — `IDrawing.drawTexture` emission per segment.
-- [`CullingHelper.getDistanceFromCameraToBox`](../common/src/main/java/org/mtr/tool/CullingHelper.java) — the new whole-object cull helper.
+- [`RenderRails.renderWithinRenderDistance`](../src/main/java/org/mtr/render/RenderRails.java) — the per-segment walk.
+- [`RenderRails.renderRailStandard`](../src/main/java/org/mtr/render/RenderRails.java) — `IDrawing.drawTexture` emission per segment.
+- [`CullingHelper.getDistanceFromCameraToBox`](../src/main/java/org/mtr/tool/CullingHelper.java) — the new whole-object cull helper.
 
 **Why it costs (and looks bad)**
 
@@ -646,7 +646,7 @@ of writing this document; the rest are tracked in `PENDING.md`.
 
 ### 4.2 Worker thread sleeps 10 ms even when work is pending
 
-**Where** — [`WorkerThread.start`](../common/src/main/java/org/mtr/render/WorkerThread.java) lines 35–58.
+**Where** — [`WorkerThread.start`](../src/main/java/org/mtr/render/WorkerThread.java) lines 35–58.
 
 The worker loop sleeps 10 ms unconditionally between iterations, even after a long task
 just completed. This bounds dynamic-texture throughput to 100 tasks/s regardless of how
@@ -656,7 +656,7 @@ genuinely idle.
 
 ### 4.3 `Identifier.of("")` and `Identifier.of(MTR.MOD_ID, "id_" + MTR.randomString())` allocations
 
-**Where** — [`MainRenderer.scheduleRender`](../common/src/main/java/org/mtr/render/MainRenderer.java) line 154, and [`DynamicTextureCache.getResource`](../common/src/main/java/org/mtr/client/DynamicTextureCache.java) line 302.
+**Where** — [`MainRenderer.scheduleRender`](../src/main/java/org/mtr/render/MainRenderer.java) line 154, and [`DynamicTextureCache.getResource`](../src/main/java/org/mtr/client/DynamicTextureCache.java) line 302.
 
 `Identifier.of("")` creates a new `Identifier` per call from
 `MainRenderer.scheduleRender(QueuedRenderLayer, ScheduledRender)`. Hoist to

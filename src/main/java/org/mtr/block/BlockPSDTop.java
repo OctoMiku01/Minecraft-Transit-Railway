@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -29,12 +30,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.mtr.item.ItemBrush;
 import org.mtr.registry.BlockEntityTypes;
 import org.mtr.registry.Items;
-
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
 
 public class BlockPSDTop extends Block implements IBlock, EntityBlock {
 
@@ -83,12 +78,7 @@ public class BlockPSDTop extends Block implements IBlock, EntityBlock {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state, boolean includeData) {
-//? } else {
-	/*public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-//
-*///? }
 		return new ItemStack(asItem());
 	}
 
@@ -103,12 +93,7 @@ public class BlockPSDTop extends Block implements IBlock, EntityBlock {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
-//? } else {
-	/*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-//
-*///? }
 		if (direction == Direction.DOWN && IBlock.getStatePropertySafe(state, PERSISTENT) == EnumPersistent.NONE && !(neighborState.getBlock() instanceof BlockPSDAPGBase)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {

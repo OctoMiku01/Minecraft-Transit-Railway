@@ -6,7 +6,7 @@
 
 MTR maintains shared data models that must stay consistent across:
 
-- Java runtime code in `common/`
+- Java runtime code in `src/`
 - TypeScript UI code in `website/`
 
 To avoid hand-maintaining duplicate model classes, the project generates source code from JSON schema definitions.
@@ -23,9 +23,9 @@ Authoring files live in:
 
 | Target                 | Output path                                        |
 |------------------------|----------------------------------------------------|
-| Java                   | `common/src/main/java/org/mtr/generated/`          |
-| Java (config subset)   | `common/src/main/java/org/mtr/generated/config/`   |
-| Java (resource subset) | `common/src/main/java/org/mtr/generated/resource/` |
+| Java                   | `src/main/java/org/mtr/generated/`          |
+| Java (config subset)   | `src/main/java/org/mtr/generated/config/`   |
+| Java (resource subset) | `src/main/java/org/mtr/generated/resource/` |
 | TypeScript             | `website/src/app/entity/generated/`                |
 
 ## Regeneration workflow

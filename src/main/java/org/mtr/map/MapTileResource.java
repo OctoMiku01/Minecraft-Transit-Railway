@@ -80,12 +80,7 @@ public final class MapTileResource extends CachedFileResource {
 					if (mapType == MapTileProvider.MapType.DYNAMIC && y < topY) {
 						int currentY = y;
 						while (true) {
-//? if >= 1.21.4 {
 							final int minY = world.getMinY();
-//? } else {
-							/*final int minY = world.getMinBuildHeight();
-//
-*///? }
 							if (currentY < minY || !world.isEmptyBlock(new BlockPos(blockX, currentY, blockZ))) {
 								break;
 							} else {

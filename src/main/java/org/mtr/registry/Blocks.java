@@ -313,9 +313,7 @@ public final class Blocks {
 		RegistryServer.registerItem(registryName, settings -> {
 			final Block block = objectHolder.get();
 			return blockItemFactory.apply(block, settings
-//? if >= 1.21.4 {
 					.overrideDescription(formatBlockItemTranslationKey(block, registryName))
-//? }
 			);
 		}, itemGroupRegistryName);
 		return objectHolder;

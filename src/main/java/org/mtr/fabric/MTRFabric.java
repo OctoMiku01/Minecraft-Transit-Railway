@@ -1,7 +1,5 @@
 package org.mtr.fabric;
 
-//? if fabric {
-
 import net.fabricmc.api.ModInitializer;
 import org.mtr.MTR;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -20,4 +18,3 @@ public final class MTRFabric implements ModInitializer {
 	}
 }
 
-//? }

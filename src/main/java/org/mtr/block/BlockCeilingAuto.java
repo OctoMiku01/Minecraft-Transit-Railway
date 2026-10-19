@@ -6,17 +6,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
 
 public class BlockCeilingAuto extends BlockCeiling {
 
@@ -33,13 +28,8 @@ public class BlockCeilingAuto extends BlockCeiling {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
 		return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random).setValue(LIGHT, hasLight(IBlock.getStatePropertySafe(state, FACING), pos));
-//? } else {
-  /*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-		return super.updateShape(state, direction, neighborState, world, pos, neighborPos).setValue(LIGHT, hasLight(IBlock.getStatePropertySafe(state, FACING), pos));
-*///? }
 	}
 
 	@Override

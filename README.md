@@ -76,7 +76,7 @@ You can create a free account to start translating.
 
 ### Building
 
-To build the mod, this project uses **Stonecutter** for managing multi-platform (Fabric + NeoForge) and multi-version builds.
+The mod is built for **Minecraft 26.2** with **Fabric** and requires **JDK 25**. The build is set up with **Stonecutter** so that more versions can be added later.
 
 The build resolves `org.mtr:transport-simulation-core:+` from GitHub Packages. For local development, create a GitHub [personal access token (classic)](https://github.com/settings/tokens) with at least the `read:packages` scope, then add your credentials to your Gradle user-home properties file:
 
@@ -93,21 +93,16 @@ From the repository root:
 
 ```powershell
 # Setup files (one-time)
-.\gradlew.bat setupFiles -PcrowdinApiKey="<key>" -PpatreonApiKey="<key>"
+.\gradlew.bat :26.2-fabric:setupFiles
 
-# Set active version and build Fabric
-.\gradlew.bat "Set active project to 1.21.4-fabric"
-.\gradlew.bat 1.21.4-fabric:build
-
-# Set active version and build NeoForge
-.\gradlew.bat "Set active project to 1.21.4-neoforge"
-.\gradlew.bat 1.21.4-neoforge:build
+# Build
+.\gradlew.bat :26.2-fabric:build
 ```
 
-The mod JAR files should be generated in the following directory:
+The mod JAR file is generated at:
 
 ```
-<root>/build/release/MTR-<fabric|neoforge>-<mod_version>+<minecraft_version>.jar
+<root>/versions/26.2-fabric/build/libs/mtr-<mod_version>+26.2-fabric.jar
 ```
 
 For full build instructions, see [docs/BUILD.md](docs/BUILD.md).

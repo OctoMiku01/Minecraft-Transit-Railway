@@ -87,11 +87,9 @@ tasks {
 			"minecraft_version" to sc.current.version,
 		)
 
-		filesMatching(listOf("fabric.mod.json", "META-INF/neoforge.mods.toml", "META-INF/mods.toml")) {
+		filesMatching("fabric.mod.json") {
 			expand(properties)
 		}
-
-		exclude("**/neoforge.mods.toml")
 	}
 
 	test {

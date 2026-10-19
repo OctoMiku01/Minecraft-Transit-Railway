@@ -35,12 +35,7 @@ public final class ScheduledSound {
 	public static void schedule(BlockPos blockPos, @Nullable SoundEvent soundEvent, float gain, float pitch) {
 		final LocalPlayer clientPlayerEntity = Minecraft.getInstance().player;
 		if (soundEvent != null && clientPlayerEntity != null) {
-//? if >= 1.21.4 {
 			final String currentKey = String.format("%s_%s_%s", soundEvent.location(), gain, pitch);
-//? } else {
-		/*final String currentKey = String.format("%s_%s_%s", soundEvent.getLocation(), gain, pitch);
-//
-*///? }
 
 			final ScheduledSound scheduledSound = SCHEDULED_SOUNDS.computeIfAbsent(currentKey, key -> new ScheduledSound(blockPos, soundEvent, gain, pitch));
 			final BlockPos clientPos = clientPlayerEntity.blockPosition();

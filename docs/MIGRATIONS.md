@@ -29,8 +29,8 @@
 **State**
 
 The runtime always pays the migration cost: every load goes through
-[`CustomResourcesConverter.convert(...)`](../common/src/main/java/org/mtr/legacy/resource/CustomResourcesConverter.java)
-in [`CustomResourceLoader.reload()`](../common/src/main/java/org/mtr/client/CustomResourceLoader.java)
+[`CustomResourcesConverter.convert(...)`](../src/main/java/org/mtr/legacy/resource/CustomResourcesConverter.java)
+in [`CustomResourceLoader.reload()`](../src/main/java/org/mtr/client/CustomResourceLoader.java)
 even for already-new-format packs, because the converter is also the path that recognises
 the new format and short-circuits (see `convert`, line 22–24 — it returns immediately if
 neither `custom_trains` nor `custom_signs` is present).
@@ -81,8 +81,8 @@ half in the main manifest, and the half still pending conversion in the migratio
 
 **State**
 
-- Living in `common/src/main/java/org/mtr/mtr_custom_resources_template.json` and
-  `common/src/main/java/org/mtr/vehicle_templates/`.
+- Living in `src/main/java/org/mtr/mtr_custom_resources_template.json` and
+  `src/main/java/org/mtr/vehicle_templates/`.
 - The dual load is **not** a fallback — both files are read and both contribute vehicles.
   If the same vehicle id is in both, it is registered twice and the duplicate-id warning
   fires in `validateDataset`.
@@ -105,11 +105,11 @@ content.
 
 **What's old / what's new**
 
-- **Old**: [`org.mtr.client.DoorAnimationType`](../common/src/main/java/org/mtr/client/DoorAnimationType.java)
+- **Old**: [`org.mtr.client.DoorAnimationType`](../src/main/java/org/mtr/client/DoorAnimationType.java)
   — `float`-based, parameterised on the enum constructor with a `maxTime` field, exposes
   static helpers `getDoorAnimationX(type, value)` and
   `getDoorAnimationZ(type, doorMax, duration, value, opening)`.
-- **New**: [`org.mtr.resource.DoorAnimationType`](../common/src/main/java/org/mtr/resource/DoorAnimationType.java)
+- **New**: [`org.mtr.resource.DoorAnimationType`](../src/main/java/org/mtr/resource/DoorAnimationType.java)
   — `double`-based, instance methods `getDoorAnimationX(multiplier, flipped, time)` and
   `getDoorAnimationZ(multiplier, flipped, time, opening)`. Adds `PLUG_SLOW_2` and
   `PLUG_SLOW_3` variants that the legacy enum does not have.
@@ -132,13 +132,13 @@ is structurally identical between the two files — the only real differences ar
   `ModelPropertiesPartSchema` is on the **new** enum.
 - The **old** enum (`org.mtr.client.DoorAnimationType`) appears to no longer be referenced
   outside its own file. Validate with
-  `grep -r "org.mtr.client.DoorAnimationType" common/` before deletion — if zero hits, the
+  `grep -r "org.mtr.client.DoorAnimationType" src/` before deletion — if zero hits, the
   file is safe to delete in the same change that updates `CODE_STYLES.md` to remove the
   "duplicate enums are tolerated" precedent.
 
 **Finish line**
 
-Delete `common/src/main/java/org/mtr/client/DoorAnimationType.java` once nothing imports it.
+Delete `src/main/java/org/mtr/client/DoorAnimationType.java` once nothing imports it.
 
 **Pitfall**
 
@@ -153,8 +153,8 @@ The "New" prefix is from a previous mesh-building rewrite. There is no `Optimize
 (without the `New` prefix) anywhere in the tree any more, but the prefix has been
 preserved across:
 
-- [`NewOptimizedModel`](../common/src/main/java/org/mtr/model/NewOptimizedModel.java)
-- [`NewOptimizedModelGroup`](../common/src/main/java/org/mtr/model/NewOptimizedModelGroup.java)
+- [`NewOptimizedModel`](../src/main/java/org/mtr/model/NewOptimizedModel.java)
+- [`NewOptimizedModelGroup`](../src/main/java/org/mtr/model/NewOptimizedModelGroup.java)
 - Every field that holds one (`builtModel2`, `nameToNewOptimizedModelGroup`, …).
 
 **State**
@@ -164,21 +164,21 @@ Pure naming debt. The "new" implementation is the only implementation.
 **Finish line**
 
 Rename `NewOptimizedModel` → `OptimizedModel` and
-`NewOptimizedModelGroup` → `OptimizedModelGroup` across `common/`. The rename is mechanical
+`NewOptimizedModelGroup` → `OptimizedModelGroup` across `src/`. The rename is mechanical
 because the old name does not exist as a separate type; an IntelliJ "Rename" refactor
 handles it.
 
 **Pitfall**
 
 When the rename happens, **also** update the comment in
-[`VehicleResource.vehicleResourceCacheInitializer`](../common/src/main/java/org/mtr/resource/VehicleResource.java)
+[`VehicleResource.vehicleResourceCacheInitializer`](../src/main/java/org/mtr/resource/VehicleResource.java)
 line 320 (`// TODO don't rebuild shared models, e.g. bogies`) — that TODO is wired to the
 old mental model where rebuilds were cheap. With the renamed type plus deferred parsing
 (see `PERFORMANCE.md` §1.3), bogie-sharing becomes feasible.
 
 ## 5. `ModelLoaderBase` — two parallel "build" paths
 
-**Where** — [`common/src/main/java/org/mtr/model/ModelLoaderBase.java`](../common/src/main/java/org/mtr/model/ModelLoaderBase.java).
+**Where** — [`src/main/java/org/mtr/model/ModelLoaderBase.java`](../src/main/java/org/mtr/model/ModelLoaderBase.java).
 
 **What's old / what's new**
 
@@ -220,8 +220,8 @@ yourself wanting to call `get()` on a `VehicleModel`'s loader, you almost certai
 ## 6. Model-format dispatch is duplicated between `VehicleModel` and `StoredModelResourceBase`
 
 **Where**
-- [`VehicleModel.getModelLoaderBase`](../common/src/main/java/org/mtr/resource/VehicleModel.java) lines 133–159.
-- [`StoredModelResourceBase.load`](../common/src/main/java/org/mtr/resource/StoredModelResourceBase.java) lines 20–45.
+- [`VehicleModel.getModelLoaderBase`](../src/main/java/org/mtr/resource/VehicleModel.java) lines 133–159.
+- [`StoredModelResourceBase.load`](../src/main/java/org/mtr/resource/StoredModelResourceBase.java) lines 20–45.
 
 Both branches do the same `.bbmodel` / `.obj` / fallback dispatch, call
 `new BlockbenchModelLoader(...)` or `new ObjModelLoader(...)`, and route the same texture
@@ -252,10 +252,10 @@ separately. Extract the factory **first**, then add the new branch in one place.
 
 ## 7. `StoredModelResourceBase.preload()` is a no-op marked `// TODO`
 
-**Where** — [`common/src/main/java/org/mtr/resource/StoredModelResourceBase.java`](../common/src/main/java/org/mtr/resource/StoredModelResourceBase.java) lines 57–59.
+**Where** — [`src/main/java/org/mtr/resource/StoredModelResourceBase.java`](../src/main/java/org/mtr/resource/StoredModelResourceBase.java) lines 57–59.
 
 The interface method is called from
-[`CustomResourceLoader.reload()`](../common/src/main/java/org/mtr/client/CustomResourceLoader.java)
+[`CustomResourceLoader.reload()`](../src/main/java/org/mtr/client/CustomResourceLoader.java)
 lines 162–186 for every rail and every object whose id matches the
 preload-resource-pattern. The current body is `// TODO` — i.e. **preloading rails and
 objects does nothing**. Only vehicles actually preload.
@@ -273,17 +273,17 @@ hitches on first encounter despite `shouldPreload = true`, this no-op is why.
 
 **What's old / what's new**
 
-- **Old**: [`LegacyVehicleSound`](../common/src/main/java/org/mtr/sound/LegacyVehicleSound.java) — six
+- **Old**: [`LegacyVehicleSound`](../src/main/java/org/mtr/sound/LegacyVehicleSound.java) — six
   `legacy*` configuration fields (`legacySpeedSoundBaseResource`,
   `legacySpeedSoundCount`, `legacyUseAccelerationSoundsWhenCoasting`,
   `legacyConstantPlaybackSpeed`, `legacyDoorSoundBaseResource`,
   `legacyDoorCloseSoundTime`).
-- **New**: [`BveVehicleSound`](../common/src/main/java/org/mtr/sound/BveVehicleSound.java) +
+- **New**: [`BveVehicleSound`](../src/main/java/org/mtr/sound/BveVehicleSound.java) +
   `BveVehicleSoundConfig` — BVE-style sound config (per-throttle-step samples, named
   channels, etc.).
 
 Selection happens in
-[`VehicleResource.createVehicleSoundBaseInitializer`](../common/src/main/java/org/mtr/resource/VehicleResource.java)
+[`VehicleResource.createVehicleSoundBaseInitializer`](../src/main/java/org/mtr/resource/VehicleResource.java)
 lines 357–372: if `bveSoundBaseResource.isEmpty()`, the legacy sound is used; otherwise the
 BVE sound is used. There's no fallback path — they are mutually exclusive per-vehicle.
 
@@ -299,11 +299,11 @@ Do not delete `LegacyVehicleSound`. The MTR 3.x sound system is a supported auth
 choice, not deprecated. Renaming the fields away from the `legacy*` prefix is reasonable
 (e.g. `simpleSpeedSoundBaseResource`); deleting the class is not.
 
-Also covered by [`BveVehicleSound.java:121` — `// TODO play flange sounds`](../common/src/main/java/org/mtr/sound/BveVehicleSound.java): the new system is itself incomplete.
+Also covered by [`BveVehicleSound.java:121` — `// TODO play flange sounds`](../src/main/java/org/mtr/sound/BveVehicleSound.java): the new system is itself incomplete.
 
 ## 9. `VehicleResource.extraModelsSupplier` (`LegacyVehicleSupplier`)
 
-**Where** — [`common/src/main/java/org/mtr/resource/VehicleResource.java`](../common/src/main/java/org/mtr/resource/VehicleResource.java) lines 34, 374–377.
+**Where** — [`src/main/java/org/mtr/resource/VehicleResource.java`](../src/main/java/org/mtr/resource/VehicleResource.java) lines 34, 374–377.
 
 A `@FunctionalInterface` named `LegacyVehicleSupplier<T>` with signature
 `T apply(int carNumber, int totalCars)` — supplies "extra" models that depend on a car's
@@ -329,8 +329,8 @@ Adding new model fields to the new schema is fine; adding them by extending
 ## 10. Two list/widget systems: `ScrollableListWidget` and `ListComponent`
 
 **Where**
-- [`org.mtr.widget.ScrollableListWidget`](../common/src/main/java/org/mtr/widget/ScrollableListWidget.java) — the older Minecraft-screen-widget-based list (extends `EntryListWidget`).
-- [`org.mtr.widget.ListComponent`](../common/src/main/java/org/mtr/widget/ListComponent.java) — the newer composable component used inside the resource-pack-creator preview UI.
+- [`org.mtr.widget.ScrollableListWidget`](../src/main/java/org/mtr/widget/ScrollableListWidget.java) — the older Minecraft-screen-widget-based list (extends `EntryListWidget`).
+- [`org.mtr.widget.ListComponent`](../src/main/java/org/mtr/widget/ListComponent.java) — the newer composable component used inside the resource-pack-creator preview UI.
 
 Both classes have the same `// TODO use vehicle family instead` comment at
 `ScrollableListWidget.java:246` and `ListComponent.java:223`. The duplicated TODO is the
@@ -352,20 +352,20 @@ If you add a new vehicle-list view, prefer `ListComponent`. Touching
 ## 11. Misc TODOs that look like deferred sub-migrations
 
 Smaller, more localised, but worth tracking together. The list is exhaustive across
-`common/src/main/java/org/mtr/` as of this writing:
+`src/main/java/org/mtr/` as of this writing:
 
 | File:line | Comment | What it suggests |
 |---|---|---|
-| [`block/BlockPIDSHorizontalBase.java:44`](../common/src/main/java/org/mtr/block/BlockPIDSHorizontalBase.java) | `// TODO copy NBT when copying block` | NBT-copy hook missing on a block that ships data in BE. |
-| [`block/BlockPSDAPGDoorBase.java:84, 103`](../common/src/main/java/org/mtr/block/BlockPSDAPGDoorBase.java) | `// TODO don't hard code these bounds` / bare `// TODO` | Hard-coded hitbox extents that should come from `ModelProperties`. |
-| [`data/VehicleExtension.java:127`](../common/src/main/java/org/mtr/data/VehicleExtension.java) | `// TODO chat announcements (next station, route number, etc.)` | In-train announcements not implemented yet. |
-| [`packet/PacketDriveTrain.java:33`](../common/src/main/java/org/mtr/packet/PacketDriveTrain.java) | bare `// TODO` | Inline `// TODO` next to driver-input handling — context-light, needs investigation. |
-| [`packet/PacketUpdateLiftTrackFloorConfig.java:48`](../common/src/main/java/org/mtr/packet/PacketUpdateLiftTrackFloorConfig.java) | `// TODO update lift floor` | Floor-update path not wired through. |
-| [`resource/ModelPropertiesPart.java:163`](../common/src/main/java/org/mtr/resource/ModelPropertiesPart.java) | `// TODO figure out why inconsistent translations are needed` | A "do not change this magic offset" sign — needs an actual investigation. |
-| [`resource/VehicleResource.java:320`](../common/src/main/java/org/mtr/resource/VehicleResource.java) | `// TODO don't rebuild shared models, e.g. bogies` | Performance — see `PERFORMANCE.md`. |
-| [`servlet/ResourcePackCreatorOperationServlet.java:47, 111`](../common/src/main/java/org/mtr/servlet/ResourcePackCreatorOperationServlet.java) | `// TODO load backup` / `// TODO save backup` | Backup/restore for the resource-pack-creator is stubbed. |
-| [`sound/BveVehicleSound.java:121`](../common/src/main/java/org/mtr/sound/BveVehicleSound.java) | `// TODO play flange sounds` | Migration #8 — BVE sounds incomplete. |
-| [`widget/PreviewBoxComponent.java:131`](../common/src/main/java/org/mtr/widget/PreviewBoxComponent.java) | `// TODO figure out why is this Z offset needed?` | Mystery Z-offset — investigation needed. |
+| [`block/BlockPIDSHorizontalBase.java:44`](../src/main/java/org/mtr/block/BlockPIDSHorizontalBase.java) | `// TODO copy NBT when copying block` | NBT-copy hook missing on a block that ships data in BE. |
+| [`block/BlockPSDAPGDoorBase.java:84, 103`](../src/main/java/org/mtr/block/BlockPSDAPGDoorBase.java) | `// TODO don't hard code these bounds` / bare `// TODO` | Hard-coded hitbox extents that should come from `ModelProperties`. |
+| [`data/VehicleExtension.java:127`](../src/main/java/org/mtr/data/VehicleExtension.java) | `// TODO chat announcements (next station, route number, etc.)` | In-train announcements not implemented yet. |
+| [`packet/PacketDriveTrain.java:33`](../src/main/java/org/mtr/packet/PacketDriveTrain.java) | bare `// TODO` | Inline `// TODO` next to driver-input handling — context-light, needs investigation. |
+| [`packet/PacketUpdateLiftTrackFloorConfig.java:48`](../src/main/java/org/mtr/packet/PacketUpdateLiftTrackFloorConfig.java) | `// TODO update lift floor` | Floor-update path not wired through. |
+| [`resource/ModelPropertiesPart.java:163`](../src/main/java/org/mtr/resource/ModelPropertiesPart.java) | `// TODO figure out why inconsistent translations are needed` | A "do not change this magic offset" sign — needs an actual investigation. |
+| [`resource/VehicleResource.java:320`](../src/main/java/org/mtr/resource/VehicleResource.java) | `// TODO don't rebuild shared models, e.g. bogies` | Performance — see `PERFORMANCE.md`. |
+| [`servlet/ResourcePackCreatorOperationServlet.java:47, 111`](../src/main/java/org/mtr/servlet/ResourcePackCreatorOperationServlet.java) | `// TODO load backup` / `// TODO save backup` | Backup/restore for the resource-pack-creator is stubbed. |
+| [`sound/BveVehicleSound.java:121`](../src/main/java/org/mtr/sound/BveVehicleSound.java) | `// TODO play flange sounds` | Migration #8 — BVE sounds incomplete. |
+| [`widget/PreviewBoxComponent.java:131`](../src/main/java/org/mtr/widget/PreviewBoxComponent.java) | `// TODO figure out why is this Z offset needed?` | Mystery Z-offset — investigation needed. |
 
 Each row above should either:
 1. Be resolved (preferred when the fix is bounded).

@@ -580,21 +580,11 @@ public class RouteMapGenerator implements IGui {
 	}
 
 	public static int getPixel(NativeImage nativeImage, int x, int y) {
-//? if >= 1.21.4 {
 		return nativeImage.getPixel(x, y);
-//? } else {
-		/*return convertNativeImageColor(nativeImage.getPixelRGBA(x, y));
-//
-*///? }
 	}
 
 	public static void setPixel(NativeImage nativeImage, int x, int y, int color) {
-//? if >= 1.21.4 {
 		nativeImage.setPixel(x, y, color);
-//? } else {
-		/*nativeImage.setPixelRGBA(x, y, convertNativeImageColor(color));
-//
-*///? }
 	}
 
 	private static int convertNativeImageColor(int color) {

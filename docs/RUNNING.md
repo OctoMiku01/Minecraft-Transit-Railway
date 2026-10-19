@@ -4,27 +4,22 @@
 
 ## Build artifacts
 
-This project uses **Stonecutter** to configure multi-platform (Fabric/NeoForge) and multi-version (1.21.4) builds.
+The mod is built for **Minecraft 26.2** with **Fabric**. A build creates the mod jar at `versions/26.2-fabric/build/libs/mtr-<modVersion>+26.2-fabric.jar`; `buildAndCollect` additionally copies it to `build/release/MTR-fabric-<modVersion>+26.2.jar`.
 
-A full build creates loader-specific jars under `build/release/`:
-
-- `MTR-fabric-<modVersion>+<minecraftVersion>.jar`
-- `MTR-neoforge-<modVersion>+<minecraftVersion>.jar`
-
-Both variants use official **Mojang mappings** (not Fabric Yarn).
+The code uses the official Mojang names, which Minecraft 26.x ships with.
 
 See [BUILD.md](BUILD.md) for build commands and prerequisites.
 
 ## Installing a development build
 
 1. Build the project with Gradle.
-2. Pick the jar matching your loader (`fabric` or `neoforge`).
-3. Copy the jar into the target Minecraft instance `mods` directory.
-4. Start Minecraft with matching loader and game version.
+2. Copy the mod jar (not the `-dev` or `-sources` jar) into the target Minecraft instance `mods` directory.
+3. Make sure Fabric Loader and Fabric API for Minecraft 26.2 are installed. Elementa, UniversalCraft and Kotlin are bundled with the mod.
+4. Start Minecraft 26.2 with Java 25.
 
 ## Dedicated server considerations
 
-- Use the server-compatible loader/runtime for your selected platform.
+- Install Fabric Loader and Fabric API on the server as well.
 - Keep mod, loader, and Minecraft versions aligned with `gradle.properties`.
 - If the transport backend becomes unresponsive, the mod currently logs an error and can stop the server to avoid desynchronised state.
 

@@ -23,9 +23,7 @@ public final class Items {
 		GUARD_KEY = RegistryServer.registerItem("guard_key", itemSettings -> new ItemDepotDriverKey(itemSettings.stacksTo(1), false, true, false, 0xB6FFB6), null);
 		CREATIVE_DRIVER_KEY = RegistryServer.registerItem("creative_driver_key", itemSettings -> new ItemCreativeDriverKey(itemSettings.stacksTo(1)), ItemGroups.CORE);
 		BOAT_NODE = RegistryServer.registerItem("boat_node", itemSettings -> new PlaceOnWaterBlockItem(Blocks.BOAT_NODE.get(), itemSettings
-//? if >= 1.21.4 {
 			.overrideDescription("block.mtr.boat_node")
-//? }
 		), ItemGroups.CORE);
 
 		// Doors

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -18,12 +19,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-//? if >= 1.21.4 {
-import net.minecraft.world.level.ScheduledTickAccess;
-//? } else {
-/*import net.minecraft.world.level.LevelAccessor;
- *///? }
-
 public class BlockEscalatorSide extends BlockEscalatorBase {
 
 	public BlockEscalatorSide(BlockBehaviour.Properties settings) {
@@ -31,31 +26,16 @@ public class BlockEscalatorSide extends BlockEscalatorBase {
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
-//? } else {
-	/*protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-//
-*///? }
 		if (direction == Direction.DOWN && !(world.getBlockState(pos.below()).getBlock() instanceof BlockEscalatorStep)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-//? if >= 1.21.4 {
 			return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-//? } else {
-			/*return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
-//
-*///? }
 		}
 	}
 
 	@Override
-//? if >= 1.21.4 {
 	protected VoxelShape getOcclusionShape(BlockState state) {
-//? } else {
-	/*protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-//
-*///? }
 		// Prevents culling optimization mods from culling our see-through escalator side
 		return Shapes.empty();
 	}

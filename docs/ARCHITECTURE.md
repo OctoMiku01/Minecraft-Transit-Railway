@@ -7,42 +7,31 @@
 
 | Module      | Purpose                                                                                                                                                |
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `common/`   | Shared mod logic used by all loaders: gameplay objects, packets, rendering helpers, servlets, registry abstractions, generated resource/config models. |
-| `fabric/`   | Fabric-specific bootstrap and adapter code. Produces the Fabric mod jar.                                                                               |
-| `neoforge/` | NeoForge-specific bootstrap and adapter code. Produces the NeoForge mod jar.                                                                           |
-| `versions/` | **Stonecutter-managed** per-version/per-platform configurations: `1.21.1-fabric`, `1.21.1-neoforge`, `1.21.4-fabric`, `1.21.4-neoforge`.               |
+| `src/`      | Mod source and resources: gameplay objects, packets, rendering, GUI, servlets, registries, generated resource/config models. Fabric entry points live in `org.mtr.fabric`. |
+| `versions/` | **Stonecutter-managed** per-version configurations. Currently only `26.2-fabric`.                                                                      |
 | `buildSrc/` | Build utilities, schema generator integration, translation/resource preparation tasks, and import-fix utilities used during build.                     |
 | `website/`  | Angular web application and generated TypeScript entities used for map and data views.                                                                 |
 | `docs/`     | Project documentation for architecture, build flow, runtime, API surface, and schema generation.                                                       |
 
 ## Source code management: Stonecutter
 
-This project uses **Stonecutter** to manage platform-specific and version-specific code from a unified codebase. The active version is set in `stonecutter.gradle.kts` (`stonecutter active "1.21.4-fabric"`). Platform conditionals appear as comments in the source:
+The build is set up with **Stonecutter**, which can build several Minecraft versions or loaders from one codebase. Currently only **Minecraft 26.2 with Fabric** is built (`26.2-fabric`, active in `stonecutter.gradle.kts`), so the source contains no conditionals. When another version or loader is added, code that differs between them is guarded with comment directives:
 
-- `//? if fabric {` ... `//? }` — Fabric-only code blocks
-- `//? if neoforge {` ... `//? }` — NeoForge-only code blocks
+- `//? if >= 26.3 {` ... `//? } else {` ... `//? }` — version-specific code
+- `//? if fabric {` ... `//? }` — loader-specific code (the `fabric` and `neoforge` constants are defined in `stonecutter.gradle.kts`)
 
-Supported combinations (defined in `settings.gradle.kts`):
-
-| Version | Loader    |
-|---------|-----------|
-| 1.21.1  | Fabric    |
-| 1.21.1  | NeoForge  |
-| 1.21.4  | Fabric    |
-| 1.21.4  | NeoForge  |
-
-All variants use **official Mojang mappings** (not Fabric Yarn). During Gradle build, Stonecutter processes these directives to generate platform/version-specific JAR artifacts.
+The code uses the official Mojang names, which Minecraft 26.x ships with.
 For build commands and workflow, see [BUILD.md](BUILD.md).
 
 ## Runtime model
 
 MTR runtime behaviour is split into three cooperating layers:
 
-1. **Minecraft loader/runtime layer** (`fabric/`, `neoforge/`)
-   - Initialises the mod for the selected loader.
-   - Delegates gameplay logic into shared code in `common/`.
+1. **Minecraft loader/runtime layer** (`org.mtr.fabric`)
+   - Initialises the mod through the Fabric entry points.
+   - Delegates gameplay logic into the shared mod code.
 
-2. **Shared mod layer** (`common/`)
+2. **Shared mod layer** (everything else under `org.mtr`)
    - Owns blocks, items, entities, packets, rendering support, and player-world interactions.
    - Bridges selected requests to the transport backend via message passing.
    - Hosts local servlet endpoints used by in-game tools such as the resource pack creator.
@@ -57,23 +46,23 @@ render-thread GPU upload, and frame render-queue draining, see
 
 ## Message and data flow
 
-- Player/client interactions trigger shared mod handlers in `common/`.
-- Packet flows route Minecraft client/server requests via classes in `common/src/main/java/org/mtr/packet/`.
-- Operation responses are post-processed in `common/src/main/java/org/mtr/servlet/MinecraftOperationProcessor.java` and fan out to players as needed.
-- Persistent Minecraft-only settings are stored in `common/src/main/java/org/mtr/data/PersistentStateData.java`.
+- Player/client interactions trigger shared mod handlers.
+- Packet flows route Minecraft client/server requests via classes in `src/main/java/org/mtr/packet/`.
+- Operation responses are post-processed in `src/main/java/org/mtr/servlet/MinecraftOperationProcessor.java` and fan out to players as needed.
+- Persistent Minecraft-only settings are stored in `src/main/java/org/mtr/data/PersistentStateData.java`.
 
 ## Resource and schema flow
 
 - Authoring schemas live under `buildSrc/src/main/resources/schema/`.
 - Build tasks generate Java and TypeScript model classes from schema definitions.
-- Generated Java code lands in `common/src/main/java/org/mtr/generated/`.
+- Generated Java code lands in `src/main/java/org/mtr/generated/`.
 - Generated TypeScript code lands in `website/src/app/entity/generated/`.
 
 See [SCHEMA.md](SCHEMA.md) for the regeneration workflow and guardrails.
 
 ## HTTP/servlet surface inside the mod
 
-Servlet handlers for local tooling live in `common/src/main/java/org/mtr/servlet/`, including:
+Servlet handlers for local tooling live in `src/main/java/org/mtr/servlet/`, including:
 
 - `ClientServlet`
 - `ResourcePackCreatorOperationServlet`
@@ -83,6 +72,6 @@ The endpoint matrix and method/path behaviour are documented in [API.md](API.md)
 
 ## Extension points
 
-- Add new shared gameplay systems in `common/` first, then wire loader-specific hooks in `fabric/` and `neoforge/` only when required.
+- Keep loader-specific hooks in the `org.mtr.registry` and `org.mtr.fabric` classes so that gameplay code stays loader-independent.
 - For new wire formats or content models, update schema definitions first, then regenerate classes.
-- Keep Minecraft-only concerns in `common/`, and simulation-core-only concerns in the backend dependency.
+- Keep Minecraft-only concerns in this mod, and simulation-core-only concerns in the backend dependency.

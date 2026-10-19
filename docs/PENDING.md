@@ -13,13 +13,13 @@
 
 These items were addressed in earlier modernisation passes:
 
-- ✅ **Package-level JavaDoc** — every package under `common/src/main/java/org/mtr/` carries a
+- ✅ **Package-level JavaDoc** — every package under `src/main/java/org/mtr/` carries a
   concise, descriptive `package-info.java` per §3.7 of `CODE_STYLES.md`.
 - ✅ **Import grouping** — all Java and TypeScript sources were resorted per §2.6:
   - Java: framework / library → third-party / shadowed → project (`org.mtr.*`).
   - TypeScript: Angular framework → Material / third-party → services / components / entities.
 - ✅ **Class-level JavaDoc on the load-bearing classes** — 12+ canonical classes across
-  `common/` carry a paragraph explaining their role.
+  `src/` carry a paragraph explaining their role.
 - ✅ **Angular component file split** — every component is `name.component.{ts,html,scss}`;
   no inline `template:` / `styles:` blocks remain.
 - ✅ **Deprecated API removal**:
@@ -52,7 +52,7 @@ These items were addressed in earlier modernisation passes:
   `ClientPacketHelper`).
 
 - ✅ **Dead screen cleanup** — removed unused
-  `common/src/main/java/org/mtr/screen/RailActionsScreen.java` after confirming
+  `src/main/java/org/mtr/screen/RailActionsScreen.java` after confirming
   there were no call sites.
 
 - ✅ **Elementa migration (driver key dispenser)** — migrated
@@ -107,12 +107,12 @@ These items were addressed in earlier modernisation passes:
   use the empty form (already fixed: `CustomResourceLoader`, `DynamicTextureCache`,
   `ObjModelLoader`, `ResourceManagerHelper`, `RouteMapGenerator` first three sites).
   Remaining sites:
-  - `common/src/test/java/org/mtr/test/BlockbenchModelValidationTest.java:28`
+  - `src/test/java/org/mtr/test/BlockbenchModelValidationTest.java:28`
   - `buildSrc/src/main/java/org/mtr/BuildTools.java:139, 220, 233, 237, 254, 257, 262`
-  - `common/src/main/java/org/mtr/cache/CachedFileResource.java:43, 95`
-  - `common/src/main/java/org/mtr/cache/CachedFileProvider.java:30`
-  - `common/src/main/java/org/mtr/config/Config.java:50, 69`
-  - `common/src/main/java/org/mtr/legacy/resource/CustomResourcesConverter.java:33, 45, 64, 81`
+  - `src/main/java/org/mtr/cache/CachedFileResource.java:43, 95`
+  - `src/main/java/org/mtr/cache/CachedFileProvider.java:30`
+  - `src/main/java/org/mtr/config/Config.java:50, 69`
+  - `src/main/java/org/mtr/legacy/resource/CustomResourcesConverter.java:33, 45, 64, 81`
 
   Each must name the operation that failed (e.g. `"Failed to load custom resources from {}"`,
   `identifier`).
