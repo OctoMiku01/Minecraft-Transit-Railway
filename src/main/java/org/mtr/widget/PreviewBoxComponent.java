@@ -45,6 +45,11 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 	 * Distance of the virtual camera from the centre of the preview in blocks. Larger values give a weaker perspective.
 	 */
 	private static final float CAMERA_DISTANCE = 8;
+	/**
+	 * The GUI only draws depths between 0 and 10000, so the preview is moved in front of the GUI at this depth.
+	 */
+	private static final float DEPTH_CENTER = 1000;
+	private static final float DEPTH_PER_BLOCK = 100;
 
 	public PreviewBoxComponent(boolean allowPan, boolean allowRotation, boolean allowZoom, Consumer<PoseStack> onDraw) {
 		setBackgroundColor(Color.BLACK);
@@ -132,18 +137,19 @@ public final class PreviewBoxComponent extends SlotBackgroundComponent {
 	 * Maps view space (in blocks, y up, camera looking towards negative z) to GUI coordinates with a perspective projection.
 	 * The GUI projection is orthographic but keeps the w component, so the GPU's perspective division still applies.
 	 * Points at depth 0 are scaled by {@code pixelsPerBlock}; closer points get bigger and further points smaller.
+	 * The depth is mapped around {@link #DEPTH_CENTER} so that the whole preview stays inside the depth range of the GUI.
 	 *
 	 * @param centerX        the GUI x coordinate of the view centre
 	 * @param centerY        the GUI y coordinate of the view centre
 	 * @param pixelsPerBlock how many GUI pixels one block at depth 0 covers
 	 */
 	private static Matrix4f createPerspectiveMatrix(float centerX, float centerY, float pixelsPerBlock) {
-		// Columns: x' = s * x + cx * w, y' = -s * y + cy * w, z' = s * z, w = 1 - z / distance
+		// Columns: x' = s * x + cx * w, y' = -s * y + cy * w, z' = d * z + dc * w, w = 1 - z / distance
 		return new Matrix4f(
 			pixelsPerBlock, 0, 0, 0,
 			0, -pixelsPerBlock, 0, 0,
-			-centerX / CAMERA_DISTANCE, -centerY / CAMERA_DISTANCE, pixelsPerBlock, -1 / CAMERA_DISTANCE,
-			centerX, centerY, 0, 1
+			-centerX / CAMERA_DISTANCE, -centerY / CAMERA_DISTANCE, DEPTH_PER_BLOCK - DEPTH_CENTER / CAMERA_DISTANCE, -1 / CAMERA_DISTANCE,
+			centerX, centerY, DEPTH_CENTER, 1
 		);
 	}
 
