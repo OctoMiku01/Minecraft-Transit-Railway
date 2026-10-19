@@ -13,6 +13,7 @@ import gg.essential.universal.vertex.UVertexConsumer;
 import kotlin.Unit;
 import lombok.Setter;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 import org.mtr.MTR;
 import org.mtr.core.tool.Vector;
@@ -80,7 +81,7 @@ public abstract class ImageComponentBase extends UIComponent {
 
 	public static void drawRectangle(Consumer<UVertexConsumer> consumer, boolean hasAlpha) {
 		final UBufferBuilder bufferBuilder = UBufferBuilder.create(UGraphics.DrawMode.QUADS, UGraphics.CommonVertexFormats.POSITION_COLOR);
-		consumer.accept(bufferBuilder);
+		consumer.accept(new ProjectingVertexConsumer(bufferBuilder));
 
 		try (final UBuiltBuffer builtBuffer = bufferBuilder.build()) {
 			if (builtBuffer != null) {
@@ -97,7 +98,7 @@ public abstract class ImageComponentBase extends UIComponent {
 
 	public static void drawTexture(IntSupplier glIdSupplier, Consumer<UVertexConsumer> consumer) {
 		final UBufferBuilder bufferBuilder = UBufferBuilder.create(UGraphics.DrawMode.QUADS, UGraphics.CommonVertexFormats.POSITION_TEXTURE_COLOR);
-		consumer.accept(bufferBuilder);
+		consumer.accept(new ProjectingVertexConsumer(bufferBuilder));
 
 		try (final UBuiltBuffer builtBuffer = bufferBuilder.build()) {
 			if (builtBuffer != null) {
@@ -207,5 +208,55 @@ public abstract class ImageComponentBase extends UIComponent {
 			builder.setBlendState(BlendState.ALPHA);
 		}
 		return builder.build();
+	}
+
+	/**
+	 * Applies the whole matrix including the perspective divide, which vanilla vertex consumers leave out.
+	 * Without it, the perspective of {@link PreviewBoxComponent} would turn into a shear. For matrices without perspective, this changes nothing.
+	 */
+	private record ProjectingVertexConsumer(UVertexConsumer vertexConsumer) implements UVertexConsumer {
+
+		@Override
+		public UVertexConsumer pos(UMatrixStack matrixStack, double x, double y, double z) {
+			final Vector3f position = matrixStack.peek().getModel().transformProject((float) x, (float) y, (float) z, new Vector3f());
+			vertexConsumer.pos(UMatrixStack.UNIT, position.x, position.y, position.z);
+			return this;
+		}
+
+		@Override
+		public UVertexConsumer color(int red, int green, int blue, int alpha) {
+			vertexConsumer.color(red, green, blue, alpha);
+			return this;
+		}
+
+		@Override
+		public UVertexConsumer tex(double u, double v) {
+			vertexConsumer.tex(u, v);
+			return this;
+		}
+
+		@Override
+		public UVertexConsumer overlay(int u, int v) {
+			vertexConsumer.overlay(u, v);
+			return this;
+		}
+
+		@Override
+		public UVertexConsumer light(int u, int v) {
+			vertexConsumer.light(u, v);
+			return this;
+		}
+
+		@Override
+		public UVertexConsumer norm(UMatrixStack matrixStack, float x, float y, float z) {
+			vertexConsumer.norm(matrixStack, x, y, z);
+			return this;
+		}
+
+		@Override
+		public UVertexConsumer endVertex() {
+			vertexConsumer.endVertex();
+			return this;
+		}
 	}
 }

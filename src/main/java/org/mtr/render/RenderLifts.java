@@ -31,6 +31,7 @@ import org.mtr.libraries.it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectBooleanImmutablePair;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
+import org.mtr.model.LiftModel;
 import org.mtr.registry.Items;
 import org.mtr.resource.LiftResource;
 import org.mtr.tool.Drawing;
@@ -174,14 +175,21 @@ public class RenderLifts implements IGui {
 
 				// Render the lift
 				final StoredMatrixTransformations storedMatrixTransformations = RenderVehicles.getStoredMatrixTransformations(offsetVector == null, renderingPositionAndRotation, 0);
-//				new ModelLift1((int) Math.round(lift.getHeight() * 2), (int) Math.round(lift.getWidth()), (int) Math.round(lift.getDepth()), lift.getIsDoubleSided()).render(
-//						storedMatrixTransformations,
-//						null,
-//						getLiftResource(lift.getStyle()).getTexture(),
-//						absolutePositionAndRotation.light,
-//						doorway1Open ? lift.getDoorValue() / LIFT_DOOR_VALUE : 0, doorway2Open ? lift.getDoorValue() / LIFT_DOOR_VALUE : 0, false,
-//						0, 1, true, true, false, true, false
-//				);
+				LiftModel.iterateModels(
+					(int) Math.round(lift.getHeight() * 2), (int) Math.round(lift.getWidth()), (int) Math.round(lift.getDepth()), lift.getIsDoubleSided(),
+					getLiftResource(lift.getStyle()).getTexture(),
+					doorway1Open ? lift.getDoorValue() / LIFT_DOOR_VALUE : 0, doorway2Open ? lift.getDoorValue() / LIFT_DOOR_VALUE : 0,
+					(models, transformation) -> {
+						final StoredMatrixTransformations modelTransformations;
+						if (transformation == null) {
+							modelTransformations = storedMatrixTransformations;
+						} else {
+							modelTransformations = storedMatrixTransformations.copy();
+							modelTransformations.add(transformation);
+						}
+						MainRenderer.renderModel(models, modelTransformations, absolutePositionAndRotation.light);
+					}
+				);
 
 				// Render the display inside the lift
 				for (int i = 0; i < (lift.getIsDoubleSided() ? 2 : 1); i++) {
