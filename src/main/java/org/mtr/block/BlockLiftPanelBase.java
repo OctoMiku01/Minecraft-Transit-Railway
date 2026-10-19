@@ -4,7 +4,8 @@ import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
@@ -36,11 +37,12 @@ import java.util.List;
 
 //? if >= 1.21.4 {
 import net.minecraft.world.level.ScheduledTickAccess;
+import java.util.function.Consumer;
 //? } else {
 /*import net.minecraft.world.level.LevelAccessor;
  *///? }
 
-public abstract class BlockLiftPanelBase extends Block implements IBlock, TripleHorizontalBlock, EntityBlock {
+public abstract class BlockLiftPanelBase extends Block implements IBlock, TripleHorizontalBlock, EntityBlock, IBlockTooltip {
 
 	private final boolean isOdd;
 	private final boolean isFlat;
@@ -101,7 +103,7 @@ public abstract class BlockLiftPanelBase extends Block implements IBlock, Triple
 				world.setBlock(pos.relative(direction.getClockWise()), defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction).setValue(SIDE, EnumSide.RIGHT), 3);
 			}
 
-			world.blockUpdated(pos, Blocks.AIR);
+			world.updateNeighborsAt(pos, Blocks.AIR, null);
 			state.updateNeighbourShapes(world, pos, 3);
 		}
 	}
@@ -128,8 +130,8 @@ public abstract class BlockLiftPanelBase extends Block implements IBlock, Triple
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add((isOdd ? TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_ODD : TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_EVEN).getMutableText().withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept((isOdd ? TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_ODD : TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_EVEN).getMutableText().withStyle(ChatFormatting.GRAY));
 	}
 
 	public abstract static class BlockEntityBase extends BlockEntityExtension {
@@ -144,14 +146,14 @@ public abstract class BlockLiftPanelBase extends Block implements IBlock, Triple
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
-			final long data = nbtCompound.getLong(KEY_TRACK_FLOOR_POS);
+		protected void readNbt(ValueInput valueInput) {
+			final long data = valueInput.getLongOr(KEY_TRACK_FLOOR_POS, 0);
 			trackPosition = data == 0 ? null : BlockPos.of(data);
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
-			nbtCompound.putLong(KEY_TRACK_FLOOR_POS, trackPosition == null ? 0 : trackPosition.asLong());
+		protected void writeNbt(ValueOutput valueOutput) {
+			valueOutput.putLong(KEY_TRACK_FLOOR_POS, trackPosition == null ? 0 : trackPosition.asLong());
 		}
 
 		public void registerFloor(Level world, BlockPos pos, boolean isAdd) {

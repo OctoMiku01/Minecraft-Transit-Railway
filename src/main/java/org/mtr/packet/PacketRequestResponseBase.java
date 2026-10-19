@@ -35,7 +35,7 @@ public abstract class PacketRequestResponseBase extends PacketHandler {
 
 	@Override
 	public final void runServer(MinecraftServer minecraftServer, ServerPlayer serverPlayerEntity) {
-		runServerOutbound(serverPlayerEntity.serverLevel(), serverPlayerEntity);
+		runServerOutbound(serverPlayerEntity.level(), serverPlayerEntity);
 	}
 
 	@Override

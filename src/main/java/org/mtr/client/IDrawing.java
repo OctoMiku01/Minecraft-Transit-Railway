@@ -210,7 +210,7 @@ public interface IDrawing {
 			if (player != null) {
 				chatMessages.forEach(chatMessage -> {
 					if (!chatMessage.getString().isEmpty()) {
-						player.displayClientMessage(chatMessage, false);
+						player.sendSystemMessage(chatMessage);
 					}
 				});
 			}

@@ -41,11 +41,11 @@ public interface TripleHorizontalBlock extends IBlock {
 			final BlockState newBlockState = defaultPlacementState.setValue(BlockStateProperties.HORIZONTAL_FACING, direction).setValue(SIDE, EnumSide.RIGHT);
 
 			world.setBlock(blockPos.relative(rotatedDirection), newBlockState.setValue(CENTER, true), 3);
-			world.blockUpdated(blockPos, Blocks.AIR);
+			world.updateNeighborsAt(blockPos, Blocks.AIR, null);
 			blockState.updateNeighbourShapes(world, blockPos, 3);
 
 			world.setBlock(blockPos.relative(rotatedDirection, 2), newBlockState.setValue(CENTER, false), 3);
-			world.blockUpdated(blockPos.relative(rotatedDirection), Blocks.AIR);
+			world.updateNeighborsAt(blockPos.relative(rotatedDirection), Blocks.AIR, null);
 			blockState.updateNeighbourShapes(world, blockPos.relative(rotatedDirection), 3);
 		}
 	}

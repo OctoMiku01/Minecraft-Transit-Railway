@@ -59,7 +59,7 @@ public class BlockTactileMap extends BlockDirectionalDoubleBlockBase implements 
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
-		return type == BlockEntityTypes.TACTILE_MAP.get() && world.isClientSide && TactileMapBlockEntity.updateSoundSource != null ? (world1, pos, state1, blockEntity) -> TactileMapBlockEntity.updateSoundSource.accept(pos, false) : null;
+		return type == BlockEntityTypes.TACTILE_MAP.get() && world.isClientSide() && TactileMapBlockEntity.updateSoundSource != null ? (world1, pos, state1, blockEntity) -> TactileMapBlockEntity.updateSoundSource.accept(pos, false) : null;
 	}
 
 	@Override

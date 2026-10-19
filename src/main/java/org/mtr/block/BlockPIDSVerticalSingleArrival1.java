@@ -17,8 +17,9 @@ import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.registry.BlockEntityTypes;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class BlockPIDSVerticalSingleArrival1 extends BlockPIDSVerticalBase {
+public class BlockPIDSVerticalSingleArrival1 extends BlockPIDSVerticalBase implements IBlockTooltip {
 
 	private static final int MAX_ARRIVALS = 16;
 
@@ -32,8 +33,8 @@ public class BlockPIDSVerticalSingleArrival1 extends BlockPIDSVerticalBase {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(TranslationProvider.TOOLTIP_MTR_ARRIVALS.getMutableText(1).withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(TranslationProvider.TOOLTIP_MTR_ARRIVALS.getMutableText(1).withStyle(ChatFormatting.GRAY));
 	}
 
 	@Override

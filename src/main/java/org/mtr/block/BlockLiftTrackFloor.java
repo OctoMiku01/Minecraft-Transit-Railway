@@ -4,7 +4,8 @@ import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,8 +32,9 @@ import org.mtr.packet.PacketOpenBlockEntityScreen;
 import org.mtr.registry.BlockEntityTypes;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class BlockLiftTrackFloor extends BlockLiftTrackBase implements EntityBlock {
+public class BlockLiftTrackFloor extends BlockLiftTrackBase implements EntityBlock, IBlockTooltip {
 
 	public BlockLiftTrackFloor(BlockBehaviour.Properties settings) {
 		super(settings);
@@ -62,8 +64,8 @@ public class BlockLiftTrackFloor extends BlockLiftTrackBase implements EntityBlo
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(TranslationProvider.TOOLTIP_MTR_LIFT_TRACK_FLOOR.getMutableText().withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(TranslationProvider.TOOLTIP_MTR_LIFT_TRACK_FLOOR.getMutableText().withStyle(ChatFormatting.GRAY));
 	}
 
 	@Override
@@ -89,17 +91,17 @@ public class BlockLiftTrackFloor extends BlockLiftTrackBase implements EntityBlo
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
-			floorNumber = nbtCompound.getString(KEY_FLOOR_NUMBER);
-			floorDescription = nbtCompound.getString(KEY_FLOOR_DESCRIPTION);
-			shouldDing = nbtCompound.getBoolean(KEY_SHOULD_DING);
+		protected void readNbt(ValueInput valueInput) {
+			floorNumber = valueInput.getStringOr(KEY_FLOOR_NUMBER, "");
+			floorDescription = valueInput.getStringOr(KEY_FLOOR_DESCRIPTION, "");
+			shouldDing = valueInput.getBooleanOr(KEY_SHOULD_DING, false);
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
-			nbtCompound.putString(KEY_FLOOR_NUMBER, floorNumber);
-			nbtCompound.putString(KEY_FLOOR_DESCRIPTION, floorDescription);
-			nbtCompound.putBoolean(KEY_SHOULD_DING, shouldDing);
+		protected void writeNbt(ValueOutput valueOutput) {
+			valueOutput.putString(KEY_FLOOR_NUMBER, floorNumber);
+			valueOutput.putString(KEY_FLOOR_DESCRIPTION, floorDescription);
+			valueOutput.putBoolean(KEY_SHOULD_DING, shouldDing);
 		}
 
 		public void setData(String floorNumber, String floorDescription, boolean shouldDing) {

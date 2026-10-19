@@ -4,7 +4,8 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
@@ -66,17 +67,17 @@ public class BlockTrainAnnouncer extends BlockTrainSensorBase {
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
-			message = nbtCompound.getString(KEY_MESSAGE);
-			soundId = nbtCompound.getString(KEY_SOUND_ID);
-			delay = nbtCompound.getInt(KEY_DELAY);
+		protected void readNbt(ValueInput valueInput) {
+			message = valueInput.getStringOr(KEY_MESSAGE, "");
+			soundId = valueInput.getStringOr(KEY_SOUND_ID, "");
+			delay = valueInput.getIntOr(KEY_DELAY, 0);
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
-			nbtCompound.putString(KEY_MESSAGE, message);
-			nbtCompound.putString(KEY_SOUND_ID, soundId);
-			nbtCompound.putInt(KEY_DELAY, delay);
+		protected void writeNbt(ValueOutput valueOutput) {
+			valueOutput.putString(KEY_MESSAGE, message);
+			valueOutput.putString(KEY_SOUND_ID, soundId);
+			valueOutput.putInt(KEY_DELAY, delay);
 		}
 
 		public void setData(LongAVLTreeSet filterRouteIds, boolean stoppedOnly, boolean movingOnly, String message, String soundId, int delay) {

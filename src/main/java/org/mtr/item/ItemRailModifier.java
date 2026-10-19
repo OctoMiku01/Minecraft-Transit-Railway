@@ -1,6 +1,7 @@
 package org.mtr.item;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -28,6 +29,7 @@ import org.mtr.packet.PacketUpdateLastRailStyles;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class ItemRailModifier extends ItemNodeModifierBase {
 
@@ -48,11 +50,11 @@ public class ItemRailModifier extends ItemNodeModifierBase {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag type) {
 		if (isConnector && railType != null && railType.canAccelerate) {
-			tooltip.add(TranslationProvider.TOOLTIP_MTR_RAIL_SPEED_LIMIT.getMutableText(railType.speedLimit).withStyle(ChatFormatting.GRAY));
+			tooltip.accept(TranslationProvider.TOOLTIP_MTR_RAIL_SPEED_LIMIT.getMutableText(railType.speedLimit).withStyle(ChatFormatting.GRAY));
 		}
-		super.appendHoverText(stack, context, tooltip, type);
+		super.appendHoverText(stack, context, tooltipDisplay, tooltip, type);
 	}
 
 	@Override
@@ -64,7 +66,7 @@ public class ItemRailModifier extends ItemNodeModifierBase {
 				world.setBlockAndUpdate(posEnd, stateEnd.setValue(BlockNode.IS_CONNECTED, true));
 				PacketUpdateData.sendDirectlyToServerRail((ServerLevel) world, rail);
 			} else if (player != null) {
-				player.displayClientMessage(TranslationProvider.GUI_MTR_INVALID_ORIENTATION.getText(), true);
+				player.sendOverlayMessage(TranslationProvider.GUI_MTR_INVALID_ORIENTATION.getText());
 			}
 		}
 	}

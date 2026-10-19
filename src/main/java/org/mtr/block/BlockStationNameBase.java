@@ -17,8 +17,9 @@ import org.mtr.data.IGui;
 import org.mtr.generated.lang.TranslationProvider;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public abstract class BlockStationNameBase extends Block implements EntityBlock {
+public abstract class BlockStationNameBase extends Block implements EntityBlock, IBlockTooltip {
 
 	public static final IntegerProperty COLOR = IntegerProperty.create("color", 0, 2);
 
@@ -27,8 +28,8 @@ public abstract class BlockStationNameBase extends Block implements EntityBlock 
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(TranslationProvider.TOOLTIP_MTR_STATION_COLOR_NAME.getMutableText().withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(TranslationProvider.TOOLTIP_MTR_STATION_COLOR_NAME.getMutableText().withStyle(ChatFormatting.GRAY));
 	}
 
 	public abstract static class BlockEntityBase extends BlockEntity implements IGui {

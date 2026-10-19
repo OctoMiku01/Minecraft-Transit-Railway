@@ -96,7 +96,7 @@ public abstract class BlockStationNameTallBase extends BlockStationNameBase impl
 			final Direction facing = IBlock.getStatePropertySafe(state, BlockStateProperties.HORIZONTAL_FACING);
 			world.setBlock(pos.above(), defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, facing).setValue(METAL, true).setValue(THIRD, EnumThird.MIDDLE), 3);
 			world.setBlock(pos.above(2), defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, facing).setValue(METAL, true).setValue(THIRD, EnumThird.UPPER), 3);
-			world.blockUpdated(pos, Blocks.AIR);
+			world.updateNeighborsAt(pos, Blocks.AIR, null);
 			state.updateNeighbourShapes(world, pos, 3);
 		}
 	}

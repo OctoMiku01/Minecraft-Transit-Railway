@@ -34,8 +34,9 @@ import org.mtr.packet.PacketDeleteData;
 import org.mtr.registry.Items;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class BlockNode extends BlockWaterloggable implements SimpleWaterloggedBlock {
+public class BlockNode extends BlockWaterloggable implements SimpleWaterloggedBlock, IBlockTooltip {
 
 	public final TransportMode transportMode;
 
@@ -145,10 +146,10 @@ public class BlockNode extends BlockWaterloggable implements SimpleWaterloggedBl
 		}
 
 		@Override
-		public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
+		public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
 			final String[] strings = (isStation ? TranslationProvider.TOOLTIP_MTR_CABLE_CAR_NODE_STATION : TranslationProvider.TOOLTIP_MTR_CABLE_CAR_NODE).getString().split("\n");
 			for (final String string : strings) {
-				tooltip.add(Component.literal(string).withStyle(ChatFormatting.GRAY));
+				tooltip.accept(Component.literal(string).withStyle(ChatFormatting.GRAY));
 			}
 		}
 

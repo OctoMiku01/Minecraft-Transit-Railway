@@ -4,7 +4,8 @@ import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,11 +46,12 @@ import java.util.Locale;
 
 //? if >= 1.21.4 {
 import net.minecraft.world.level.ScheduledTickAccess;
+import java.util.function.Consumer;
 //? } else {
 /*import net.minecraft.world.level.LevelAccessor;
  *///? }
 
-public class BlockRailwaySign extends Block implements IBlock, EntityBlock {
+public class BlockRailwaySign extends Block implements IBlock, EntityBlock, IBlockTooltip {
 
 	public final int length;
 	public final boolean isOdd;
@@ -123,7 +125,7 @@ public class BlockRailwaySign extends Block implements IBlock, EntityBlock {
 				}
 			}
 			world.setBlock(pos.relative(facing.getClockWise(), getMiddleLength() + 1), defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, facing.getOpposite()), 3);
-			world.blockUpdated(pos, Blocks.AIR);
+			world.updateNeighborsAt(pos, Blocks.AIR, null);
 			state.updateNeighbourShapes(world, pos, 3);
 		}
 	}
@@ -142,9 +144,9 @@ public class BlockRailwaySign extends Block implements IBlock, EntityBlock {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_LENGTH.getMutableText(length).withStyle(ChatFormatting.GRAY));
-		tooltip.add((isOdd ? TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_ODD : TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_EVEN).getMutableText().withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_LENGTH.getMutableText(length).withStyle(ChatFormatting.GRAY));
+		tooltip.accept((isOdd ? TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_ODD : TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_EVEN).getMutableText().withStyle(ChatFormatting.GRAY));
 	}
 
 	@Nullable
@@ -222,25 +224,25 @@ public class BlockRailwaySign extends Block implements IBlock, EntityBlock {
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
+		protected void readNbt(ValueInput valueInput) {
 			final LongAVLTreeSet legacySelectedIds = new LongAVLTreeSet();
-			Arrays.stream(nbtCompound.getLongArray(KEY_SELECTED_IDS)).forEach(legacySelectedIds::add);
+			Arrays.stream(readLongArray(valueInput, KEY_SELECTED_IDS)).forEach(legacySelectedIds::add);
 
 			for (int i = 0; i < signIds.length; i++) {
 				selectedIds[i].clear();
 				selectedIds[i].addAll(legacySelectedIds);
-				Arrays.stream(nbtCompound.getLongArray(KEY_SELECTED_IDS + i)).forEach(selectedIds[i]::add);
+				Arrays.stream(readLongArray(valueInput, KEY_SELECTED_IDS + i)).forEach(selectedIds[i]::add);
 
-				final String signId = nbtCompound.getString(KEY_SIGN_LENGTH + i);
+				final String signId = valueInput.getStringOr(KEY_SIGN_LENGTH + i, "");
 				signIds[i] = signId.isEmpty() ? null : (Arrays.asList(LEGACY_SIGNS).contains(signId) ? signId.toLowerCase(Locale.ENGLISH) : signId);
 			}
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
+		protected void writeNbt(ValueOutput valueOutput) {
 			for (int i = 0; i < signIds.length; i++) {
-				nbtCompound.putLongArray(KEY_SELECTED_IDS + i, new ArrayList<>(selectedIds[i]));
-				nbtCompound.putString(KEY_SIGN_LENGTH + i, signIds[i] == null ? "" : signIds[i]);
+				writeLongArray(valueOutput, KEY_SELECTED_IDS + i, selectedIds[i].toLongArray());
+				valueOutput.putString(KEY_SIGN_LENGTH + i, signIds[i] == null ? "" : signIds[i]);
 			}
 		}
 

@@ -14,8 +14,9 @@ import org.jspecify.annotations.Nullable;
 import org.mtr.generated.lang.TranslationProvider;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public abstract class BlockPoleCheckBase extends Block {
+public abstract class BlockPoleCheckBase extends Block implements IBlockTooltip {
 
 	public BlockPoleCheckBase(BlockBehaviour.Properties blockSettings) {
 		super(blockSettings);
@@ -33,10 +34,10 @@ public abstract class BlockPoleCheckBase extends Block {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
 		final String[] strings = TranslationProvider.TOOLTIP_MTR_POLE_PLACEMENT.getString(getTooltipBlockText()).split("\n");
 		for (final String string : strings) {
-			tooltip.add(Component.literal(string).withStyle(ChatFormatting.GRAY));
+			tooltip.accept(Component.literal(string).withStyle(ChatFormatting.GRAY));
 		}
 	}
 

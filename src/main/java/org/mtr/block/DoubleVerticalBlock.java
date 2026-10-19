@@ -25,7 +25,7 @@ public interface DoubleVerticalBlock extends IBlock {
 		if (!world.isClientSide()) {
 			final Direction direction = IBlock.getStatePropertySafe(blockState, BlockStateProperties.HORIZONTAL_FACING);
 			world.setBlock(blockPos.above(), defaultPlacementState.setValue(BlockStateProperties.HORIZONTAL_FACING, direction).setValue(HALF, DoubleBlockHalf.UPPER), 3);
-			world.blockUpdated(blockPos, Blocks.AIR);
+			world.updateNeighborsAt(blockPos, Blocks.AIR, null);
 			blockState.updateNeighbourShapes(world, blockPos, 3);
 		}
 	}

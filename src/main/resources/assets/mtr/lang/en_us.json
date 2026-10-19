@@ -147,6 +147,7 @@
 	"block.mtr.train_sensor": "Redstone Sensor",
 	"block.mtrsteamloco.eye_candy": "Decoration Object",
 	"category.mtr.keybinding": "Minecraft Transit Railway Keybinding",
+	"key.category.mtr.keybinding": "Minecraft Transit Railway Keybinding",
 	"command.mtr.clear_all": "Cleared vehicles from all depots",
 	"command.mtr.clear_filter": "Cleared vehicles for depots matching \"%s\"",
 	"command.mtr.generate_all": "Path generation for all depots started",

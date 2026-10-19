@@ -86,20 +86,20 @@ public class TicketSystem {
 
 	private static int getPlayerScore(Level world, Player player, String objective, String title) {
 		final Objective scoreboardObjective = getOrCreateScoreboardObjective(world, objective, title);
-		return scoreboardObjective == null ? 0 : world.getScoreboard().getOrCreatePlayerScore(ScoreHolder.forNameOnly(player.getGameProfile().getName()), scoreboardObjective).get();
+		return scoreboardObjective == null ? 0 : world.getScoreboard().getOrCreatePlayerScore(ScoreHolder.forNameOnly(player.getGameProfile().name()), scoreboardObjective).get();
 	}
 
 	private static void setPlayerScore(Level world, Player player, String objective, String title, int value) {
 		final Objective scoreboardObjective = getOrCreateScoreboardObjective(world, objective, title);
 		if (scoreboardObjective != null) {
-			world.getScoreboard().getOrCreatePlayerScore(ScoreHolder.forNameOnly(player.getGameProfile().getName()), scoreboardObjective).set(value);
+			world.getScoreboard().getOrCreatePlayerScore(ScoreHolder.forNameOnly(player.getGameProfile().name()), scoreboardObjective).set(value);
 		}
 	}
 
 	private static void incrementPlayerScore(Level world, Player player, String objective, String title, int value) {
 		final Objective scoreboardObjective = getOrCreateScoreboardObjective(world, objective, title);
 		if (scoreboardObjective != null) {
-			world.getScoreboard().getOrCreatePlayerScore(ScoreHolder.forNameOnly(player.getGameProfile().getName()), scoreboardObjective).add(value);
+			world.getScoreboard().getOrCreatePlayerScore(ScoreHolder.forNameOnly(player.getGameProfile().name()), scoreboardObjective).add(value);
 		}
 	}
 
@@ -119,7 +119,7 @@ public class TicketSystem {
 
 		if (entered(entryZone1, entryZone2, entryZone3)) {
 			if (remindIfNoRecord) {
-				player.displayClientMessage(TranslationProvider.GUI_MTR_ALREADY_ENTERED.getText(), true);
+				player.sendOverlayMessage(TranslationProvider.GUI_MTR_ALREADY_ENTERED.getText());
 				return false;
 			} else {
 				setPlayerScore(world, player, ENTRY_ZONE_1_OBJECTIVE, ENTRY_ZONE_1_TITLE, 0);
@@ -135,10 +135,10 @@ public class TicketSystem {
 			setPlayerScore(world, player, ENTRY_ZONE_1_OBJECTIVE, ENTRY_ZONE_1_TITLE, encodeZone((int) station.getZone1()));
 			setPlayerScore(world, player, ENTRY_ZONE_2_OBJECTIVE, ENTRY_ZONE_2_TITLE, encodeZone((int) station.getZone2()));
 			setPlayerScore(world, player, ENTRY_ZONE_3_OBJECTIVE, ENTRY_ZONE_3_TITLE, encodeZone((int) station.getZone3()));
-			player.displayClientMessage(TranslationProvider.GUI_MTR_ENTER_BARRIER.getText(formatStationName(station), balance), true);
+			player.sendOverlayMessage(TranslationProvider.GUI_MTR_ENTER_BARRIER.getText(formatStationName(station), balance));
 			return true;
 		} else {
-			player.displayClientMessage(TranslationProvider.GUI_MTR_INSUFFICIENT_BALANCE.getText(balance), true);
+			player.sendOverlayMessage(TranslationProvider.GUI_MTR_INSUFFICIENT_BALANCE.getText(balance));
 			return false;
 		}
 	}
@@ -150,7 +150,7 @@ public class TicketSystem {
 		final boolean entered = entered(entryZone1, entryZone2, entryZone3);
 
 		if (!entered && remindIfNoRecord) {
-			player.displayClientMessage(TranslationProvider.GUI_MTR_ALREADY_EXITED.getText(), true);
+			player.sendOverlayMessage(TranslationProvider.GUI_MTR_ALREADY_EXITED.getText());
 			return false;
 		} else {
 			final long fare = BASE_FARE + ZONE_FARE * (Math.abs(station.getZone1() - decodeZone(entryZone1)) + Math.abs(station.getZone2() - decodeZone(entryZone2)) + Math.abs(station.getZone3() - decodeZone(entryZone3)));
@@ -160,7 +160,7 @@ public class TicketSystem {
 			setPlayerScore(world, player, ENTRY_ZONE_3_OBJECTIVE, ENTRY_ZONE_3_TITLE, 0);
 			incrementPlayerScore(world, player, BALANCE_OBJECTIVE, BALANCE_OBJECTIVE_TITLE, (int) -finalFare);
 			final int balance = getPlayerScore(world, player, BALANCE_OBJECTIVE, BALANCE_OBJECTIVE_TITLE);
-			player.displayClientMessage(TranslationProvider.GUI_MTR_EXIT_BARRIER.getText(formatStationName(station), finalFare, balance), true);
+			player.sendOverlayMessage(TranslationProvider.GUI_MTR_EXIT_BARRIER.getText(formatStationName(station), finalFare, balance));
 			return true;
 		}
 	}

@@ -61,7 +61,7 @@ public final class EventRegistryClient {
 
 	public static void registerStartWorldTick(Consumer<ClientLevel> consumer) {
 //? if fabric {
-		ClientTickEvents.START_WORLD_TICK.register(consumer::accept);
+		ClientTickEvents.START_LEVEL_TICK.register(consumer::accept);
 //? }
 
 //? if neoforge {
@@ -72,7 +72,7 @@ public final class EventRegistryClient {
 
 	public static void registerEndWorldTick(Consumer<ClientLevel> consumer) {
 //? if fabric {
-		ClientTickEvents.END_WORLD_TICK.register(consumer::accept);
+		ClientTickEvents.END_LEVEL_TICK.register(consumer::accept);
 //? }
 
 //? if neoforge {

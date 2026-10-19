@@ -49,7 +49,7 @@ public abstract class BlockPIDSHorizontalBase extends BlockPIDSBase {
 		if (!world.isClientSide()) {
 			final Direction direction = IBlock.getStatePropertySafe(state, BlockStateProperties.HORIZONTAL_FACING);
 			world.setBlock(pos.relative(direction), defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction.getOpposite()), 3);
-			world.blockUpdated(pos, Blocks.AIR);
+			world.updateNeighborsAt(pos, Blocks.AIR, null);
 			state.updateNeighbourShapes(world, pos, 3);
 			// TODO copy NBT when copying block
 		}

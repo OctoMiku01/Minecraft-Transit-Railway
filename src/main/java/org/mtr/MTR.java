@@ -325,7 +325,7 @@ public final class MTR {
 	}
 
 	public static String getWorldId(Level world) {
-		final Identifier identifier = world.dimension().location();
+		final Identifier identifier = world.dimension().identifier();
 		return String.format("%s/%s", identifier.getNamespace(), identifier.getPath());
 	}
 

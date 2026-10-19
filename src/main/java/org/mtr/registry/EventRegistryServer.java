@@ -90,7 +90,7 @@ public final class EventRegistryServer {
 
 	public static void registerStartWorldTick(Consumer<ServerLevel> consumer) {
 //? if fabric {
-		ServerTickEvents.START_WORLD_TICK.register(consumer::accept);
+		ServerTickEvents.START_LEVEL_TICK.register(consumer::accept);
 //? }
 
 //? if neoforge {
@@ -101,7 +101,7 @@ public final class EventRegistryServer {
 
 	public static void registerEndWorldTick(Consumer<ServerLevel> consumer) {
 //? if fabric {
-		ServerTickEvents.END_WORLD_TICK.register(consumer::accept);
+		ServerTickEvents.END_LEVEL_TICK.register(consumer::accept);
 //? }
 
 //? if neoforge {
@@ -134,7 +134,7 @@ public final class EventRegistryServer {
 
 	public static void registerChunkLoad(BiConsumer<ServerLevel, ChunkAccess> consumer) {
 //? if fabric {
-		ServerChunkEvents.CHUNK_LOAD.register(consumer::accept);
+		ServerChunkEvents.CHUNK_LOAD.register((serverLevel, levelChunk, generated) -> consumer.accept(serverLevel, levelChunk));
 //? }
 
 //? if neoforge {

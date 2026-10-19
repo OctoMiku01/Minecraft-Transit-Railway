@@ -150,7 +150,7 @@ public class MainRenderer {
 		MinecraftClientData.getInstance().lifts.forEach(lift -> {
 			lift.tick(millisElapsed);
 			if (VehicleRidingMovement.isRiding(lift.getId()) && VehicleRidingMovement.showShiftProgressBar()) {
-				clientPlayerEntity.displayClientMessage(TranslationProvider.GUI_MTR_PRESS_TO_SELECT_FLOOR.getText(KeyBindings.LIFT_MENU.getTranslatedKeyMessage().getString()), true);
+				clientPlayerEntity.sendOverlayMessage(TranslationProvider.GUI_MTR_PRESS_TO_SELECT_FLOOR.getText(KeyBindings.LIFT_MENU.getTranslatedKeyMessage().getString()));
 			}
 		});
 		lastRenderedMillis = MTRClient.getGameMillis();

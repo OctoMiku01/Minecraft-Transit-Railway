@@ -3,7 +3,9 @@ package org.mtr.block;
 import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,8 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 
-public abstract class BlockPIDSBase extends Block implements EntityBlock {
+public abstract class BlockPIDSBase extends Block implements EntityBlock, IBlockTooltip {
 
 	public final int maxArrivals;
 	public final BiPredicate<Level, BlockPos> canStoreData;
@@ -75,8 +78,9 @@ public abstract class BlockPIDSBase extends Block implements EntityBlock {
 
 			for (final InteractionHand interactionHand : InteractionHand.values()) {
 				final ItemStack itemStack = player.getItemInHand(interactionHand);
-				if (itemStack.getItem() instanceof DyeItem dyeItem) {
-					blockEntity.customColor = convertPIDSColor(dyeItem.getDyeColor());
+				final DyeColor dyeColor = itemStack.get(DataComponents.DYE);
+				if (dyeColor != null) {
+					blockEntity.customColor = convertPIDSColor(dyeColor);
 					blockEntity.setChanged();
 					player.playSound(SoundEvents.DYE_USE);
 					if (!player.isCreative()) {
@@ -101,8 +105,8 @@ public abstract class BlockPIDSBase extends Block implements EntityBlock {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(TranslationProvider.TOOLTIP_MTR_ARRIVALS.getMutableText(maxArrivals).withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(TranslationProvider.TOOLTIP_MTR_ARRIVALS.getMutableText(maxArrivals).withStyle(ChatFormatting.GRAY));
 	}
 
 	public static abstract class BlockEntityBase extends BlockEntityExtension {
@@ -140,32 +144,32 @@ public abstract class BlockPIDSBase extends Block implements EntityBlock {
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
+		protected void readNbt(ValueInput valueInput) {
 			for (int i = 0; i < maxArrivals; i++) {
-				messages[i] = nbtCompound.getString(KEY_MESSAGE + i);
-				hideArrivalArray[i] = nbtCompound.getBoolean(KEY_HIDE_ARRIVAL + i);
+				messages[i] = valueInput.getStringOr(KEY_MESSAGE + i, "");
+				hideArrivalArray[i] = valueInput.getBooleanOr(KEY_HIDE_ARRIVAL + i, false);
 			}
 
 			platformIds.clear();
-			final long[] platformIdsArray = nbtCompound.getLongArray(KEY_PLATFORM_IDS);
+			final long[] platformIdsArray = readLongArray(valueInput, KEY_PLATFORM_IDS);
 			for (final long platformId : platformIdsArray) {
 				platformIds.add(platformId);
 			}
 
-			displayPage = nbtCompound.getInt(KEY_DISPLAY_PAGE);
-			final int tempCustomColor = nbtCompound.getInt(KEY_CUSTOM_COLOR);
+			displayPage = valueInput.getIntOr(KEY_DISPLAY_PAGE, 0);
+			final int tempCustomColor = valueInput.getIntOr(KEY_CUSTOM_COLOR, 0);
 			customColor = tempCustomColor == 0 ? null : tempCustomColor;
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
+		protected void writeNbt(ValueOutput valueOutput) {
 			for (int i = 0; i < maxArrivals; i++) {
-				nbtCompound.putString(KEY_MESSAGE + i, messages[i] == null ? "" : messages[i]);
-				nbtCompound.putBoolean(KEY_HIDE_ARRIVAL + i, hideArrivalArray[i]);
+				valueOutput.putString(KEY_MESSAGE + i, messages[i] == null ? "" : messages[i]);
+				valueOutput.putBoolean(KEY_HIDE_ARRIVAL + i, hideArrivalArray[i]);
 			}
-			nbtCompound.putLongArray(KEY_PLATFORM_IDS, new ArrayList<>(platformIds));
-			nbtCompound.putInt(KEY_DISPLAY_PAGE, displayPage);
-			nbtCompound.putInt(KEY_CUSTOM_COLOR, customColor == null ? 0 : customColor);
+			writeLongArray(valueOutput, KEY_PLATFORM_IDS, platformIds.toLongArray());
+			valueOutput.putInt(KEY_DISPLAY_PAGE, displayPage);
+			valueOutput.putInt(KEY_CUSTOM_COLOR, customColor == null ? 0 : customColor);
 		}
 
 		public void setData(String[] messages, boolean[] hideArrivalArray, LongAVLTreeSet platformIds, int displayPage) {

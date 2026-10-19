@@ -2,9 +2,6 @@ package org.mtr.packet;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.datafix.DataFixTypes;
-import net.minecraft.world.level.saveddata.SavedData;
-import org.mtr.MTR;
 import org.mtr.data.PersistentStateData;
 
 public final class PacketSetRouteIdHasDisabledAnnouncements extends PacketHandler {
@@ -30,7 +27,7 @@ public final class PacketSetRouteIdHasDisabledAnnouncements extends PacketHandle
 
 	@Override
 	public void runServer(MinecraftServer minecraftServer, ServerPlayer serverPlayerEntity) {
-		final PersistentStateData persistentStateData = serverPlayerEntity.serverLevel().getDataStorage().computeIfAbsent(new SavedData.Factory<>(PersistentStateData::new, (nbt, wrapperLookup) -> new PersistentStateData(nbt), DataFixTypes.LEVEL), MTR.MOD_ID);
+		final PersistentStateData persistentStateData = PersistentStateData.get(serverPlayerEntity.level());
 		persistentStateData.setRouteIdHasDisabledAnnouncements(routeId, isDisabled);
 	}
 }

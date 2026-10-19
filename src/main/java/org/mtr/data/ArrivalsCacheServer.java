@@ -46,7 +46,7 @@ public final class ArrivalsCacheServer extends ArrivalsCache {
 	}
 
 	public static ArrivalsCacheServer getInstance(ServerLevel serverWorld) {
-		return INSTANCES.computeIfAbsent(serverWorld.dimension().location().toString(), worldId -> new ArrivalsCacheServer(serverWorld));
+		return INSTANCES.computeIfAbsent(serverWorld.dimension().identifier().toString(), worldId -> new ArrivalsCacheServer(serverWorld));
 	}
 
 	public static void tickAll() {

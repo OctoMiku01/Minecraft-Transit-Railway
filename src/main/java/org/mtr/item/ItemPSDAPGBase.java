@@ -1,6 +1,7 @@
 package org.mtr.item;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -22,6 +23,7 @@ import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.registry.Blocks;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ItemPSDAPGBase extends Item implements IBlock {
 
@@ -71,8 +73,8 @@ public class ItemPSDAPGBase extends Item implements IBlock {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag type) {
-		tooltip.add((this.type.isLift ? this.type.isOdd ? TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_ODD : TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_EVEN : item.translationKey).getMutableText().withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag type) {
+		tooltip.accept((this.type.isLift ? this.type.isOdd ? TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_ODD : TranslationProvider.TOOLTIP_MTR_RAILWAY_SIGN_EVEN : item.translationKey).getMutableText().withStyle(ChatFormatting.GRAY));
 	}
 
 	private BlockState getBlockStateFromItem() {

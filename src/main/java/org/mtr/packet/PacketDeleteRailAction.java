@@ -23,6 +23,6 @@ public final class PacketDeleteRailAction extends PacketHandler {
 
 	@Override
 	public void runServer(MinecraftServer minecraftServer, ServerPlayer serverPlayerEntity) {
-		MTR.getRailActionModule(serverPlayerEntity.serverLevel(), railActionModule -> railActionModule.removeRailAction(id));
+		MTR.getRailActionModule(serverPlayerEntity.level(), railActionModule -> railActionModule.removeRailAction(id));
 	}
 }

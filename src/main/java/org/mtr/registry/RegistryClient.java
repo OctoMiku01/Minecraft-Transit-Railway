@@ -2,8 +2,7 @@ package org.mtr.registry;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,13 +13,13 @@ import org.mtr.packet.PacketBufferSender;
 import org.mtr.packet.PacketHandler;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 //? if fabric {
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import org.mtr.MTR;
 import org.mtr.fabric.MTRFabric;
@@ -46,20 +45,9 @@ public final class RegistryClient {
 *///? }
 	}
 
-	public static void registerBlockRenderType(RenderType renderLayer, ObjectHolder<Block> block) {
-//? if fabric {
-		BlockRenderLayerMap.INSTANCE.putBlock(block.get(), renderLayer);
-//? }
-
-//? if neoforge {
-		/*ModEventBusClient.CLIENT_OBJECTS_TO_REGISTER.add(() -> ItemBlockRenderTypes.setRenderLayer(block.get(), renderLayer));
-//
-*///? }
-	}
-
 	public static void registerKeyBinding(KeyMapping keyBinding) {
 //? if fabric {
-		KeyBindingHelper.registerKeyBinding(keyBinding);
+		KeyMappingHelper.registerKeyMapping(keyBinding);
 //? }
 
 //? if neoforge {
@@ -69,13 +57,13 @@ public final class RegistryClient {
 	}
 
 	@SafeVarargs
-	public static void registerBlockColors(BlockColor blockColorProvider, ObjectHolder<Block>... blocks) {
+	public static void registerBlockColors(BlockTintSource blockTintSource, ObjectHolder<Block>... blocks) {
 //? if fabric {
-		ColorProviderRegistry.BLOCK.register(blockColorProvider, Arrays.stream(blocks).map(ObjectHolder::get).toArray(Block[]::new));
+		BlockColorRegistry.register(List.of(blockTintSource), Arrays.stream(blocks).map(ObjectHolder::get).toArray(Block[]::new));
 //? }
 
 //? if neoforge {
-		/*ModEventBusClient.BLOCK_COLORS.add(event -> event.getBlockColors().register(blockColorProvider, Arrays.stream(blocks).map(ObjectHolder::get).toArray(Block[]::new)));
+		/*ModEventBusClient.BLOCK_COLORS.add(event -> event.getBlockColors().register(blockTintSource, Arrays.stream(blocks).map(ObjectHolder::get).toArray(Block[]::new)));
 //
 *///? }
 	}

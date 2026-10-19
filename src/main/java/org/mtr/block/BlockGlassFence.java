@@ -19,8 +19,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class BlockGlassFence extends BlockDirectionalDoubleBlockBase {
+public class BlockGlassFence extends BlockDirectionalDoubleBlockBase implements IBlockTooltip {
 
 	public static final IntegerProperty NUMBER = IntegerProperty.create("number", 1, 7);
 
@@ -50,8 +51,8 @@ public class BlockGlassFence extends BlockDirectionalDoubleBlockBase {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(Component.translatable("tooltip." + stack.getItem().getDescriptionId()).withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(Component.translatable("tooltip." + stack.getItem().getDescriptionId()).withStyle(ChatFormatting.GRAY));
 	}
 
 	@Override

@@ -3,7 +3,8 @@ package org.mtr.block;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -64,13 +65,13 @@ public abstract class BlockRouteSignBase extends BlockDirectionalDoubleBlockBase
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
-			platformId = nbtCompound.getLong(KEY_PLATFORM_ID);
+		protected void readNbt(ValueInput valueInput) {
+			platformId = valueInput.getLongOr(KEY_PLATFORM_ID, 0);
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
-			nbtCompound.putLong(KEY_PLATFORM_ID, platformId);
+		protected void writeNbt(ValueOutput valueOutput) {
+			valueOutput.putLong(KEY_PLATFORM_ID, platformId);
 		}
 
 		public void setPlatformId(long platformId) {

@@ -31,7 +31,7 @@ import java.util.function.*;
 
 //? if fabric {
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -126,7 +126,7 @@ public final class RegistryServer {
 
 	public static String registerItemGroup(String registryName, Supplier<ItemStack> iconSupplier) {
 //? if fabric {
-		register(BuiltInRegistries.CREATIVE_MODE_TAB, Registries.CREATIVE_MODE_TAB, registryName, dataRegistryKey -> FabricItemGroup.builder().icon(iconSupplier).title(Component.translatable(String.format("itemGroup.%s.%s", MTR.MOD_ID, registryName))).displayItems((displayContext, entries) -> ITEM_GROUP_ENTRIES.getOrDefault(registryName, new ObjectArrayList<>()).forEach(itemSupplier -> entries.accept(itemSupplier.get()))).build());
+		register(BuiltInRegistries.CREATIVE_MODE_TAB, Registries.CREATIVE_MODE_TAB, registryName, dataRegistryKey -> FabricCreativeModeTab.builder().icon(iconSupplier).title(Component.translatable(String.format("itemGroup.%s.%s", MTR.MOD_ID, registryName))).displayItems((displayContext, entries) -> ITEM_GROUP_ENTRIES.getOrDefault(registryName, new ObjectArrayList<>()).forEach(itemSupplier -> entries.accept(itemSupplier.get()))).build());
 		return registryName;
 //? }
 
@@ -171,14 +171,14 @@ public final class RegistryServer {
 
 	public static void setupPackets() {
 //? if fabric {
-		PayloadTypeRegistry.playS2C().register(MTR.PACKET_IDENTIFIER_S2C, StreamCodec.composite(ByteBufCodecs.BYTE_ARRAY, CustomPacketS2C::buffer, CustomPacketS2C::new));
-		PayloadTypeRegistry.playC2S().register(MTR.PACKET_IDENTIFIER_C2S, StreamCodec.composite(ByteBufCodecs.BYTE_ARRAY, CustomPacketC2S::buffer, CustomPacketC2S::new));
+		PayloadTypeRegistry.clientboundPlay().register(MTR.PACKET_IDENTIFIER_S2C, StreamCodec.composite(ByteBufCodecs.BYTE_ARRAY, CustomPacketS2C::buffer, CustomPacketS2C::new));
+		PayloadTypeRegistry.serverboundPlay().register(MTR.PACKET_IDENTIFIER_C2S, StreamCodec.composite(ByteBufCodecs.BYTE_ARRAY, CustomPacketC2S::buffer, CustomPacketC2S::new));
 		ServerPlayNetworking.registerGlobalReceiver(MTR.PACKET_IDENTIFIER_C2S, (customPacketC2S, context) -> PacketBufferReceiver.receive(customPacketC2S.buffer(), packetBufferReceiver -> {
 			final Function<PacketBufferReceiver, ? extends PacketHandler> getInstance = MTRFabric.PACKETS.get(packetBufferReceiver.readString());
 			if (getInstance != null) {
-				getInstance.apply(packetBufferReceiver).runServer(context.player().server, context.player());
+				getInstance.apply(packetBufferReceiver).runServer(context.player().level().getServer(), context.player());
 			}
-		}, context.player().server::execute));
+		}, context.player().level().getServer()::execute));
 //? }
 
 //? if neoforge {
@@ -215,14 +215,14 @@ public final class RegistryServer {
 		final PacketBufferSender packetBufferSender = new PacketBufferSender();
 		packetBufferSender.writeString(data.getClass().getName());
 		data.write(packetBufferSender);
-		packetBufferSender.send(bytes -> ServerPlayNetworking.send(serverPlayerEntity, new CustomPacketS2C(bytes)), serverPlayerEntity.server::execute);
+		packetBufferSender.send(bytes -> ServerPlayNetworking.send(serverPlayerEntity, new CustomPacketS2C(bytes)), serverPlayerEntity.level().getServer()::execute);
 //? }
 
 //? if neoforge {
 		/*final PacketBufferSender packetBufferSender = new PacketBufferSender();
 		packetBufferSender.writeString(data.getClass().getName());
 		data.write(packetBufferSender);
-		packetBufferSender.send(bytes -> PacketDistributor.sendToPlayer(serverPlayerEntity, new CustomPacketS2C(bytes)), serverPlayerEntity.server::execute);
+		packetBufferSender.send(bytes -> PacketDistributor.sendToPlayer(serverPlayerEntity, new CustomPacketS2C(bytes)), serverPlayerEntity.level().getServer()::execute);
 *///? }
 	}
 

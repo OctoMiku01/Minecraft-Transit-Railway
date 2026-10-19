@@ -2,7 +2,8 @@ package org.mtr.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -32,8 +33,6 @@ import org.mtr.registry.BlockEntityTypes;
 import org.mtr.registry.Items;
 import org.mtr.registry.RegistryClient;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class BlockLiftButtons extends BlockWaterloggable implements EntityBlock {
@@ -49,7 +48,7 @@ public class BlockLiftButtons extends BlockWaterloggable implements EntityBlock 
 		final InteractionResult result = IBlock.checkHoldingBrush(world, player, () -> {
 			final boolean unlocked = !IBlock.getStatePropertySafe(state, UNLOCKED);
 			world.setBlockAndUpdate(pos, state.setValue(UNLOCKED, unlocked));
-			player.displayClientMessage((unlocked ? TranslationProvider.GUI_MTR_LIFT_BUTTONS_UNLOCKED : TranslationProvider.GUI_MTR_LIFT_BUTTONS_LOCKED).getText(), true);
+			player.sendOverlayMessage((unlocked ? TranslationProvider.GUI_MTR_LIFT_BUTTONS_UNLOCKED : TranslationProvider.GUI_MTR_LIFT_BUTTONS_LOCKED).getText());
 		});
 
 		if (result == InteractionResult.SUCCESS) {
@@ -150,18 +149,16 @@ public class BlockLiftButtons extends BlockWaterloggable implements EntityBlock 
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
+		protected void readNbt(ValueInput valueInput) {
 			trackPositions.clear();
-			for (final long position : nbtCompound.getLongArray(KEY_TRACK_FLOOR_POS)) {
+			for (final long position : readLongArray(valueInput, KEY_TRACK_FLOOR_POS)) {
 				trackPositions.add(BlockPos.of(position));
 			}
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
-			final List<Long> trackPositionsList = new ArrayList<>();
-			trackPositions.forEach(position -> trackPositionsList.add(position.asLong()));
-			nbtCompound.putLongArray(KEY_TRACK_FLOOR_POS, trackPositionsList);
+		protected void writeNbt(ValueOutput valueOutput) {
+			writeLongArray(valueOutput, KEY_TRACK_FLOOR_POS, trackPositions.stream().mapToLong(BlockPos::asLong).toArray());
 		}
 
 		public void registerFloor(BlockPos pos, boolean isAdd) {

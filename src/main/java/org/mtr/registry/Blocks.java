@@ -12,6 +12,7 @@ import org.mtr.Keys;
 import org.mtr.MTR;
 import org.mtr.block.*;
 import org.mtr.core.data.TransportMode;
+import org.mtr.item.ItemBlockBase;
 import org.mtr.item.ItemBlockEnchanted;
 import org.mtr.libraries.com.google.gson.JsonParser;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
@@ -303,7 +304,7 @@ public final class Blocks {
 	}
 
 	private static ObjectHolder<Block> registerBlockWithBlockItem(String registryName, Function<BlockBehaviour.Properties, Block> factory, boolean blockPiston, String itemGroupRegistryName) {
-		return registerBlockWithBlockItem(registryName, factory, blockPiston, BlockItem::new, itemGroupRegistryName);
+		return registerBlockWithBlockItem(registryName, factory, blockPiston, ItemBlockBase::new, itemGroupRegistryName);
 	}
 
 	private static ObjectHolder<Block> registerBlockWithBlockItem(String registryName, Function<BlockBehaviour.Properties, Block> blockFactory, boolean blockPiston, BiFunction<Block, Item.Properties, BlockItem> blockItemFactory, String itemGroupRegistryName) {

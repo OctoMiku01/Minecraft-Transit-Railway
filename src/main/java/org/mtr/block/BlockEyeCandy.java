@@ -2,7 +2,8 @@ package org.mtr.block;
 
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -106,27 +107,27 @@ public class BlockEyeCandy extends BlockWaterloggable implements EntityBlock {
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
-			modelId = nbtCompound.getString(KEY_MODEL_ID);
-			translateX = nbtCompound.getFloat(KEY_TRANSLATE_X);
-			translateY = nbtCompound.getFloat(KEY_TRANSLATE_Y);
-			translateZ = nbtCompound.getFloat(KEY_TRANSLATE_Z);
-			rotateX = nbtCompound.getFloat(KEY_ROTATE_X);
-			rotateY = nbtCompound.getFloat(KEY_ROTATE_Y);
-			rotateZ = nbtCompound.getFloat(KEY_ROTATE_Z);
-			fullBrightness = nbtCompound.getBoolean(KEY_FULL_BRIGHTNESS);
+		protected void readNbt(ValueInput valueInput) {
+			modelId = valueInput.getStringOr(KEY_MODEL_ID, "");
+			translateX = valueInput.getFloatOr(KEY_TRANSLATE_X, 0);
+			translateY = valueInput.getFloatOr(KEY_TRANSLATE_Y, 0);
+			translateZ = valueInput.getFloatOr(KEY_TRANSLATE_Z, 0);
+			rotateX = valueInput.getFloatOr(KEY_ROTATE_X, 0);
+			rotateY = valueInput.getFloatOr(KEY_ROTATE_Y, 0);
+			rotateZ = valueInput.getFloatOr(KEY_ROTATE_Z, 0);
+			fullBrightness = valueInput.getBooleanOr(KEY_FULL_BRIGHTNESS, false);
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
-			nbtCompound.putString(KEY_MODEL_ID, modelId);
-			nbtCompound.putFloat(KEY_TRANSLATE_X, translateX);
-			nbtCompound.putFloat(KEY_TRANSLATE_Y, translateY);
-			nbtCompound.putFloat(KEY_TRANSLATE_Z, translateZ);
-			nbtCompound.putFloat(KEY_ROTATE_X, rotateX);
-			nbtCompound.putFloat(KEY_ROTATE_Y, rotateY);
-			nbtCompound.putFloat(KEY_ROTATE_Z, rotateZ);
-			nbtCompound.putBoolean(KEY_FULL_BRIGHTNESS, fullBrightness);
+		protected void writeNbt(ValueOutput valueOutput) {
+			valueOutput.putString(KEY_MODEL_ID, modelId);
+			valueOutput.putFloat(KEY_TRANSLATE_X, translateX);
+			valueOutput.putFloat(KEY_TRANSLATE_Y, translateY);
+			valueOutput.putFloat(KEY_TRANSLATE_Z, translateZ);
+			valueOutput.putFloat(KEY_ROTATE_X, rotateX);
+			valueOutput.putFloat(KEY_ROTATE_Y, rotateY);
+			valueOutput.putFloat(KEY_ROTATE_Z, rotateZ);
+			valueOutput.putBoolean(KEY_FULL_BRIGHTNESS, fullBrightness);
 		}
 
 		public void setData(String modelId, float translateX, float translateY, float translateZ, float rotateX, float rotateY, float rotateZ, boolean fullLight) {

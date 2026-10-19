@@ -94,7 +94,7 @@ public class VehicleExtension extends Vehicle implements Utilities {
 			// Render client action bar floating text
 			if (VehicleRidingMovement.showShiftProgressBar()) {
 				if (speed * MILLIS_PER_SECOND > 5 || thisRouteName.isEmpty() || thisStationName.isEmpty() || thisRouteDestination.isEmpty()) {
-					clientPlayerEntity.displayClientMessage(TranslationProvider.GUI_MTR_VEHICLE_SPEED.getText(Utilities.round(speed * MILLIS_PER_SECOND, 1), Utilities.round(speed * 3.6F * MILLIS_PER_SECOND, 1)), true);
+					clientPlayerEntity.sendOverlayMessage(TranslationProvider.GUI_MTR_VEHICLE_SPEED.getText(Utilities.round(speed * MILLIS_PER_SECOND, 1), Utilities.round(speed * 3.6F * MILLIS_PER_SECOND, 1)));
 				} else {
 					final MutableComponent text;
 					switch ((int) ((System.currentTimeMillis() / 1000) % 3)) {
@@ -117,7 +117,7 @@ public class VehicleExtension extends Vehicle implements Utilities {
 							text = getStationText(thisStationName, TranslationProvider.GUI_MTR_THIS_STATION_CJK, TranslationProvider.GUI_MTR_THIS_STATION);
 							break;
 					}
-					clientPlayerEntity.displayClientMessage(text, true);
+					clientPlayerEntity.sendOverlayMessage(text);
 				}
 			}
 

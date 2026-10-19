@@ -17,8 +17,9 @@ import org.mtr.generated.lang.TranslationProvider;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class BlockLiftTrackHorizontal extends BlockLiftTrackBase {
+public class BlockLiftTrackHorizontal extends BlockLiftTrackBase implements IBlockTooltip {
 
 	public BlockLiftTrackHorizontal(BlockBehaviour.Properties settings) {
 		super(settings);
@@ -30,8 +31,8 @@ public class BlockLiftTrackHorizontal extends BlockLiftTrackBase {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(TranslationProvider.TOOLTIP_MTR_LIFT_TRACK_HORIZONTAL.getMutableText().withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(TranslationProvider.TOOLTIP_MTR_LIFT_TRACK_HORIZONTAL.getMutableText().withStyle(ChatFormatting.GRAY));
 	}
 
 	@Override

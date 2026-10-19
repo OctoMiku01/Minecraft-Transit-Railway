@@ -30,7 +30,7 @@ public final class PacketAddBalance extends PacketHandler {
 
 	@Override
 	public void runServer(MinecraftServer minecraftServer, ServerPlayer serverPlayerEntity) {
-		final ServerLevel serverWorld = serverPlayerEntity.serverLevel();
+		final ServerLevel serverWorld = serverPlayerEntity.level();
 		TicketSystem.addBalance(serverWorld, serverPlayerEntity, getAddBalanceAmount(index));
 		ContainerHelper.clearOrCountMatchingItems(serverPlayerEntity.getInventory(), itemStack -> itemStack.getItem().equals(Items.EMERALD), getEmeraldAmount(index), false);
 		serverWorld.playSound(null, serverPlayerEntity.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 1, 1);

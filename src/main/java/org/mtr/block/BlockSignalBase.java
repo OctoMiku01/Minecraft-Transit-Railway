@@ -2,7 +2,8 @@ package org.mtr.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
@@ -111,25 +112,25 @@ public abstract class BlockSignalBase extends Block implements EntityBlock {
 		}
 
 		@Override
-		protected void readNbt(CompoundTag nbtCompound) {
-			acceptRedstone = nbtCompound.getBoolean(KEY_ACCEPT_REDSTONE);
-			outputRedstone = nbtCompound.getBoolean(KEY_OUTPUT_REDSTONE);
+		protected void readNbt(ValueInput valueInput) {
+			acceptRedstone = valueInput.getBooleanOr(KEY_ACCEPT_REDSTONE, false);
+			outputRedstone = valueInput.getBooleanOr(KEY_OUTPUT_REDSTONE, false);
 			signalColors1.clear();
-			for (final int color : nbtCompound.getIntArray(KEY_SIGNAL_COLORS_1)) {
+			for (final int color : valueInput.getIntArray(KEY_SIGNAL_COLORS_1).orElse(new int[0])) {
 				signalColors1.add(color);
 			}
 			signalColors2.clear();
-			for (final int color : nbtCompound.getIntArray(KEY_SIGNAL_COLORS_2)) {
+			for (final int color : valueInput.getIntArray(KEY_SIGNAL_COLORS_2).orElse(new int[0])) {
 				signalColors2.add(color);
 			}
 		}
 
 		@Override
-		protected void writeNbt(CompoundTag nbtCompound) {
-			nbtCompound.putBoolean(KEY_ACCEPT_REDSTONE, acceptRedstone);
-			nbtCompound.putBoolean(KEY_OUTPUT_REDSTONE, outputRedstone);
-			nbtCompound.putIntArray(KEY_SIGNAL_COLORS_1, new ArrayList<>(signalColors1));
-			nbtCompound.putIntArray(KEY_SIGNAL_COLORS_2, new ArrayList<>(signalColors2));
+		protected void writeNbt(ValueOutput valueOutput) {
+			valueOutput.putBoolean(KEY_ACCEPT_REDSTONE, acceptRedstone);
+			valueOutput.putBoolean(KEY_OUTPUT_REDSTONE, outputRedstone);
+			valueOutput.putIntArray(KEY_SIGNAL_COLORS_1, signalColors1.toIntArray());
+			valueOutput.putIntArray(KEY_SIGNAL_COLORS_2, signalColors2.toIntArray());
 		}
 
 		public void setData(boolean acceptRedstone, boolean outputRedstone, IntAVLTreeSet signalColors, boolean isBackSide) {

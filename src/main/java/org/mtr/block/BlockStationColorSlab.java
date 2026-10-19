@@ -10,15 +10,16 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.mtr.generated.lang.TranslationProvider;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class BlockStationColorSlab extends SlabBlock {
+public class BlockStationColorSlab extends SlabBlock implements IBlockTooltip {
 
 	public BlockStationColorSlab(BlockBehaviour.Properties settings) {
 		super(settings);
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		tooltip.add(TranslationProvider.TOOLTIP_MTR_STATION_COLOR.getMutableText().withStyle(ChatFormatting.GRAY));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag options) {
+		tooltip.accept(TranslationProvider.TOOLTIP_MTR_STATION_COLOR.getMutableText().withStyle(ChatFormatting.GRAY));
 	}
 }

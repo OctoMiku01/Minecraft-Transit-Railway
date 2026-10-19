@@ -12,7 +12,7 @@ public abstract class BlockEntityPacketHandler extends PacketHandler {
 
 	@Override
 	public final void runServer(MinecraftServer minecraftServer, ServerPlayer serverPlayerEntity) {
-		setData(serverPlayerEntity.getCommandSenderWorld());
+		setData(serverPlayerEntity.level());
 	}
 
 	@Override

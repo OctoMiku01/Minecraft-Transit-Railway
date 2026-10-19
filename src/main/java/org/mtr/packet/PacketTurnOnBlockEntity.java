@@ -37,7 +37,7 @@ public final class PacketTurnOnBlockEntity extends PacketHandler {
 
 	@Override
 	public void runServer(MinecraftServer minecraftServer, ServerPlayer serverPlayerEntity) {
-		final Level world = serverPlayerEntity.serverLevel();
+		final Level world = serverPlayerEntity.level();
 		if (!MTR.isChunkLoaded(world, blockPos)) {
 			return;
 		}
